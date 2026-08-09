@@ -22,9 +22,9 @@ router.get('/tournees', async (req, res) => {
   const { statut, user_id } = req.query;
   const clauses = ['t.laboratoire_id = $1'];
   const params = [req.user.laboratoire_id];
-  if (req.user.role === 'delegue') { clauses.push('t.user_id = $1'); params.push(req.user.id); }
-  if (statut) { clauses.push('t.statut = $1'); params.push(statut); }
-  if (user_id) { clauses.push('t.user_id = $1'); params.push(user_id); }
+  if (req.user.role === 'delegue') { clauses.push('t.user_id = $2'); params.push(req.user.id); }
+  if (statut) { clauses.push(`t.statut = $${params.length + 1}`); params.push(statut); }
+  if (user_id) { clauses.push(`t.user_id = $${params.length + 1}`); params.push(user_id); }
 
   const rows = await all(`
     SELECT t.id, t.date, t.statut, t.ps_list,

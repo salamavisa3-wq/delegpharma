@@ -30,7 +30,7 @@ router.get('/catalog', async (req, res) => {
   const [types, specialites, produits] = await Promise.all([
     all('SELECT * FROM type_structure ORDER BY nom'),
     all('SELECT * FROM specialite ORDER BY nom'),
-    all('SELECT id, nom, dci, presentation, agrement_arp FROM produit WHERE laboratoire_id = $2 ORDER BY nom',
+    all('SELECT id, nom, dci, presentation, agrement_arp FROM produit WHERE laboratoire_id = $1 ORDER BY nom',
       [req.user.laboratoire_id]),
   ]);
   return res.json({ types, specialites, produits });

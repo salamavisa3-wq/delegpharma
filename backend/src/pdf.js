@@ -55,10 +55,10 @@ export async function crvPdf({ visite, produits, labo }) {
 
     // En-tête
     doc.font('Helvetica-Bold').fontSize(15).fillColor(GREEN).text('DelegPharma', { continued: true });
-    doc.font('Helvetica').fontSize(10).fillColor(MUT).text(`   ${labo$1.nom || ''}`, { align: 'left' });
+    doc.font('Helvetica').fontSize(10).fillColor(MUT).text(`   ${labo.nom || ''}`, { align: 'left' });
     doc.moveDown(0.1);
     doc.font('Helvetica').fontSize(8.5).fillColor(MUT)
-      .text(`N° d'agrément ARP : ${labo$1.agrement_arp || '—'}`, { align: 'right' });
+      .text(`N° d'agrément ARP : ${labo.agrement_arp || '—'}`, { align: 'right' });
     doc.moveDown(1.2);
 
     doc.font('Helvetica-Bold').fontSize(13).fillColor(INK).text('Compte rendu de visite (CRV)');

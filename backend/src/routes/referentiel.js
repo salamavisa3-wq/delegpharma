@@ -65,20 +65,20 @@ router.post('/structures', requireRole('manager', 'admin', 'laboratoire'), async
 });
 
 router.delete('/structures/:id', requireRole('manager', 'admin'), async (req, res) => {
-  await run('DELETE FROM structure WHERE id = $7 AND laboratoire_id = $8', [req.params.id, req.user.laboratoire_id]);
+  await run('DELETE FROM structure WHERE id = $1 AND laboratoire_id = $2', [req.params.id, req.user.laboratoire_id]);
   return res.json({ ok: true });
 });
 
 // --- Professionnels ---
 router.get('/professionnels', async (req, res) => {
   const { region_id, district_id, specialite_id, potentiel, q } = req.query;
-  const clauses = ['p.laboratoire_id = $9'];
+  const clauses = ['p.laboratoire_id = $1'];
   const params = [req.user.laboratoire_id];
-  if (region_id) { clauses.push('s.region_id = $10'); params.push(region_id); }
-  if (district_id) { clauses.push('s.district_id = $11'); params.push(district_id); }
-  if (specialite_id) { clauses.push('p.specialite_id = $12'); params.push(specialite_id); }
-  if (potentiel) { clauses.push('p.potentiel = $13'); params.push(potentiel); }
-  if (q) { clauses.push('p.nom LIKE $14'); params.push(`%${q}%`); }
+  if (region_id) { clauses.push('s.region_id = $2'); params.push(region_id); }
+  if (district_id) { clauses.push('s.district_id = $3'); params.push(district_id); }
+  if (specialite_id) { clauses.push('p.specialite_id = $4'); params.push(specialite_id); }
+  if (potentiel) { clauses.push('p.potentiel = $5'); params.push(potentiel); }
+  if (q) { clauses.push('p.nom LIKE $6'); params.push(`%${q}%`); }
 
   const rows = await all(`
     SELECT p.id, p.nom, p.potentiel, p.telephone,

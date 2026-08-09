@@ -35,12 +35,12 @@ router.get('/visites', async (req, res) => {
   const clauses = ['v.laboratoire_id = $1'];
   const params = [req.user.laboratoire_id];
   if (req.user.role === 'delegue') { clauses.push('v.user_id = $2'); params.push(req.user.id); }
-  if (statut) { clauses.push('v.statut = $3'); params.push(statut); }
-  if (user_id) { clauses.push('v.user_id = $4'); params.push(user_id); }
-  if (date_from) { clauses.push('v.date >= $5'); params.push(date_from); }
-  if (date_to) { clauses.push('v.date <= $6'); params.push(date_to); }
-  if (region_id) { clauses.push('s.region_id = $7'); params.push(region_id); }
-  if (district_id) { clauses.push('s.district_id = $8'); params.push(district_id); }
+  if (statut) { clauses.push('v.statut = $' + (params.length + 1)); params.push(statut); }
+  if (user_id) { clauses.push('v.user_id = $' + (params.length + 1)); params.push(user_id); }
+  if (date_from) { clauses.push('v.date >= $' + (params.length + 1)); params.push(date_from); }
+  if (date_to) { clauses.push('v.date <= $' + (params.length + 1)); params.push(date_to); }
+  if (region_id) { clauses.push('s.region_id = $' + (params.length + 1)); params.push(region_id); }
+  if (district_id) { clauses.push('s.district_id = $' + (params.length + 1)); params.push(district_id); }
 
   const rows = await all(`
     SELECT ${VISITE_LIST}

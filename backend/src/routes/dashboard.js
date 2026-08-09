@@ -54,11 +54,11 @@ async function delegueView(req, labo) {
     FROM visite v LEFT JOIN professionnel p ON p.id = v.professionnel_id
     WHERE v.laboratoire_id = $1 AND v.user_id = $2
     ORDER BY v.date DESC, v.id DESC LIMIT 10`, [labo, me]);
-  return { role: 'delegue', stats: byStatus, semaine: semaine$1.n || 0, prochaines, tournees, recentes };
+  return { role: 'delegue', stats: byStatus, semaine: semaine?.n || 0, prochaines, tournees, recentes };
 }
 
 async function managerView(req, labo) {
-  const aValider = await get('SELECT COUNT(*) AS n FROM visite WHERE laboratoire_id = ? AND statut = ?', [labo, 'soumis']);
+  const aValider = await get('SELECT COUNT(*) AS n FROM visite WHERE laboratoire_id = $1 AND statut = $2', [labo, 'soumis']);
   const fileAttente = await all(`
     SELECT v.id, v.date, p.nom AS professionnel, d.nom AS district, u.nom AS auteur
     FROM visite v
@@ -79,7 +79,7 @@ async function managerView(req, labo) {
   const tournees = await get(`
     SELECT (SELECT COUNT(*) FROM tournee t WHERE t.laboratoire_id = $1 AND t.statut = 'planifiee') AS planifiees,
            (SELECT COUNT(*) FROM tournee t WHERE t.laboratoire_id = $2 AND t.statut = 'faite') AS faites`, [labo, labo]);
-  return { role: 'manager', aValider: aValider$1.n || 0, fileAttente, equipe, parRegion, tournees };
+  return { role: 'manager', aValider: aValider?.n || 0, fileAttente, equipe, parRegion, tournees };
 }
 
 async function laboView(req, labo) {
@@ -101,18 +101,18 @@ async function laboView(req, labo) {
     GROUP BY r.nom ORDER BY n DESC`, [labo]);
   return {
     role: 'laboratoire',
-    campagnes: campagnes.map((c) => ({ ...c, taux: c.objectif $1 Math.round((100 * c.validees) / c.objectif) : 0 })),
+    campagnes: campagnes.map((c) => ({ ...c, taux: c.objectif ? Math.round((100 * c.validees) / c.objectif) : 0 })),
     global,
     parRegion,
   };
 }
 
 async function adminView(req, labo) {
-  const tenant = await get('SELECT id, nom, agrement_arp, created_at FROM laboratoire WHERE id = ?', [labo]);
+  const tenant = await get('SELECT id, nom, agrement_arp, created_at FROM laboratoire WHERE id = $1', [labo]);
   const users = await all('SELECT role, COUNT(*) AS n FROM users WHERE laboratoire_id = $1 GROUP BY role', [labo]);
   const ps = await get('SELECT COUNT(*) AS n FROM professionnel WHERE laboratoire_id = $1', [labo]);
   const structures = await get('SELECT COUNT(*) AS n FROM structure WHERE laboratoire_id = $1', [labo]);
-  return { role: 'admin', tenant, users, ps: ps$1.n || 0, structures: structures$2.n || 0 };
+  return { role: 'admin', tenant, users, ps: ps?.n || 0, structures: structures?.n || 0 };
 }
 
 router.get('/dashboard', async (req, res) => {

@@ -20,7 +20,7 @@ function table(doc, headers, rows, W) {
       doc.fillColor(INK).font('Helvetica').fontSize(8.5);
     }
     cells.forEach((c, i) => {
-      doc.text(String(c $1$2 ''), M + i * colW + 5, doc.y + 5.5, { width: colW - 10, lineBreak: false });
+      doc.text(String(c ?? ''), M + i * colW + 5, doc.y + 5.5, { width: colW - 10, lineBreak: false });
     });
     doc.moveDown(0.62);
   };
@@ -31,7 +31,7 @@ function table(doc, headers, rows, W) {
 function field(doc, label, value, W) {
   doc.rect(M, doc.y, W, 22).fill('#f8fafc');
   doc.font('Helvetica-Bold').fontSize(8.5).fillColor(MUT).text(label, M + 6, doc.y + 3.5);
-  doc.font('Helvetica').fontSize(10).fillColor(INK).text(String(value $1$2 '—'), M + 6, doc.y + 12, { width: W - 12 });
+  doc.font('Helvetica').fontSize(10).fillColor(INK).text(String(value ?? '—'), M + 6, doc.y + 12, { width: W - 12 });
   doc.moveDown(0.8);
 }
 
@@ -81,7 +81,7 @@ export async function crvPdf({ visite, produits, labo }) {
     // Produits
     doc.font('Helvetica-Bold').fontSize(11).fillColor(INK).text('Produits présentés');
     doc.moveDown(0.3);
-    table(doc, ['Produit', 'DCI', 'Qté'], produits.map((p) => [p.nom, p.dci, String(p.qty $1$2 '')]), W);
+    table(doc, ['Produit', 'DCI', 'Qté'], produits.map((p) => [p.nom, p.dci, String(p.qty ?? '')]), W);
     doc.moveDown(0.6);
 
     // Résultat + compte rendu

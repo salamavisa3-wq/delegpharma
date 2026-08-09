@@ -16,8 +16,7 @@ let _db;
 async function pgClient() {
   if (!_db) {
     const { default: pg } = await import('pg');
-    const ssl = { rejectUnauthorized: false };
-    _db = new pg.Pool({ connectionString: url, ssl });
+    _db = new pg.Pool({ connectionString: url, ssl: { rejectUnauthorized: false } });
   }
   return _db;
 }
@@ -49,7 +48,6 @@ function toPgSql(sql) {
 
 // lastInsertId() pg lit rows[0].id : garantit que l'INSERT renvoie l'id.
 function withReturningId(sql) {
-  // Ne rien faire si la requête contient un point-virgule (multi-instructions DDL) ou déjà un RETURNING.
   if (/;/.test(sql) || /\bRETURNING\b/i.test(sql)) return sql;
   const t = sql.trim();
   if (!/^INSERT\b/i.test(t)) return sql;

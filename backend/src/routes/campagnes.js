@@ -24,7 +24,7 @@ const COVERAGE = `
 
 router.get('/campagnes', async (req, res) => {
   const rows = await all(COVERAGE, [req.user.laboratoire_id]);
-  return res.json(rows.map((c) => ({ ...c, taux: c.objectif $1 Math.round((100 * c.validees) / c.objectif) : 0 })));
+  return res.json(rows.map((c) => ({ ...c, taux: c.objectif ? Math.round((100 * c.validees) / c.objectif) : 0 })));
 });
 
 router.post('/campagnes', requireRole('manager', 'admin', 'laboratoire'), async (req, res) => {
@@ -47,9 +47,9 @@ router.put('/campagnes/:id', requireRole('manager', 'admin', 'laboratoire'), asy
   await run(
     `UPDATE campagne SET nom=$1, produit_id=$2, agrement_arp=$3, debut=$4, fin=$5, objectif=$6, statut=$7, region_id=$8, district_id=$9
      WHERE id = $10`,
-    [b.nom $11$12 cur.nom, b.produit_id $13$14 cur.produit_id, b.agrement_arp $15$16 cur.agrement_arp,
-      b.debut $17$18 cur.debut, b.fin $19$20 cur.fin, b.objectif $21$22 cur.objectif, b.statut $23$24 cur.statut,
-      b.region_id $25$26 cur.region_id, b.district_id $27$28 cur.district_id, req.params.id],
+    [b.nom ?? cur.nom, b.produit_id ?? cur.produit_id, b.agrement_arp ?? cur.agrement_arp,
+      b.debut ?? cur.debut, b.fin ?? cur.fin, b.objectif ?? cur.objectif, b.statut ?? cur.statut,
+      b.region_id ?? cur.region_id, b.district_id ?? cur.district_id, req.params.id],
   );
   return res.json({ ok: true });
 });

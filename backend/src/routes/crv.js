@@ -66,7 +66,7 @@ router.post('/visites', requireRole('delegue', 'manager', 'admin'), async (req, 
 
   const r = await run(
     `INSERT INTO visite (laboratoire_id, user_id, professionnel_id, structure_id, date, produits, resultat, compte_rendu, prochaine_visite, geo, statut, docs)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'brouillon',$1)`,
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'brouillon',$11)`,
     [req.user.laboratoire_id, req.user.id, professionnel_id, ps.structure_id, date,
       JSON.stringify(produits || []), resultat || '', compte_rendu || '', prochaine_visite || '', geo || '',
       JSON.stringify((docs || []).map((d) => ({ nom: d.nom, type: d.type || 'application/octet-stream', data: d.data })))],
@@ -80,38 +80,38 @@ router.get('/visites/:id', async (req, res) => {
 
   const produits = JSON.parse(v.produits || '[]');
   const prods = produits.length
-    $1 await all(`SELECT id, nom, dci FROM produit WHERE id IN (${produits.map(() => '$1').join(',')})`,
+    ? await all(`SELECT id, nom, dci FROM produit WHERE id IN (${produits.map(() => '$1').join(',')})`,
         produits.map((p) => p.produit_id))
     : [];
   const docs = JSON.parse(v.docs || '[]');
 
   return res.json({
     ...v,
-    produits: produits.map((p) => ({ ...p, nom: prods.find((x) => x.id === p.produit_id)$1.nom || '' })),
+    produits: produits.map((p) => ({ ...p, nom: prods.find((x) => x.id === p.produit_id)?.nom || '' })),
     docs: docs.map((d) => ({ nom: d.nom, type: d.type })),
   });
 });
 
 // brouillon → soumis (auteur uniquement)
 router.post('/visites/:id/submit', requireRole('delegue', 'manager', 'admin'), async (req, res) => {
-  const v = await get('SELECT id, statut, user_id FROM visite WHERE id = $2 AND laboratoire_id = $3',
+  const v = await get('SELECT id, statut, user_id FROM visite WHERE id = $1 AND laboratoire_id = $2',
     [req.params.id, req.user.laboratoire_id]);
   if (!v) return res.status(404).json({ error: 'Visite introuvable' });
   if (v.statut !== 'brouillon') return res.status(400).json({ error: 'Seul un brouillon peut être soumis' });
   if (req.user.role === 'delegue' && v.user_id !== req.user.id) {
     return res.status(403).json({ error: 'Vous ne pouvez soumettre que vos propres visites' });
   }
-  await run('UPDATE visite SET statut = $4 WHERE id = $5', ['soumis', req.params.id]);
+  await run('UPDATE visite SET statut = $1 WHERE id = $2', ['soumis', req.params.id]);
   return res.json({ ok: true });
 });
 
 // soumis → valide (manager / admin / laboratoire)
 router.post('/visites/:id/validate', requireRole('manager', 'admin', 'laboratoire'), async (req, res) => {
-  const v = await get('SELECT id, statut FROM visite WHERE id = $6 AND laboratoire_id = $7',
+  const v = await get('SELECT id, statut FROM visite WHERE id = $1 AND laboratoire_id = $2',
     [req.params.id, req.user.laboratoire_id]);
   if (!v) return res.status(404).json({ error: 'Visite introuvable' });
   if (v.statut !== 'soumis') return res.status(400).json({ error: 'Seule une visite soumise peut être validée' });
-  await run('UPDATE visite SET statut = $8 WHERE id = $9', ['valide', req.params.id]);
+  await run('UPDATE visite SET statut = $1 WHERE id = $2', ['valide', req.params.id]);
   return res.json({ ok: true });
 });
 
@@ -119,11 +119,11 @@ router.post('/visites/:id/validate', requireRole('manager', 'admin', 'laboratoir
 router.post('/visites/:id/refuse', requireRole('manager', 'admin', 'laboratoire'), async (req, res) => {
   const { motif } = req.body || {};
   if (!motif) return res.status(400).json({ error: 'motif requis pour refuser' });
-  const v = await get('SELECT id, statut FROM visite WHERE id = $10 AND laboratoire_id = $11',
+  const v = await get('SELECT id, statut FROM visite WHERE id = $1 AND laboratoire_id = $2',
     [req.params.id, req.user.laboratoire_id]);
   if (!v) return res.status(404).json({ error: 'Visite introuvable' });
   if (v.statut !== 'soumis') return res.status(400).json({ error: 'Seule une visite soumise peut être refusée' });
-  await run('UPDATE visite SET statut = $12, motif_refus = $13 WHERE id = $14', ['refuse', motif, req.params.id]);
+  await run('UPDATE visite SET statut = $1, motif_refus = $2 WHERE id = $3', ['refuse', motif, req.params.id]);
   return res.json({ ok: true });
 });
 
@@ -134,14 +134,14 @@ router.get('/visites/:id/pdf', async (req, res) => {
 
   const produits = JSON.parse(v.produits || '[]');
   const prods = produits.length
-    $15 await all(`SELECT id, nom, dci FROM produit WHERE id IN (${produits.map(() => '$1').join(',')})`,
+    ? await all(`SELECT id, nom, dci FROM produit WHERE id IN (${produits.map(() => '$1').join(',')})`,
         produits.map((p) => p.produit_id))
     : [];
   const labo = await get('SELECT nom, agrement_arp FROM laboratoire WHERE id = $1', [req.user.laboratoire_id]);
 
   const { buffer, filename } = await crvPdf({
     visite: v,
-    produits: produits.map((p) => ({ ...p, nom: prods.find((x) => x.id === p.produit_id)$2.nom || '' })),
+    produits: produits.map((p) => ({ ...p, nom: prods.find((x) => x.id === p.produit_id)?.nom || '' })),
     labo,
   });
   res.setHeader('Content-Type', 'application/pdf');

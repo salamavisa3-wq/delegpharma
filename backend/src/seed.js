@@ -3,7 +3,7 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import bcrypt from 'bcryptjs';
-import { db, run, get, lastInsertId } from './db.js';
+import { run, get, close, lastInsertId, url, isPg } from './db.js';
 import { initSchema } from './schema.js';
 import {
   PAYS, REGIONS, TYPES_STRUCTURE, SPECIALITES, TENANT_DEMO,
@@ -112,7 +112,7 @@ export async function seed() {
 const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   seed()
-    .then(() => db.close())
+    .then(() => close())
     .then(() => process.exit(0))
     .catch((e) => {
       console.error('Seed a échoué :', e);

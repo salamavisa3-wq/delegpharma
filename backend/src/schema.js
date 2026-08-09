@@ -1,7 +1,7 @@
 // Schéma SQL — DelegPharma SaaS.
 // Multi-tenant : chaque table métier porte laboratoire_id (isolation par laboratoire).
 // Multi-pays : pays -> region -> district (hiérarchie sanitaire officielle).
-const DDL = `
+const SQLiteDDL = `
 CREATE TABLE IF NOT EXISTS meta (
   key   TEXT PRIMARY KEY,
   value TEXT
@@ -146,7 +146,43 @@ CREATE TABLE IF NOT EXISTS tournee (
 CREATE INDEX IF NOT EXISTS idx_tournee_labo ON tournee(laboratoire_id);
 `;
 
+const PgDDL = SQLiteDDL
+  .replace(/INTEGER PRIMARY KEY AUTOINCREMENT/g, 'SERIAL PRIMARY KEY')
+  .replace(/TEXT NOT NULL DEFAULT \(datetime\('now'\)\)/g, "TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP")
+  .replace(/CREATE INDEX IF NOT EXISTS idx_region_pays ON region\(pays_id\);/g, '')
+  .replace(/CREATE INDEX IF NOT EXISTS idx_district_region ON district\(region_id\);/g, '')
+  .replace(/CREATE INDEX IF NOT EXISTS idx_structure_labo ON structure\(laboratoire_id\);/g, '')
+  .replace(/CREATE INDEX IF NOT EXISTS idx_structure_zone ON structure\(region_id, district_id\);/g, '')
+  .replace(/CREATE INDEX IF NOT EXISTS idx_prof_labo ON professionnel\(laboratoire_id\);/g, '')
+  .replace(/CREATE INDEX IF NOT EXISTS idx_prof_structure ON professionnel\(structure_id\);/g, '')
+  .replace(/CREATE INDEX IF NOT EXISTS idx_produit_labo ON produit\(laboratoire_id\);/g, '')
+  .replace(/CREATE INDEX IF NOT EXISTS idx_visite_labo ON visite\(laboratoire_id, statut\);/g, '')
+  .replace(/CREATE INDEX IF NOT EXISTS idx_visite_user ON visite\(user_id\);/g, '')
+  .replace(/CREATE INDEX IF NOT EXISTS idx_visite_date ON visite\(date\);/g, '')
+  .replace(/CREATE INDEX IF NOT EXISTS idx_campagne_labo ON campagne\(laboratoire_id\);/g, '')
+  .replace(/CREATE INDEX IF NOT EXISTS idx_tournee_labo ON tournee\(laboratoire_id\);/g, '');
+
 export async function initSchema() {
-  const { db } = await import('./db.js');
-  await db.executeMultiple(DDL);
+  const { exec } = await import('./db.js');
+  const url = process.env.DATABASE_URL || '';
+  const isPg = url.startsWith('postgres://') || url.startsWith('postgresql://');
+  await exec(isPg ? PgDDL : SQLiteDDL);
+  if (isPg) {
+    const { all, run } = await import('./db.js');
+    const indexes = [
+      'CREATE INDEX IF NOT EXISTS idx_region_pays ON region(pays_id)',
+      'CREATE INDEX IF NOT EXISTS idx_district_region ON district(region_id)',
+      'CREATE INDEX IF NOT EXISTS idx_structure_labo ON structure(laboratoire_id)',
+      'CREATE INDEX IF NOT EXISTS idx_structure_zone ON structure(region_id, district_id)',
+      'CREATE INDEX IF NOT EXISTS idx_prof_labo ON professionnel(laboratoire_id)',
+      'CREATE INDEX IF NOT EXISTS idx_prof_structure ON professionnel(structure_id)',
+      'CREATE INDEX IF NOT EXISTS idx_produit_labo ON produit(laboratoire_id)',
+      'CREATE INDEX IF NOT EXISTS idx_visite_labo ON visite(laboratoire_id, statut)',
+      'CREATE INDEX IF NOT EXISTS idx_visite_user ON visite(user_id)',
+      'CREATE INDEX IF NOT EXISTS idx_visite_date ON visite(date)',
+      'CREATE INDEX IF NOT EXISTS idx_campagne_labo ON campagne(laboratoire_id)',
+      'CREATE INDEX IF NOT EXISTS idx_tournee_labo ON tournee(laboratoire_id)',
+    ];
+    for (const sql of indexes) await run(sql);
+  }
 }

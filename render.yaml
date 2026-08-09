@@ -12,12 +12,12 @@ services:
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
-        sync: false            # libsql://delegpharma-<org>.turso.io — défini dans le dashboard
-      - key: TURSO_AUTH_TOKEN
-        sync: false            # token Turso — défini dans le dashboard
+        sync: false            # postgres://... depuis Render Postgres
       - key: JWT_SECRET
         generateValue: true
       - key: COOKIE_SECURE
         value: "true"
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: "10000"

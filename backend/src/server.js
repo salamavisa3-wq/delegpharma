@@ -5,6 +5,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { initSchema } from './schema.js';
+import { seed } from './seed.js';
 import authRoutes from './routes/auth.js';
 import referentielRoutes from './routes/referentiel.js';
 import crvRoutes from './routes/crv.js';
@@ -47,12 +48,13 @@ process.on('uncaughtException', (err) => console.error('[uncaughtException]', er
 
 const PORT = process.env.PORT || 10000;
 initSchema()
+  .then(() => seed()) // idempotent : ne fait rien si meta.seeded_v1 existe déjà
   .then(() => {
     app.listen(PORT, () => {
       console.log(`DelegPharma API écoute sur :${PORT} (${process.env.NODE_ENV || 'dev'})`);
     });
   })
   .catch((e) => {
-    console.error('initSchema a échoué :', e);
+    console.error('initSchema/seed a échoué :', e);
     process.exit(1);
   });

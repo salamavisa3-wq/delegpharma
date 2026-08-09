@@ -1,6 +1,6 @@
 // Module CRV : cycle brouillon → soumis → valide/refusé + pièces jointes + PDF pdfkit.
 import { Router } from 'express';
-import { all, get, run, lastInsertId } from '../db.js';
+import { all, get, run, lastInsertId, ph } from '../db.js';
 import { requireAuth, requireRole } from '../auth.js';
 import { crvPdf } from '../pdf.js';
 
@@ -80,7 +80,7 @@ router.get('/visites/:id', async (req, res) => {
 
   const produits = JSON.parse(v.produits || '[]');
   const prods = produits.length
-    ? await all(`SELECT id, nom, dci FROM produit WHERE id IN (${produits.map(() => '$1').join(',')})`,
+    ? await all(`SELECT id, nom, dci FROM produit WHERE id IN (${produits.map((_, i) => ph(i + 1)).join(',')})`,
         produits.map((p) => p.produit_id))
     : [];
   const docs = JSON.parse(v.docs || '[]');
@@ -134,7 +134,7 @@ router.get('/visites/:id/pdf', async (req, res) => {
 
   const produits = JSON.parse(v.produits || '[]');
   const prods = produits.length
-    ? await all(`SELECT id, nom, dci FROM produit WHERE id IN (${produits.map(() => '$1').join(',')})`,
+    ? await all(`SELECT id, nom, dci FROM produit WHERE id IN (${produits.map((_, i) => ph(i + 1)).join(',')})`,
         produits.map((p) => p.produit_id))
     : [];
   const labo = await get('SELECT nom, agrement_arp FROM laboratoire WHERE id = $1', [req.user.laboratoire_id]);

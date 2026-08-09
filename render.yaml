@@ -1,23 +1,33 @@
-# Render blueprint — DelegPharma SaaS
-# Créé via la CLI Render (render services create / blueprints). Un seul Web Service
-# sert l'API (Express) ET le frontend (express.static) — une seule origine, pas de CORS.
+# DelegPharma SaaS — Render Blueprint
+# Un seul Web Service sert l'API (Express) ET le frontend (express.static) — une seule origine, pas de CORS.
 services:
   - type: web
     name: delegpharma
     runtime: node
     rootDir: backend
     region: frankfurt
-    plan: free
+    plan: starter
     buildCommand: npm ci --omit=dev
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
-        sync: false            # postgres://... depuis Render Postgres
+        fromDatabase:
+          name: delegpharma-db
+          property: connectionString
       - key: JWT_SECRET
         generateValue: true
       - key: COOKIE_SECURE
         value: "true"
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: "10000"
+
+databases:
+  - name: delegpharma-db
+    plan: basic-256mb
+    region: frankfurt
+    postgresMajorVersion: "18"
+    databaseName: delegpharma
+    user: delegpharma
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: Render internal + local seed access

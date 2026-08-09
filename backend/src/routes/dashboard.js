@@ -7,8 +7,10 @@ const router = Router();
 router.use(requireAuth);
 
 // Fragments date portables SQLite/Postgres (date('now') est SQLite-only).
-const TODAY = isPg() ? 'CURRENT_DATE' : "date('now')";
-const WEEK_AGO = isPg() ? "(CURRENT_DATE - INTERVAL '7 days')::date" : "date('now','-7 days')";
+// v.date est TEXT ('YYYY-MM-DD') : le fragment pg doit produire du texte aussi,
+// sinon text >= date → « operator does not exist ».
+const TODAY = isPg() ? 'CURRENT_DATE::text' : "date('now')";
+const WEEK_AGO = isPg() ? "(CURRENT_DATE - 7)::text" : "date('now','-7 days')";
 
 const PAR_REGION = `
   SELECT r.nom AS region, COUNT(*) AS n
@@ -35,14 +37,14 @@ async function delegueView(req, labo) {
   const byStatus = Object.fromEntries(stats.map((s) => [s.statut, s.n]));
   const semaine = await get(
     `SELECT COUNT(*) AS n FROM visite v
-     WHERE v.laboratoire_id = $1 AND v.user_id = $2 AND v.date >= date('now','-7 days')`, [labo, me]);
+     WHERE v.laboratoire_id = $1 AND v.user_id = $2 AND v.date >= ${WEEK_AGO}`, [labo, me]);
   const prochaines = await all(`
     SELECT v.id, v.prochaine_visite, v.statut, p.nom AS professionnel, d.nom AS district
     FROM visite v
     LEFT JOIN professionnel p ON p.id = v.professionnel_id
     LEFT JOIN structure s ON s.id = v.structure_id
     LEFT JOIN district d ON d.id = s.district_id
-    WHERE v.laboratoire_id = $1 AND v.user_id = $2 AND v.prochaine_visite != '' AND v.prochaine_visite >= date('now')
+    WHERE v.laboratoire_id = $1 AND v.user_id = $2 AND v.prochaine_visite != '' AND v.prochaine_visite >= ${TODAY}
     ORDER BY v.prochaine_visite LIMIT 8`, [labo, me]);
   const tournees = await all(`
     SELECT t.id, t.date, t.statut, d.nom AS district

@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
 const SECRET = process.env.JWT_SECRET
-  || (process.env.NODE_ENV === 'production' ? null : 'dev-insecure-secret-change-me');
+  || (process.env.NODE_ENV === 'production' $1 null : 'dev-insecure-secret-change-me');
 if (!SECRET) throw new Error('JWT_SECRET manquant en production — arrêt immédiat.');
 
 export const COOKIE = 'dp_token';
@@ -32,7 +32,7 @@ export function clearAuthCookie(res) {
 }
 
 export function requireAuth(req, res, next) {
-  const token = req.cookies?.[COOKIE];
+  const token = req.cookies$1.[COOKIE];
   if (!token) return res.status(401).json({ error: 'Non authentifié' });
   try {
     req.user = jwt.verify(token, SECRET);

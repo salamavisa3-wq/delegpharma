@@ -16,7 +16,7 @@ let _db;
 async function pgClient() {
   if (!_db) {
     const { default: pg } = await import('pg');
-    const ssl = process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false;
+    const ssl = { rejectUnauthorized: false };
     _db = new pg.Pool({ connectionString: url, ssl });
   }
   return _db;
@@ -35,9 +35,31 @@ async function sqliteClient() {
 
 const db = () => isPg() ? pgClient() : sqliteClient();
 
+// Postgres exige des placeholders $1..$N : traduit « ? » hors chaînes '...'.
+function toPgSql(sql) {
+  let out = '', n = 0, inStr = false;
+  for (let i = 0; i < sql.length; i++) {
+    const c = sql[i];
+    if (c === "'") inStr = !inStr;
+    else if (c === '?' && !inStr) { n += 1; out += '$' + n; continue; }
+    out += c;
+  }
+  return out;
+}
+
+// lastInsertId() pg lit rows[0].id : garantit que l'INSERT renvoie l'id.
+function withReturningId(sql) {
+  // Ne rien faire si la requête contient un point-virgule (multi-instructions DDL) ou déjà un RETURNING.
+  if (/;/.test(sql) || /\bRETURNING\b/i.test(sql)) return sql;
+  const t = sql.trim();
+  if (!/^INSERT\b/i.test(t)) return sql;
+  return `${t.replace(/;\s*$/, '')} RETURNING id`;
+}
+
 /** Exécute une requête SQL paramétrée (INSERT/UPDATE/DELETE…). */
 export async function run(sql, params = []) {
   if (isPg()) {
+    sql = toPgSql(withReturningId(sql));
     const client = await (await db()).connect();
     try { return await client.query(sql, params); }
     finally { client.release(); }
@@ -49,6 +71,7 @@ export async function run(sql, params = []) {
 /** Retourne toutes les lignes. */
 export async function all(sql, params = []) {
   if (isPg()) {
+    sql = toPgSql(sql);
     const client = await (await db()).connect();
     try { const r = await client.query(sql, params); return r.rows; }
     finally { client.release(); }
@@ -60,6 +83,7 @@ export async function all(sql, params = []) {
 /** Retourne la première ligne ou null. */
 export async function get(sql, params = []) {
   if (isPg()) {
+    sql = toPgSql(sql);
     const client = await (await db()).connect();
     try { const r = await client.query(sql, params); return r.rows[0] ?? null; }
     finally { client.release(); }

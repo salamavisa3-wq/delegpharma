@@ -19,12 +19,12 @@ const COVERAGE = `
   LEFT JOIN produit pr ON pr.id = c.produit_id
   LEFT JOIN region r ON r.id = c.region_id
   LEFT JOIN district d ON d.id = c.district_id
-  WHERE c.laboratoire_id = ?
+  WHERE c.laboratoire_id = $1
   ORDER BY c.debut DESC`;
 
 router.get('/campagnes', async (req, res) => {
   const rows = await all(COVERAGE, [req.user.laboratoire_id]);
-  return res.json(rows.map((c) => ({ ...c, taux: c.objectif ? Math.round((100 * c.validees) / c.objectif) : 0 })));
+  return res.json(rows.map((c) => ({ ...c, taux: c.objectif $1 Math.round((100 * c.validees) / c.objectif) : 0 })));
 });
 
 router.post('/campagnes', requireRole('manager', 'admin', 'laboratoire'), async (req, res) => {
@@ -32,7 +32,7 @@ router.post('/campagnes', requireRole('manager', 'admin', 'laboratoire'), async 
   if (!nom || !produit_id) return res.status(400).json({ error: 'nom et produit_id requis' });
   const r = await run(
     `INSERT INTO campagne (laboratoire_id, produit_id, agrement_arp, debut, fin, objectif, statut, region_id, district_id)
-     VALUES (?,?,?,?,?,?,'active',?,?)`,
+     VALUES ($1,$2,$3,$4,$5,$6,'active',$7,$8)`,
     [req.user.laboratoire_id, produit_id, agrement_arp || '', debut || '', fin || '', objectif || 0,
       region_id || null, district_id || null],
   );
@@ -40,22 +40,22 @@ router.post('/campagnes', requireRole('manager', 'admin', 'laboratoire'), async 
 });
 
 router.put('/campagnes/:id', requireRole('manager', 'admin', 'laboratoire'), async (req, res) => {
-  const cur = await get('SELECT * FROM campagne WHERE id = ? AND laboratoire_id = ?',
+  const cur = await get('SELECT * FROM campagne WHERE id = $1 AND laboratoire_id = $2',
     [req.params.id, req.user.laboratoire_id]);
   if (!cur) return res.status(404).json({ error: 'Campagne introuvable' });
   const b = req.body || {};
   await run(
-    `UPDATE campagne SET nom=?, produit_id=?, agrement_arp=?, debut=?, fin=?, objectif=?, statut=?, region_id=?, district_id=?
-     WHERE id = ?`,
-    [b.nom ?? cur.nom, b.produit_id ?? cur.produit_id, b.agrement_arp ?? cur.agrement_arp,
-      b.debut ?? cur.debut, b.fin ?? cur.fin, b.objectif ?? cur.objectif, b.statut ?? cur.statut,
-      b.region_id ?? cur.region_id, b.district_id ?? cur.district_id, req.params.id],
+    `UPDATE campagne SET nom=$1, produit_id=$2, agrement_arp=$3, debut=$4, fin=$5, objectif=$6, statut=$7, region_id=$8, district_id=$9
+     WHERE id = $10`,
+    [b.nom $11$12 cur.nom, b.produit_id $13$14 cur.produit_id, b.agrement_arp $15$16 cur.agrement_arp,
+      b.debut $17$18 cur.debut, b.fin $19$20 cur.fin, b.objectif $21$22 cur.objectif, b.statut $23$24 cur.statut,
+      b.region_id $25$26 cur.region_id, b.district_id $27$28 cur.district_id, req.params.id],
   );
   return res.json({ ok: true });
 });
 
 router.delete('/campagnes/:id', requireRole('manager', 'admin'), async (req, res) => {
-  await run('DELETE FROM campagne WHERE id = ? AND laboratoire_id = ?', [req.params.id, req.user.laboratoire_id]);
+  await run('DELETE FROM campagne WHERE id = $1 AND laboratoire_id = $2', [req.params.id, req.user.laboratoire_id]);
   return res.json({ ok: true });
 });
 

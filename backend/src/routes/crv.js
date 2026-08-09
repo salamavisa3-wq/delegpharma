@@ -21,7 +21,7 @@ async function scopeVisite(req, id) {
     LEFT JOIN district d ON d.id = s.district_id
     LEFT JOIN region r ON r.id = s.region_id
     LEFT JOIN users u ON u.id = v.user_id
-    WHERE v.id = ? AND v.laboratoire_id = ?`, [id, req.user.laboratoire_id]);
+    WHERE v.id = $1 AND v.laboratoire_id = $2`, [id, req.user.laboratoire_id]);
 }
 
 const VISITE_LIST = `
@@ -32,15 +32,15 @@ const VISITE_LIST = `
 
 router.get('/visites', async (req, res) => {
   const { statut, user_id, date_from, date_to, region_id, district_id } = req.query;
-  const clauses = ['v.laboratoire_id = ?'];
+  const clauses = ['v.laboratoire_id = $1'];
   const params = [req.user.laboratoire_id];
-  if (req.user.role === 'delegue') { clauses.push('v.user_id = ?'); params.push(req.user.id); }
-  if (statut) { clauses.push('v.statut = ?'); params.push(statut); }
-  if (user_id) { clauses.push('v.user_id = ?'); params.push(user_id); }
-  if (date_from) { clauses.push('v.date >= ?'); params.push(date_from); }
-  if (date_to) { clauses.push('v.date <= ?'); params.push(date_to); }
-  if (region_id) { clauses.push('s.region_id = ?'); params.push(region_id); }
-  if (district_id) { clauses.push('s.district_id = ?'); params.push(district_id); }
+  if (req.user.role === 'delegue') { clauses.push('v.user_id = $2'); params.push(req.user.id); }
+  if (statut) { clauses.push('v.statut = $3'); params.push(statut); }
+  if (user_id) { clauses.push('v.user_id = $4'); params.push(user_id); }
+  if (date_from) { clauses.push('v.date >= $5'); params.push(date_from); }
+  if (date_to) { clauses.push('v.date <= $6'); params.push(date_to); }
+  if (region_id) { clauses.push('s.region_id = $7'); params.push(region_id); }
+  if (district_id) { clauses.push('s.district_id = $8'); params.push(district_id); }
 
   const rows = await all(`
     SELECT ${VISITE_LIST}
@@ -60,13 +60,13 @@ router.post('/visites', requireRole('delegue', 'manager', 'admin'), async (req, 
   const { professionnel_id, date, produits, resultat, compte_rendu, prochaine_visite, geo, docs } = req.body || {};
   if (!professionnel_id || !date) return res.status(400).json({ error: 'professionnel_id et date requis' });
 
-  const ps = await get('SELECT id, structure_id FROM professionnel WHERE id = ? AND laboratoire_id = ?',
+  const ps = await get('SELECT id, structure_id FROM professionnel WHERE id = $1 AND laboratoire_id = $2',
     [professionnel_id, req.user.laboratoire_id]);
   if (!ps) return res.status(404).json({ error: 'Professionnel introuvable' });
 
   const r = await run(
     `INSERT INTO visite (laboratoire_id, user_id, professionnel_id, structure_id, date, produits, resultat, compte_rendu, prochaine_visite, geo, statut, docs)
-     VALUES (?,?,?,?,?,?,?,?,?,?,'brouillon',?)`,
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'brouillon',$1)`,
     [req.user.laboratoire_id, req.user.id, professionnel_id, ps.structure_id, date,
       JSON.stringify(produits || []), resultat || '', compte_rendu || '', prochaine_visite || '', geo || '',
       JSON.stringify((docs || []).map((d) => ({ nom: d.nom, type: d.type || 'application/octet-stream', data: d.data })))],
@@ -80,38 +80,38 @@ router.get('/visites/:id', async (req, res) => {
 
   const produits = JSON.parse(v.produits || '[]');
   const prods = produits.length
-    ? await all(`SELECT id, nom, dci FROM produit WHERE id IN (${produits.map(() => '?').join(',')})`,
+    $1 await all(`SELECT id, nom, dci FROM produit WHERE id IN (${produits.map(() => '$1').join(',')})`,
         produits.map((p) => p.produit_id))
     : [];
   const docs = JSON.parse(v.docs || '[]');
 
   return res.json({
     ...v,
-    produits: produits.map((p) => ({ ...p, nom: prods.find((x) => x.id === p.produit_id)?.nom || '' })),
+    produits: produits.map((p) => ({ ...p, nom: prods.find((x) => x.id === p.produit_id)$1.nom || '' })),
     docs: docs.map((d) => ({ nom: d.nom, type: d.type })),
   });
 });
 
 // brouillon → soumis (auteur uniquement)
 router.post('/visites/:id/submit', requireRole('delegue', 'manager', 'admin'), async (req, res) => {
-  const v = await get('SELECT id, statut, user_id FROM visite WHERE id = ? AND laboratoire_id = ?',
+  const v = await get('SELECT id, statut, user_id FROM visite WHERE id = $2 AND laboratoire_id = $3',
     [req.params.id, req.user.laboratoire_id]);
   if (!v) return res.status(404).json({ error: 'Visite introuvable' });
   if (v.statut !== 'brouillon') return res.status(400).json({ error: 'Seul un brouillon peut être soumis' });
   if (req.user.role === 'delegue' && v.user_id !== req.user.id) {
     return res.status(403).json({ error: 'Vous ne pouvez soumettre que vos propres visites' });
   }
-  await run('UPDATE visite SET statut = ? WHERE id = ?', ['soumis', req.params.id]);
+  await run('UPDATE visite SET statut = $4 WHERE id = $5', ['soumis', req.params.id]);
   return res.json({ ok: true });
 });
 
 // soumis → valide (manager / admin / laboratoire)
 router.post('/visites/:id/validate', requireRole('manager', 'admin', 'laboratoire'), async (req, res) => {
-  const v = await get('SELECT id, statut FROM visite WHERE id = ? AND laboratoire_id = ?',
+  const v = await get('SELECT id, statut FROM visite WHERE id = $6 AND laboratoire_id = $7',
     [req.params.id, req.user.laboratoire_id]);
   if (!v) return res.status(404).json({ error: 'Visite introuvable' });
   if (v.statut !== 'soumis') return res.status(400).json({ error: 'Seule une visite soumise peut être validée' });
-  await run('UPDATE visite SET statut = ? WHERE id = ?', ['valide', req.params.id]);
+  await run('UPDATE visite SET statut = $8 WHERE id = $9', ['valide', req.params.id]);
   return res.json({ ok: true });
 });
 
@@ -119,11 +119,11 @@ router.post('/visites/:id/validate', requireRole('manager', 'admin', 'laboratoir
 router.post('/visites/:id/refuse', requireRole('manager', 'admin', 'laboratoire'), async (req, res) => {
   const { motif } = req.body || {};
   if (!motif) return res.status(400).json({ error: 'motif requis pour refuser' });
-  const v = await get('SELECT id, statut FROM visite WHERE id = ? AND laboratoire_id = ?',
+  const v = await get('SELECT id, statut FROM visite WHERE id = $10 AND laboratoire_id = $11',
     [req.params.id, req.user.laboratoire_id]);
   if (!v) return res.status(404).json({ error: 'Visite introuvable' });
   if (v.statut !== 'soumis') return res.status(400).json({ error: 'Seule une visite soumise peut être refusée' });
-  await run('UPDATE visite SET statut = ?, motif_refus = ? WHERE id = ?', ['refuse', motif, req.params.id]);
+  await run('UPDATE visite SET statut = $12, motif_refus = $13 WHERE id = $14', ['refuse', motif, req.params.id]);
   return res.json({ ok: true });
 });
 
@@ -134,14 +134,14 @@ router.get('/visites/:id/pdf', async (req, res) => {
 
   const produits = JSON.parse(v.produits || '[]');
   const prods = produits.length
-    ? await all(`SELECT id, nom, dci FROM produit WHERE id IN (${produits.map(() => '?').join(',')})`,
+    $15 await all(`SELECT id, nom, dci FROM produit WHERE id IN (${produits.map(() => '$1').join(',')})`,
         produits.map((p) => p.produit_id))
     : [];
-  const labo = await get('SELECT nom, agrement_arp FROM laboratoire WHERE id = ?', [req.user.laboratoire_id]);
+  const labo = await get('SELECT nom, agrement_arp FROM laboratoire WHERE id = $1', [req.user.laboratoire_id]);
 
   const { buffer, filename } = await crvPdf({
     visite: v,
-    produits: produits.map((p) => ({ ...p, nom: prods.find((x) => x.id === p.produit_id)?.nom || '' })),
+    produits: produits.map((p) => ({ ...p, nom: prods.find((x) => x.id === p.produit_id)$2.nom || '' })),
     labo,
   });
   res.setHeader('Content-Type', 'application/pdf');

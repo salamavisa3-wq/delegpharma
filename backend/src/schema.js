@@ -160,7 +160,9 @@ const PgDDL = SQLiteDDL
   .replace(/CREATE INDEX IF NOT EXISTS idx_visite_user ON visite\(user_id\);/g, '')
   .replace(/CREATE INDEX IF NOT EXISTS idx_visite_date ON visite\(date\);/g, '')
   .replace(/CREATE INDEX IF NOT EXISTS idx_campagne_labo ON campagne\(laboratoire_id\);/g, '')
-  .replace(/CREATE INDEX IF NOT EXISTS idx_tournee_labo ON tournee\(laboratoire_id\);/g, '');
+  .replace(/CREATE INDEX IF NOT EXISTS idx_tournee_labo ON tournee\(laboratoire_id\);/g, '')
+  .replace(/CREATE TABLE IF NOT EXISTS meta \(\n  key   TEXT PRIMARY KEY,\n  value TEXT\n\);/g, 'CREATE TABLE IF NOT EXISTS meta (\n  id SERIAL PRIMARY KEY,\n  key   TEXT NOT NULL UNIQUE,\n  value TEXT\n);')
+  ;
 
 export async function initSchema() {
   const { exec } = await import('./db.js');

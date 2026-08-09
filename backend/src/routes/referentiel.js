@@ -74,11 +74,11 @@ router.get('/professionnels', async (req, res) => {
   const { region_id, district_id, specialite_id, potentiel, q } = req.query;
   const clauses = ['p.laboratoire_id = $1'];
   const params = [req.user.laboratoire_id];
-  if (region_id) { clauses.push('s.region_id = $2'); params.push(region_id); }
-  if (district_id) { clauses.push('s.district_id = $3'); params.push(district_id); }
-  if (specialite_id) { clauses.push('p.specialite_id = $4'); params.push(specialite_id); }
-  if (potentiel) { clauses.push('p.potentiel = $5'); params.push(potentiel); }
-  if (q) { clauses.push('p.nom LIKE $6'); params.push(`%${q}%`); }
+  if (region_id) { clauses.push('s.region_id = $' + (params.length + 1)); params.push(Number(region_id)); }
+  if (district_id) { clauses.push('s.district_id = $' + (params.length + 1)); params.push(Number(district_id)); }
+  if (specialite_id) { clauses.push('p.specialite_id = $' + (params.length + 1)); params.push(Number(specialite_id)); }
+  if (potentiel) { clauses.push('p.potentiel = $' + (params.length + 1)); params.push(potentiel); }
+  if (q) { clauses.push('p.nom LIKE $' + (params.length + 1)); params.push(`%${q}%`); }
 
   const rows = await all(`
     SELECT p.id, p.nom, p.potentiel, p.telephone,

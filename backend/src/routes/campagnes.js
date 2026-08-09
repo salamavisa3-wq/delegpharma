@@ -45,8 +45,8 @@ router.put('/campagnes/:id', requireRole('manager', 'admin', 'laboratoire'), asy
   if (!cur) return res.status(404).json({ error: 'Campagne introuvable' });
   const b = req.body || {};
   await run(
-    `UPDATE campagne SET nom=$1, produit_id=$2, agrement_arp=$3, debut=$4, fin=$5, objectif=$6, statut=$7, region_id=$8, district_id=$9
-     WHERE id = $9`,
+    `UPDATE campagne SET nom=$1, produit_id=$2, agrement_arp=$3, debut=$4, fin=$5, objectif=$6, statut=$7, region_id=$8, district_id=$9'
+     WHERE id = $10`,
     [b.nom ?? cur.nom, b.produit_id ?? cur.produit_id, b.agrement_arp ?? cur.agrement_arp,
       b.debut ?? cur.debut, b.fin ?? cur.fin, b.objectif ?? cur.objectif, b.statut ?? cur.statut,
       b.region_id ?? cur.region_id, b.district_id ?? cur.district_id, req.params.id],

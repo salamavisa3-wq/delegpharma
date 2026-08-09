@@ -54,6 +54,25 @@ function withReturningId(sql) {
   return `${t.replace(/;\s*$/, '')} RETURNING id`;
 }
 
+// node:sqlite exige des « ? » positionnels : traduit $N -> ? (inverse de toPgSql).
+function toSqliteSql(sql) {
+  let out = '', inStr = false;
+  for (let i = 0; i < sql.length; i++) {
+    const c = sql[i];
+    if (c === "'") inStr = !inStr;
+    else if (c === '$' && !inStr && /\d/.test(sql[i + 1] ?? '')) {
+      out += '?';
+      while (/\d/.test(sql[i + 1] ?? '')) i++;
+      continue;
+    }
+    out += c;
+  }
+  return out;
+}
+
+// Placeholder adaptatif : $n pour Postgres, ? pour SQLite.
+export const ph = (n) => isPg() ? `$${n}` : '?';
+
 /** Exécute une requête SQL paramétrée (INSERT/UPDATE/DELETE…). */
 export async function run(sql, params = []) {
   if (isPg()) {
@@ -62,7 +81,7 @@ export async function run(sql, params = []) {
     try { return await client.query(sql, params); }
     finally { client.release(); }
   }
-  const stmt = (await db()).prepare(sql);
+  const stmt = (await db()).prepare(toSqliteSql(sql));
   return stmt.run(...params);
 }
 
@@ -74,7 +93,7 @@ export async function all(sql, params = []) {
     try { const r = await client.query(sql, params); return r.rows; }
     finally { client.release(); }
   }
-  const stmt = (await db()).prepare(sql);
+  const stmt = (await db()).prepare(toSqliteSql(sql));
   return stmt.all(...params);
 }
 
@@ -86,7 +105,7 @@ export async function get(sql, params = []) {
     try { const r = await client.query(sql, params); return r.rows[0] ?? null; }
     finally { client.release(); }
   }
-  const stmt = (await db()).prepare(sql);
+  const stmt = (await db()).prepare(toSqliteSql(sql));
   return stmt.get(...params) ?? null;
 }
 

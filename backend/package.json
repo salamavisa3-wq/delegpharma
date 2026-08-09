@@ -1,0 +1,23 @@
+{
+  "name": "delegpharma-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DelegPharma SaaS — CRM délégués médicaux (Sénégal) — API Express + Turso",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed": "node src/seed.js"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.14.0",
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "pdfkit": "^0.15.0"
+  }
+}

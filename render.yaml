@@ -1,0 +1,23 @@
+# Render blueprint — DelegPharma SaaS
+# Créé via la CLI Render (render services create / blueprints). Un seul Web Service
+# sert l'API (Express) ET le frontend (express.static) — une seule origine, pas de CORS.
+services:
+  - type: web
+    name: delegpharma
+    runtime: node
+    rootDir: backend
+    region: frankfurt
+    plan: free
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false            # libsql://delegpharma-<org>.turso.io — défini dans le dashboard
+      - key: TURSO_AUTH_TOKEN
+        sync: false            # token Turso — défini dans le dashboard
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: NODE_ENV
+        value: production

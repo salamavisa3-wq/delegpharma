@@ -118,6 +118,9 @@ async function adminView(req, labo) {
 }
 
 router.get('/dashboard', async (req, res) => {
+  // Rôles sans tenant : pas de scope laboratoire — ils ont leurs propres vues (#/plateforme, #/professionnel).
+  if (req.user.role === 'plateforme') return res.json({ role: 'plateforme' });
+  if (req.user.role === 'professionnel') return res.json({ role: 'professionnel' });
   const labo = req.user.laboratoire_id;
   if (req.user.role === 'delegue') return res.json(await delegueView(req, labo));
   if (req.user.role === 'manager') return res.json(await managerView(req, labo));

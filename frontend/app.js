@@ -5,7 +5,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 const today = () => new Date().toISOString().slice(0, 10);
 const fmtDate = (d) => (d ? String(d).slice(0, 10) : '—');
 
-const state = { user: null, labo: null, catalog: null, hash: location.hash || '#/landing' };
+const state = { user: null, labo: null, catalog: null, abonnement: null, tarifs: null, laboratoires: null, selFormule: null, hash: location.hash || '#/landing' };
 let draft = { produits: [], docs: [] };
 let psFilters = { region_id: '', district_id: '', specialite_id: '', potentiel: '', q: '' };
 let crvFilters = { statut: '', region_id: '', district_id: '' };
@@ -43,31 +43,38 @@ async function init() {
     const me = await api('/auth/me');
     state.user = me.user;
     state.labo = me.laboratoire;
+    state.abonnement = me.abonnement || null;
   } catch { /* non connecté */ }
   window.addEventListener('hashchange', () => { state.hash = location.hash || '#/landing'; route(); });
   route();
 }
 function route() {
   if (!state.user) {
-    render(state.hash === '#/login' ? loginView() : landingView());
+    const h = state.hash;
+    if (h === '#/tarifs') { render(publicPage('Nos tarifs', '<div data-slot="body" class="muted">Chargement…</div>')); loadTarifs(); return; }
+    if (h === '#/inscription') { render(publicPage('Inscription délégué', '<div data-slot="body" class="muted">Chargement…</div>')); loadInscription(); return; }
+    render(h === '#/login' ? loginView() : landingView());
     return;
   }
   render(appShell());
 }
 function render(html) {
   $('#app').innerHTML = html;
+  bind(); // délégation sur document (onclick/onchange/onsubmit) — toujours réattacher,
+          // car au chargement avec cookie de session il n'y a pas de bind() sinon.
   if ($('#view')) showView();
-  else bind();
 }
 /* Rendu interne dans le shell (après nav). bind() est global sur document. */
 function renderMain(html) { $('#view').innerHTML = html; }
 
 /* ---------- Shell + nav ---------- */
 const NAV = {
-  delegue: [['dashboard', 'Tableau de bord'], ['referentiel', 'Référentiel'], ['crv', 'CRV'], ['tournees', 'Tournées']],
-  manager: [['dashboard', 'Tableau de bord'], ['referentiel', 'Référentiel'], ['crv', 'CRV'], ['tournees', 'Tournées'], ['campagnes', 'Campagnes']],
-  laboratoire: [['dashboard', 'Tableau de bord'], ['referentiel', 'Référentiel'], ['crv', 'CRV'], ['campagnes', 'Campagnes']],
-  admin: [['dashboard', 'Tableau de bord'], ['referentiel', 'Référentiel'], ['crv', 'CRV'], ['tournees', 'Tournées'], ['campagnes', 'Campagnes']],
+  delegue: [['dashboard', 'Tableau de bord'], ['referentiel', 'Référentiel'], ['crv', 'CRV'], ['tournees', 'Tournées'], ['objectifs', 'Objectifs'], ['messagerie', 'Messagerie'], ['abonnement', 'Abonnement']],
+  manager: [['dashboard', 'Tableau de bord'], ['referentiel', 'Référentiel'], ['crv', 'CRV'], ['tournees', 'Tournées'], ['campagnes', 'Campagnes'], ['objectifs', 'Objectifs'], ['messagerie', 'Messagerie'], ['abonnement', 'Abonnement'], ['revenus', 'Revenus']],
+  laboratoire: [['dashboard', 'Tableau de bord'], ['referentiel', 'Référentiel'], ['crv', 'CRV'], ['campagnes', 'Campagnes'], ['objectifs', 'Objectifs'], ['messagerie', 'Messagerie'], ['abonnement', 'Abonnement'], ['revenus', 'Revenus']],
+  admin: [['dashboard', 'Tableau de bord'], ['referentiel', 'Référentiel'], ['crv', 'CRV'], ['tournees', 'Tournées'], ['campagnes', 'Campagnes'], ['objectifs', 'Objectifs'], ['messagerie', 'Messagerie'], ['abonnement', 'Abonnement'], ['revenus', 'Revenus']],
+  plateforme: [['plateforme', 'Plateforme'], ['revenus', 'Revenus'], ['referentiel', 'Référentiel']],
+  professionnel: [['professionnel', 'Mes visites']],
 };
 function appShell() {
   const hash = state.hash;
@@ -80,17 +87,20 @@ function appShell() {
     <div class="userbox"><b>${esc(state.user.nom)}</b><span class="badge ${state.user.role}">${state.user.role}</span>
       <button class="ghost small" data-action="logout">Déconnexion</button></div>
   </header>
+  ${state.user.role === 'delegue' ? `<div id="abo-banner-slot">${aboBanner()}</div>` : ''}
   <main id="view"></main>`;
 }
 async function showView() {
+  if (state.user.role === 'delegue') await refreshMe(); // abonnement frais (verrouillage progressif §3.2)
+  if (state.user.role === 'delegue') refreshAboBanner(); // le shell a pu être rendu avant le refreshMe (login/auto-login)
   const h = state.hash.split('?')[0];
-  if (h === '#/dashboard') return dashboardView();
-  if (h === '#/referentiel') return referentielView();
-  if (h === '#/crv') return crvListView();
-  if (h === '#/crv/new') return crvNewView();
-  if (h === '#/tournees') return tourneesView();
-  if (h === '#/campagnes') return campagnesView();
-  return dashboardView();
+  // Porte d'entrée monétisation : sans abonnement actif, le délégué est dirigé vers #/abonnement.
+  const a = state.abonnement;
+  if (state.user.role === 'delegue' && a && (a.statut === 'aucun' || a.statut === 'expire') && h !== '#/abonnement') {
+    state.hash = '#/abonnement';
+    if (location.hash !== '#/abonnement') location.hash = '#/abonnement';
+  }
+  return runView(); // runView rend le résultat via renderMain
 }
 
 /* ---------- Landing / Login ---------- */
@@ -99,7 +109,10 @@ function landingView() {
   <div class="hero">
     <h1><span>DelegPharma</span> — CRM du délégué médical</h1>
     <p>Planifiez vos tournées, suivez chaque professionnel de santé, rédigez vos comptes rendus de visite et pilotez vos campagnes — de Dakar à Kédougou.</p>
-    <p style="margin-top:18px"><button class="primary" data-action="go-login" style="padding:11px 26px;font-size:15px">Se connecter</button></p>
+    <p style="margin-top:18px">
+      <button class="primary" data-action="go-login" style="padding:11px 26px;font-size:15px">Se connecter</button>
+      <button class="primary" data-action="go-tarifs" style="padding:11px 26px;font-size:15px">Voir les tarifs</button>
+    </p>
   </div>
   <div class="features">
     <div class="feature"><div class="ico">🗺️</div><h3>Référentiel national</h3><p>14 régions médicales, 79 districts sanitaires, structures et professionnels de santé ciblés.</p></div>
@@ -119,7 +132,7 @@ function loginView() {
       <div class="error" data-slot="error"></div>
     </form>
     <p class="hint">Comptes démo : <code>dm.senegal</code> / <code>manager.senegal</code> / <code>labo.pharma</code> — mot de passe dans la documentation.</p>
-    <p class="hint"><a href="#/landing">← Retour</a></p>
+    <p class="hint">Pas encore de compte ? <a href="#/inscription">Devenir délégué</a> · <a href="#/tarifs">Tarifs</a> · <a href="#/landing">← Retour</a></p>
   </div>`;
 }
 
@@ -278,6 +291,7 @@ async function crvListView() {
       <div class="field"><label>Région</label><select id="c-region">${regionOpts(regions, crvFilters.region_id)}</select></div>
       <div class="field"><label>District</label><select id="c-district"><option value="">Tous</option></select></div>
       <button data-action="crv-apply">Filtrer</button>
+      <button class="ghost" data-action="crv-export">Exporter CSV</button>
       ${can(['delegue', 'manager', 'admin']) ? `<button class="primary" data-action="crv-new">+ Nouveau CRV</button>` : ''}
     </div>
     <div class="card" data-slot="crvlist"></div>`;
@@ -404,6 +418,270 @@ async function campagnesView() {
   } catch (e) { return errBox(e); }
 }
 
+/* ---------- Monétisation & modules SaaS (spec §2/§3/§4) ---------- */
+function publicPage(title, body) {
+  return `
+  <div style="max-width:920px;margin:0 auto;padding:28px 16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div class="brand">DelegPharma</div>
+      <div><a href="#/landing">Accueil</a> · <a href="#/tarifs">Tarifs</a> · <a href="#/login">Connexion</a></div>
+    </div>
+    <h1 style="font-size:26px;margin-bottom:20px">${title}</h1>
+    <div id="public">${body}</div>
+  </div>`;
+}
+async function loadTarifs() {
+  const slot = $('#public [data-slot="body"]');
+  try {
+    const tarifs = await api('/tarifs');
+    state.tarifs = tarifs;
+    slot.innerHTML = `
+    <div class="cards">
+      ${tarifs.map((t) => `
+      <div class="card formule">
+        <h3>${esc(t.nom)}</h3>
+        <div class="prix">${Number(t.prix).toLocaleString('fr-FR')} <small>FCFA / mois</small></div>
+        <ul style="margin:12px 0 16px;padding-left:18px;line-height:1.7">${(t.fonctionnalites || []).map((f) => `<li>${esc(f)}</li>`).join('')}</ul>
+        <button class="primary" data-action="go-inscription" data-formule="${t.id}">S'abonner</button>
+      </div>`).join('')}
+    </div>
+    <p class="hint">Abonnement mensuel (30 jours), renouvelable à tout moment. Paiement Mobile Money (Wave, Orange Money…).</p>`;
+  } catch (e) { slot.innerHTML = `<div class="error">${esc(e.message)}</div>`; }
+}
+async function loadInscription() {
+  const slot = $('#public [data-slot="body"]');
+  try {
+    const [tarifs, laboratoires] = await Promise.all([api('/tarifs'), api('/laboratoires')]);
+    state.tarifs = tarifs; state.laboratoires = laboratoires;
+    slot.innerHTML = `
+    <div class="card" style="max-width:600px">
+      <form data-form="inscription">
+        <div><label>Nom complet</label><input name="nom" required></div>
+        <div class="form-row">
+          <div><label>Email</label><input name="email" type="email" required></div>
+          <div><label>Téléphone (Mobile Money)</label><input name="telephone" placeholder="77 000 00 00"></div>
+        </div>
+        <div class="form-row">
+          <div><label>Laboratoire</label><select name="laboratoire_id" required>${laboratoires.map((l) => `<option value="${l.id}">${esc(l.nom)}</option>`).join('')}</select></div>
+          <div><label>Formule</label><select name="formule_id" required>${tarifs.map((t) => `<option value="${t.id}" ${String(state.selFormule) === String(t.id) ? 'selected' : ''}>${esc(t.nom)} — ${Number(t.prix).toLocaleString('fr-FR')} FCFA</option>`).join('')}</select></div>
+        </div>
+        <div><label>Mot de passe</label><input name="password" type="password" minlength="8" required></div>
+        <button class="primary" type="submit">Créer mon compte et payer</button>
+        <div class="error" data-slot="error"></div>
+      </form>
+    </div>
+    <p class="hint">En créant un compte, vous acceptez un abonnement mensuel de la formule choisie.</p>`;
+  } catch (e) { slot.innerHTML = `<div class="error">${esc(e.message)}</div>`; }
+}
+async function refreshMe() {
+  try {
+    const me = await api('/auth/me');
+    state.user = me.user; state.labo = me.laboratoire; state.abonnement = me.abonnement || null;
+  } catch { /* session expirée */ }
+}
+function aboBanner() {
+  const a = state.abonnement || {};
+  const s = a.statut;
+  if (s === 'actif') return `<div class="abo-banner ok">Abonnement ${esc(a.formule_nom || '')} actif — ${a.jours_restants} j restants</div>`;
+  if (s === 'arrive_expiration') return `<div class="abo-banner warn">Abonnement ${esc(a.formule_nom || '')} expire dans ${a.jours_restants} j — renouvelez pour éviter le blocage.</div>`;
+  if (s === 'expire') return `<div class="abo-banner bad">Abonnement expiré — accès en lecture seule. <a href="#/abonnement">Renouveler</a></div>`;
+  if (s === 'aucun') return `<div class="abo-banner bad">Aucun abonnement actif — <a href="#/abonnement">souscrivez pour utiliser l'application</a>.</div>`;
+  return '';
+}
+/* Le shell rend le banner avec state.abonnement tel qu'au moment du rendu ; au login/
+   auto-login il peut être null avant le refreshMe de showView → on re-rend le slot seul. */
+function refreshAboBanner() {
+  const slot = $('#abo-banner-slot');
+  if (slot) slot.innerHTML = aboBanner();
+}
+async function aboInitier(formuleId) {
+  try {
+    const r = await api('/abonnements/initier', { method: 'POST', body: JSON.stringify({ formule_id: Number(formuleId) }) });
+    if (r.payment?.redirect_url) { window.location.href = r.payment.redirect_url; return; }
+    toast('Souscription en attente de paiement' + (r.pay_mode === 'demo' ? ' (validation admin requise)' : ''));
+    await refreshMe();
+    return showView();
+  } catch (e) { toast(e.message); }
+}
+async function aboPayer(aboId) {
+  try {
+    const r = await api('/abonnements/payer', { method: 'POST', body: JSON.stringify({ abonnement_id: Number(aboId) }) });
+    if (r.payment?.redirect_url) { window.location.href = r.payment.redirect_url; return; }
+    toast('Relance de paiement' + (r.pay_mode === 'demo' ? ' (validation admin requise)' : ''));
+    return showView();
+  } catch (e) { toast(e.message); }
+}
+async function abonnementView() {
+  renderMain('<div class="muted">Chargement…</div>');
+  try {
+    const d = await api('/abonnements/mon');
+    const a = d.abonnement || {};
+    if (state.user.role !== 'delegue') {
+      return `<div class="card"><h3 class="section-title">Abonnement</h3><p class="muted">Les abonnements concernent les délégués médicaux. Votre compte (${esc(state.user.role)}) n'est pas concerné.</p></div>`;
+    }
+    const statutClass = a.statut === 'actif' ? 'green' : a.statut === 'arrive_expiration' ? 'amber' : a.statut === 'expire' ? 'red' : '';
+    let html = `
+    <div class="stats">
+      <div class="stat ${statutClass}"><div class="n">${esc(a.statut)}</div><div class="l">Statut</div></div>
+      ${a.date_expiration ? `<div class="stat"><div class="n">${a.jours_restants ?? '—'}</div><div class="l">Jours restants</div></div>` : ''}
+      <div class="stat"><div class="n">${esc(a.formule_nom || '—')}</div><div class="l">Formule</div></div>
+    </div>`;
+    if (d.en_attente) {
+      html += `
+      <div class="card" style="margin:16px 0">
+        <h3 class="section-title">Paiement en attente — ${esc(d.en_attente.formule_nom)} (${Number(d.en_attente.montant).toLocaleString('fr-FR')} FCFA)</h3>
+        <p class="muted">Référence : <code>${esc(d.en_attente.ref_transaction)}</code></p>
+        <button class="primary" data-action="abo-payer" data-id="${d.en_attente.id}">Relancer / payer</button>
+      </div>`;
+    }
+    if (!state.tarifs) state.tarifs = await api('/tarifs');
+    html += `<div class="card" style="margin:16px 0"><h3 class="section-title">Formules</h3>
+      <div class="cards">${state.tarifs.map((t) => `
+        <div class="card formule">
+          <h3>${esc(t.nom)}</h3>
+          <div class="prix">${Number(t.prix).toLocaleString('fr-FR')} <small>FCFA / mois</small></div>
+          <div class="muted small" style="margin:6px 0">${(t.fonctionnalites || []).length} fonctionnalités</div>
+          <button class="primary small" data-action="abo-initier" data-id="${t.id}">Souscrire / renouveler</button>
+        </div>`).join('')}</div>
+    </div>`;
+    html += `<div class="card"><h3 class="section-title">Historique des paiements</h3>
+      ${d.historique.length ? `<table><thead><tr><th>Date</th><th>Formule</th><th>Montant</th><th>Statut</th><th>Référence</th></tr></thead><tbody>${d.historique.map((t) => `<tr><td>${fmtDate(t.created_at)}</td><td>${esc(t.formule_nom || '—')}</td><td>${Number(t.montant).toLocaleString('fr-FR')} FCFA</td><td>${badgeStatut(t.statut)}</td><td class="muted"><code>${esc(t.reference)}</code></td></tr>`).join('')}</tbody></table>` : '<div class="muted">Aucun paiement enregistré.</div>'}</div>`;
+    return html;
+  } catch (e) { return errBox(e); }
+}
+async function objectifsView() {
+  renderMain('<div class="muted">Chargement…</div>');
+  try {
+    const [objectifs, cat, regions] = await Promise.all([api('/objectifs'), catalog(), api('/regions')]);
+    state.catalog = cat;
+    const rows = objectifs.map((o) => {
+      const pct = o.objectif ? Math.round(100 * o.realise / o.objectif) : 0;
+      return `
+      <div style="padding:10px 0;border-bottom:1px solid #f1f5f9">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <div><b>${esc(o.produit_nom || o.campagne_nom || 'Objectif')}</b>
+            ${o.delegue_nom ? ` · ${esc(o.delegue_nom)}` : ''}
+            <span class="muted">· ${esc(o.region_nom || 'Tout pays')}${o.district_nom ? ' — ' + esc(o.district_nom) : ''}</span><br>
+            <span class="muted">${fmtDate(o.debut)} → ${fmtDate(o.fin)}</span></div>
+          <div style="text-align:right">
+            <div style="font-size:13px;color:var(--mut)">${o.realise}/${o.objectif} · ${pct}%</div>
+            <div class="bar" style="width:180px"><div style="width:${Math.min(100, pct)}%"></div></div>
+            ${can(['manager', 'admin']) ? `<button class="small ghost" data-action="objectif-del" data-id="${o.id}">Suppr.</button>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    return `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 class="section-title">Objectifs — produit phare par zone</h3>
+      ${can(['manager', 'admin', 'laboratoire']) ? `<button class="primary" data-action="objectif-new-open">+ Fixer un objectif</button>` : ''}
+    </div>
+    <div class="card">${rows || '<div class="empty">Aucun objectif fixé.</div>'}</div>`;
+  } catch (e) { return errBox(e); }
+}
+async function objectifNewModal() {
+  const [cat, regions, delegues] = await Promise.all([catalog(), api('/regions'), api('/delegues')]);
+  modal('Fixer un objectif', `
+    <div><label>Produit phare</label><select name="produit_id">${cat.produits.map((p) => `<option value="${p.id}">${esc(p.nom)} — ${esc(p.dci)}</option>`).join('')}</select></div>
+    <div><label>Délégué (vide = zone entière)</label><select name="user_id"><option value="">Toute l'équipe</option>${delegues.map((d) => `<option value="${d.id}">${esc(d.nom)}</option>`).join('')}</select></div>
+    <div class="form-row">
+      <div><label>Région</label><select name="region_id" data-slot="region"><option value="">Tout le pays</option>${regions.map((r) => `<option value="${r.id}">${esc(r.nom)}</option>`).join('')}</select></div>
+      <div><label>District</label><select name="district_id"><option value="">Tous</option></select></div>
+    </div>
+    <div class="form-row">
+      <div><label>Objectif (quantité)</label><input name="objectif" type="number" min="1" required></div>
+      <div><label>Début</label><input name="debut" type="date" value="${today()}"></div>
+      <div><label>Fin</label><input name="fin" type="date"></div>
+    </div>`, 'objectif-new');
+}
+async function notificationsView() {
+  renderMain('<div class="muted">Chargement…</div>');
+  try {
+    const rows = await api('/notifications');
+    return `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 class="section-title">Messagerie</h3>
+      ${can(['manager', 'admin', 'laboratoire']) ? `<button class="primary" data-action="notif-send-open">+ Envoyer un message</button>` : ''}
+    </div>
+    <div class="card">
+      ${rows.length ? rows.map((n) => `
+        <div style="padding:10px 0;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;gap:10px" class="${n.lu ? 'muted' : ''}">
+          <div><div>${esc(n.message)}</div><div class="small muted">${esc(n.from_nom || 'Laboratoire')} · ${fmtDate(n.created_at)}</div></div>
+          ${!n.lu ? `<button class="small ghost" data-action="notif-lu" data-id="${n.id}">Marquer lu</button>` : ''}
+        </div>`).join('') : '<div class="empty">Aucun message.</div>'}
+    </div>`;
+  } catch (e) { return errBox(e); }
+}
+async function notifSendModal() {
+  const delegues = await api('/delegues');
+  modal('Envoyer un message', `
+    <div><label>Destinataire</label><select name="to_user_id"><option value="">Toute l'équipe (diffusion)</option>${delegues.map((d) => `<option value="${d.id}">${esc(d.nom)}</option>`).join('')}</select></div>
+    <div><label>Message</label><textarea name="message" rows="3" required></textarea></div>`, 'notif-send');
+}
+async function plateformeView() {
+  renderMain('<div class="muted">Chargement…</div>');
+  try {
+    const [dash, revenus] = await Promise.all([api('/plateforme/dashboard'), api('/revenus')]);
+    const t = dash.totaux || {};
+    return `
+    <div class="stats">
+      <div class="stat"><div class="n">${t.n_laboratoires ?? 0}</div><div class="l">Laboratoires</div></div>
+      <div class="stat"><div class="n">${t.n_delegues ?? 0}</div><div class="l">Délégués inscrits</div></div>
+      <div class="stat green"><div class="n">${t.n_abonnes ?? 0}</div><div class="l">Abonnés actifs</div></div>
+      <div class="stat amber"><div class="n">${Number(t.ca_total ?? 0).toLocaleString('fr-FR')}</div><div class="l">FCFA CA cumulé</div></div>
+    </div>
+    <div class="card" style="margin:16px 0"><h3 class="section-title">Inscriptions par formule</h3>
+      <table><thead><tr><th>Formule</th><th>Comptes</th></tr></thead><tbody>${dash.inscParFormule.map((f) => `<tr><td>${esc(f.nom)}</td><td>${f.n}</td></tr>`).join('') || '<tr><td colspan="2" class="muted">Aucune inscription</td></tr>'}</tbody></table>
+    </div>
+    <div class="card" style="margin:16px 0"><h3 class="section-title">Revenus par formule</h3>
+      <table><thead><tr><th>Formule</th><th>Paiements</th><th>CA (FCFA)</th></tr></thead><tbody>${revenus.byFormule.map((f) => `<tr><td>${esc(f.formule)}</td><td>${f.n}</td><td>${Number(f.ca).toLocaleString('fr-FR')}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">Aucun paiement</td></tr>'}</tbody></table>
+    </div>
+    <div class="card"><h3 class="section-title">Laboratoires</h3>
+      <table><thead><tr><th>Laboratoire</th><th>Utilisateurs</th><th>Abonnés</th></tr></thead><tbody>${dash.laboratoires.map((l) => `<tr><td><b>${esc(l.nom)}</b></td><td>${l.n_users}</td><td>${l.n_abonnes}</td></tr>`).join('')}</tbody></table>
+    </div>`;
+  } catch (e) { return errBox(e); }
+}
+async function revenusView() {
+  renderMain('<div class="muted">Chargement…</div>');
+  try {
+    const r = await api('/revenus');
+    return `
+    <div class="stats">
+      <div class="stat green"><div class="n">${Number(r.total?.ca ?? 0).toLocaleString('fr-FR')}</div><div class="l">FCFA CA</div></div>
+      <div class="stat"><div class="n">${r.total?.n ?? 0}</div><div class="l">Paiements réussis</div></div>
+    </div>
+    <div class="card" style="margin:16px 0"><h3 class="section-title">Revenus par formule</h3>
+      <table><thead><tr><th>Formule</th><th>Paiements</th><th>CA (FCFA)</th></tr></thead><tbody>${r.byFormule.map((f) => `<tr><td>${esc(f.formule)}</td><td>${f.n}</td><td>${Number(f.ca).toLocaleString('fr-FR')}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">Aucun paiement</td></tr>'}</tbody></table>
+    </div>
+    <div class="card"><h3 class="section-title">Évolution mensuelle</h3>
+      <table><thead><tr><th>Mois</th><th>Paiements</th><th>CA (FCFA)</th></tr></thead><tbody>${r.evolution.map((m) => `<tr><td>${esc(m.mois)}</td><td>${m.n}</td><td>${Number(m.ca).toLocaleString('fr-FR')}</td></tr>`).join('') || '<tr><td colspan="3" class="muted">Aucun paiement</td></tr>'}</tbody></table>
+    </div>`;
+  } catch (e) { return errBox(e); }
+}
+async function professionnelView() {
+  renderMain('<div class="muted">Chargement…</div>');
+  try {
+    const [visites, synthese] = await Promise.all([api('/professionnel/visites'), api('/professionnel/synthese')]);
+    const s = synthese || {};
+    return `
+    <div class="stats">
+      <div class="stat"><div class="n">${s.total ?? 0}</div><div class="l">Visites reçues</div></div>
+      <div class="stat green"><div class="n">${s.validees ?? 0}</div><div class="l">Validées</div></div>
+      <div class="stat"><div class="n">${fmtDate(s.derniere_visite)}</div><div class="l">Dernière visite</div></div>
+    </div>
+    <div class="card" style="margin:16px 0"><h3 class="section-title">Historique des visites me concernant</h3>
+      ${visites.length ? `<table><thead><tr><th>Date</th><th>Délégué</th><th>Structure</th><th>Résultat</th><th>Statut</th><th>Compte rendu</th></tr></thead><tbody>${visites.map((v) => `<tr><td>${fmtDate(v.date)}</td><td>${esc(v.delegue)}</td><td class="muted">${esc(v.structure)}</td><td>${badgeRes(v.resultat)}</td><td>${badgeStatut(v.statut)}</td><td class="muted">${esc((v.compte_rendu || '').slice(0, 90))}</td></tr>`).join('')}</tbody></table>` : '<div class="empty">Aucune visite enregistrée.</div>'}
+    </div>`;
+  } catch (e) { return errBox(e); }
+}
+function exportCsv() {
+  const p = new URLSearchParams();
+  if (crvFilters.statut) p.set('statut', crvFilters.statut);
+  if (crvFilters.region_id) p.set('region_id', crvFilters.region_id);
+  if (crvFilters.district_id) p.set('district_id', crvFilters.district_id);
+  window.open('/api/export/visites.csv?' + p.toString(), '_blank');
+}
+
 /* ---------- Modaux ---------- */
 function modal(title, bodyHtml, formName) {
   $('#view').insertAdjacentHTML('afterend', `<div class="modal-back" data-action="modal-close">
@@ -502,6 +780,21 @@ function bind() {
       if (act === 'tournee-annuler') { await api(`/tournees/${el.dataset.id}/annuler`, { method: 'POST' }); toast('Tournée annulée'); location.hash = '#/tournees'; showView(); return; }
 
       if (act === 'campagne-new-open') { campagneNewModal(); return; }
+
+      // ---- Monétisation & modules SaaS ----
+      if (act === 'go-tarifs') { location.hash = '#/tarifs'; return; }
+      if (act === 'go-inscription') { state.selFormule = el.dataset.formule; location.hash = '#/inscription'; return; }
+      if (act === 'abo-initier') { await aboInitier(el.dataset.id); return; }
+      if (act === 'abo-payer') { await aboPayer(el.dataset.id); return; }
+      if (act === 'objectif-new-open') { await objectifNewModal(); return; }
+      if (act === 'objectif-del') {
+        if (!confirm('Supprimer cet objectif ?')) return;
+        await api(`/objectifs/${el.dataset.id}`, { method: 'DELETE' });
+        toast('Objectif supprimé'); return showView();
+      }
+      if (act === 'notif-send-open') { await notifSendModal(); return; }
+      if (act === 'notif-lu') { await api(`/notifications/${el.dataset.id}/lu`, { method: 'POST' }); return showView(); }
+      if (act === 'crv-export') { exportCsv(); return; }
     } catch (err) { toast(err.message); }
   };
   document.onchange = async (e) => {
@@ -540,7 +833,7 @@ function bind() {
       if (name === 'login') {
         const email = form.email.value, password = form.password.value;
         const me = await api('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
-        state.user = me.user; state.labo = me.laboratoire;
+        state.user = me.user; state.labo = me.laboratoire; state.abonnement = null;
         location.hash = '#/dashboard';
         return;
       }
@@ -567,6 +860,30 @@ function bind() {
       if (name === 'campagne-new') {
         await api('/campagnes', { method: 'POST', body: JSON.stringify(read(form)) });
         closeModal(); toast('Campagne créée'); return location.reload();
+      }
+      if (name === 'inscription') {
+        const body = read(form);
+        body.formule_id = Number(body.formule_id); body.laboratoire_id = Number(body.laboratoire_id);
+        const r = await api('/auth/inscription', { method: 'POST', body: JSON.stringify(body) });
+        if (r.payment?.redirect_url) { window.location.href = r.payment.redirect_url; return; }
+        state.user = r.user; state.labo = r.laboratoire; state.abonnement = null;
+        toast('Compte créé — ' + (r.pay_mode === 'demo' ? 'abonnement en attente de validation' : 'paiement en attente'));
+        return location.hash = '#/abonnement';
+      }
+      if (name === 'objectif-new') {
+        const body = read(form);
+        body.user_id = body.user_id ? Number(body.user_id) : null;
+        body.region_id = body.region_id ? Number(body.region_id) : null;
+        body.district_id = body.district_id ? Number(body.district_id) : null;
+        body.produit_id = Number(body.produit_id);
+        await api('/objectifs', { method: 'POST', body: JSON.stringify(body) });
+        closeModal(); toast('Objectif fixé'); return showView();
+      }
+      if (name === 'notif-send') {
+        const body = read(form);
+        body.to_user_id = body.to_user_id ? Number(body.to_user_id) : null;
+        await api('/notifications', { method: 'POST', body: JSON.stringify(body) });
+        closeModal(); toast('Message envoyé'); return showView();
       }
     } catch (err) { if (errSlot) errSlot.textContent = err.message; else toast(err.message); }
   };
@@ -640,6 +957,12 @@ async function runView() {
     if (h === '#/crv/new') return showCrvNew();
     if (h === '#/tournees') return renderMain(await tourneesView());
     if (h === '#/campagnes') return renderMain(await campagnesView());
+    if (h === '#/objectifs') return renderMain(await objectifsView());
+    if (h === '#/messagerie') return renderMain(await notificationsView());
+    if (h === '#/abonnement') return renderMain(await abonnementView());
+    if (h === '#/plateforme') return renderMain(await plateformeView());
+    if (h === '#/revenus') return renderMain(await revenusView());
+    if (h === '#/professionnel') return renderMain(await professionnelView());
     return renderMain(await dashboardView());
   } catch (e) { return errBox(e); }
 }

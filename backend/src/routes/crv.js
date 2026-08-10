@@ -1,7 +1,7 @@
 // Module CRV : cycle brouillon → soumis → valide/refusé + pièces jointes + PDF pdfkit.
 import { Router } from 'express';
 import { all, get, run, lastInsertId, ph } from '../db.js';
-import { requireAuth, requireRole } from '../auth.js';
+import { requireAuth, requireRole, requireAboWrite } from '../auth.js';
 import { crvPdf } from '../pdf.js';
 
 const router = Router();
@@ -56,7 +56,7 @@ router.get('/visites', async (req, res) => {
   return res.json(rows);
 });
 
-router.post('/visites', requireRole('delegue', 'manager', 'admin'), async (req, res) => {
+router.post('/visites', requireRole('delegue', 'manager', 'admin'), requireAboWrite, async (req, res) => {
   const { professionnel_id, date, produits, resultat, compte_rendu, prochaine_visite, geo, docs } = req.body || {};
   if (!professionnel_id || !date) return res.status(400).json({ error: 'professionnel_id et date requis' });
 
@@ -93,7 +93,7 @@ router.get('/visites/:id', async (req, res) => {
 });
 
 // brouillon → soumis (auteur uniquement)
-router.post('/visites/:id/submit', requireRole('delegue', 'manager', 'admin'), async (req, res) => {
+router.post('/visites/:id/submit', requireRole('delegue', 'manager', 'admin'), requireAboWrite, async (req, res) => {
   const v = await get('SELECT id, statut, user_id FROM visite WHERE id = $1 AND laboratoire_id = $2',
     [req.params.id, req.user.laboratoire_id]);
   if (!v) return res.status(404).json({ error: 'Visite introuvable' });

@@ -86,12 +86,13 @@ CREATE INDEX IF NOT EXISTS idx_produit_labo ON produit(laboratoire_id);
 
 CREATE TABLE IF NOT EXISTS users (
   id             INTEGER PRIMARY KEY AUTOINCREMENT,
-  laboratoire_id INTEGER NOT NULL REFERENCES laboratoire(id),
-  role           TEXT NOT NULL CHECK (role IN ('admin','laboratoire','manager','delegue')),
+  laboratoire_id INTEGER REFERENCES laboratoire(id),
+  role           TEXT NOT NULL CHECK (role IN ('admin','laboratoire','manager','delegue','professionnel','plateforme')),
   nom            TEXT NOT NULL,
   email          TEXT NOT NULL UNIQUE,
   telephone      TEXT NOT NULL DEFAULT '',
   password_hash  TEXT NOT NULL,
+  professionnel_id INTEGER REFERENCES professionnel(id),
   created_at     TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -144,6 +145,74 @@ CREATE TABLE IF NOT EXISTS tournee (
   created_at     TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_tournee_labo ON tournee(laboratoire_id);
+
+-- Formules d'abonnement (Essentiel / Standard / Premium — monétisation §3)
+CREATE TABLE IF NOT EXISTS formule (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  nom            TEXT NOT NULL UNIQUE,
+  prix           INTEGER NOT NULL,
+  duree_jours    INTEGER NOT NULL DEFAULT 30,
+  fonctionnalites TEXT NOT NULL DEFAULT '[]',
+  created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Abonnement mensuel du délégué (cycle de vie §3.2)
+CREATE TABLE IF NOT EXISTS abonnement (
+  id                INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id           INTEGER NOT NULL REFERENCES users(id),
+  formule_id        INTEGER NOT NULL REFERENCES formule(id),
+  montant           INTEGER NOT NULL,
+  date_debut        TEXT NOT NULL DEFAULT '',
+  date_expiration   TEXT NOT NULL DEFAULT '',
+  statut            TEXT NOT NULL DEFAULT 'en_attente' CHECK (statut IN ('en_attente','actif','arrive_expiration','expire','resilie')),
+  renouvellement_auto INTEGER NOT NULL DEFAULT 0,
+  ref_transaction   TEXT NOT NULL DEFAULT '',
+  created_at        TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_abo_user ON abonnement(user_id);
+
+-- Transactions de paiement (idempotence via reference UNIQUE)
+CREATE TABLE IF NOT EXISTS transaction_paiement (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  abonnement_id INTEGER REFERENCES abonnement(id),
+  user_id       INTEGER NOT NULL REFERENCES users(id),
+  montant       INTEGER NOT NULL,
+  moyen         TEXT NOT NULL DEFAULT '',
+  statut        TEXT NOT NULL DEFAULT 'en_attente' CHECK (statut IN ('en_attente','reussi','echoue','rembourse')),
+  reference     TEXT NOT NULL UNIQUE,
+  provider      TEXT NOT NULL DEFAULT 'cinetpay',
+  provider_ref  TEXT NOT NULL DEFAULT '',
+  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Objectifs produit phare par délégué / zone / période (§2.3)
+CREATE TABLE IF NOT EXISTS objectif (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  laboratoire_id INTEGER NOT NULL REFERENCES laboratoire(id),
+  campagne_id    INTEGER REFERENCES campagne(id),
+  produit_id     INTEGER REFERENCES produit(id),
+  user_id        INTEGER REFERENCES users(id),   -- NULL = objectif de zone (sans délégué ciblé)
+  region_id      INTEGER REFERENCES region(id),
+  district_id    INTEGER REFERENCES district(id),
+  objectif       INTEGER NOT NULL DEFAULT 0,
+  debut          TEXT NOT NULL DEFAULT '',
+  fin            TEXT NOT NULL DEFAULT '',
+  created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_objectif_user ON objectif(user_id);
+CREATE INDEX IF NOT EXISTS idx_objectif_campagne ON objectif(campagne_id);
+
+-- Messagerie / notifications laboratoire ↔ délégué (§2.2)
+CREATE TABLE IF NOT EXISTS notification (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  laboratoire_id INTEGER REFERENCES laboratoire(id),
+  from_user_id   INTEGER REFERENCES users(id),
+  to_user_id     INTEGER REFERENCES users(id),
+  message        TEXT NOT NULL,
+  lu             INTEGER NOT NULL DEFAULT 0,
+  created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_notif_to ON notification(to_user_id);
 `;
 
 const PgDDL = SQLiteDDL
@@ -161,16 +230,20 @@ const PgDDL = SQLiteDDL
   .replace(/CREATE INDEX IF NOT EXISTS idx_visite_date ON visite\(date\);/g, '')
   .replace(/CREATE INDEX IF NOT EXISTS idx_campagne_labo ON campagne\(laboratoire_id\);/g, '')
   .replace(/CREATE INDEX IF NOT EXISTS idx_tournee_labo ON tournee\(laboratoire_id\);/g, '')
+  .replace(/CREATE INDEX IF NOT EXISTS idx_abo_user ON abonnement\(user_id\);/g, '')
+  .replace(/CREATE INDEX IF NOT EXISTS idx_objectif_user ON objectif\(user_id\);/g, '')
+  .replace(/CREATE INDEX IF NOT EXISTS idx_objectif_campagne ON objectif\(campagne_id\);/g, '')
+  .replace(/CREATE INDEX IF NOT EXISTS idx_notif_to ON notification\(to_user_id\);/g, '')
   .replace(/CREATE TABLE IF NOT EXISTS meta \(\n  key   TEXT PRIMARY KEY,\n  value TEXT\n\);/g, 'CREATE TABLE IF NOT EXISTS meta (\n  id SERIAL PRIMARY KEY,\n  key   TEXT NOT NULL UNIQUE,\n  value TEXT\n);')
   ;
 
 export async function initSchema() {
-  const { exec } = await import('./db.js');
+  const { exec, run } = await import('./db.js');
   const url = process.env.DATABASE_URL || '';
   const isPg = url.startsWith('postgres://') || url.startsWith('postgresql://');
   await exec(isPg ? PgDDL : SQLiteDDL);
   if (isPg) {
-    const { all, run } = await import('./db.js');
+    const { all } = await import('./db.js');
     const indexes = [
       'CREATE INDEX IF NOT EXISTS idx_region_pays ON region(pays_id)',
       'CREATE INDEX IF NOT EXISTS idx_district_region ON district(region_id)',
@@ -184,7 +257,25 @@ export async function initSchema() {
       'CREATE INDEX IF NOT EXISTS idx_visite_date ON visite(date)',
       'CREATE INDEX IF NOT EXISTS idx_campagne_labo ON campagne(laboratoire_id)',
       'CREATE INDEX IF NOT EXISTS idx_tournee_labo ON tournee(laboratoire_id)',
+      'CREATE INDEX IF NOT EXISTS idx_abo_user ON abonnement(user_id)',
+      'CREATE INDEX IF NOT EXISTS idx_objectif_user ON objectif(user_id)',
+      'CREATE INDEX IF NOT EXISTS idx_objectif_campagne ON objectif(campagne_id)',
+      'CREATE INDEX IF NOT EXISTS idx_notif_to ON notification(to_user_id)',
     ];
     for (const sql of indexes) await run(sql);
+  }
+
+  // --- Migrations idempotentes pour bases déjà créées ---
+  // Rôles étendus (professionnel, plateforme) + admin plateforme sans tenant + lien PS.
+  // Sur une base neuve le CREATE TABLE ci-dessus porte déjà ces changements ; sur une base
+  // existante (Render Postgres / dev), on ajuste la définition en place.
+  if (isPg) {
+    await run('ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check');
+    await run('ALTER TABLE users ALTER COLUMN laboratoire_id DROP NOT NULL');
+    await run('ALTER TABLE users ADD COLUMN IF NOT EXISTS professionnel_id INTEGER');
+  } else {
+    // SQLite : ALTER ADD COLUMN est supporté ; le CHECK de rôle d'origine ne bloque pas les
+    // rôles historiques (le code valide le rôle). Base de dev jetable pour la nouvelle définition.
+    await run('ALTER TABLE users ADD COLUMN professionnel_id INTEGER').catch(() => {});
   }
 }

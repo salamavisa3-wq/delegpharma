@@ -4,7 +4,7 @@
 // champ zone sur le professionnel. C'est le bug WP corrigé — ne pas le réintroduire.
 import { Router } from 'express';
 import { all, get, run, lastInsertId } from '../db.js';
-import { requireAuth, requireRole } from '../auth.js';
+import { requireAuth, requireRole, requireAboWrite } from '../auth.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -115,7 +115,7 @@ router.get('/professionnels/:id', async (req, res) => {
   return res.json(row);
 });
 
-router.post('/professionnels', requireRole('delegue', 'manager', 'admin'), async (req, res) => {
+router.post('/professionnels', requireRole('delegue', 'manager', 'admin'), requireAboWrite, async (req, res) => {
   const { nom, structure_id, specialite_id, potentiel, telephone } = req.body || {};
   if (!nom || !structure_id) return res.status(400).json({ error: 'nom et structure_id requis' });
   const s = await get('SELECT id FROM structure WHERE id = $1 AND laboratoire_id = $2', [structure_id, req.user.laboratoire_id]);
@@ -127,7 +127,7 @@ router.post('/professionnels', requireRole('delegue', 'manager', 'admin'), async
   return res.status(201).json({ id: lastInsertId(r) });
 });
 
-router.put('/professionnels/:id', requireRole('delegue', 'manager', 'admin'), async (req, res) => {
+router.put('/professionnels/:id', requireRole('delegue', 'manager', 'admin'), requireAboWrite, async (req, res) => {
   const cur = await get('SELECT * FROM professionnel WHERE id = $1 AND laboratoire_id = $2', [req.params.id, req.user.laboratoire_id]);
   if (!cur) return res.status(404).json({ error: 'Professionnel introuvable' });
   const b = req.body || {};
@@ -142,6 +142,13 @@ router.put('/professionnels/:id', requireRole('delegue', 'manager', 'admin'), as
 router.delete('/professionnels/:id', requireRole('manager', 'admin'), async (req, res) => {
   await run('DELETE FROM professionnel WHERE id = $1 AND laboratoire_id = $2', [req.params.id, req.user.laboratoire_id]);
   return res.json({ ok: true });
+});
+
+// Délégués du tenant (fixer un objectif / cibler un message)
+router.get('/delegues', requireRole('manager', 'admin', 'laboratoire'), async (req, res) => {
+  const rows = await all('SELECT id, nom FROM users WHERE laboratoire_id = $1 AND role = $2 ORDER BY nom',
+    [req.user.laboratoire_id, 'delegue']);
+  return res.json(rows);
 });
 
 export default router;

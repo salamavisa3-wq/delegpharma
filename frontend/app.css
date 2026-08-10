@@ -113,5 +113,21 @@ nav.main a.active { background: var(--teal); color: #fff; }
 .check-list label { display: flex; gap: 8px; align-items: center; font-weight: 400; color: var(--ink); font-size: 14px; margin: 0; }
 .check-list input[type=checkbox] { width: auto; }
 .muted { color: var(--mut); font-size: 12.5px; }
+.small { font-size: 12.5px; }
 .section-title { font-size: 17px; font-weight: 700; margin: 0 0 6px; }
 .divider { border-top: 1px solid var(--line); margin: 20px 0; }
+
+/* Monétisation & modules SaaS (§2/§3) */
+.abo-banner { padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 14px; border: 1px solid; }
+.abo-banner.ok { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+.abo-banner.warn { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+.abo-banner.bad { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+.abo-banner a { color: inherit; text-decoration: underline; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.card.formule { display: flex; flex-direction: column; gap: 8px; }
+.card.formule h3 { margin: 0; font-size: 16px; }
+.card.formule ul { margin: 0 0 8px; }
+.prix { font-size: 24px; font-weight: 800; color: var(--teal); }
+.prix small { font-size: 12.5px; font-weight: 500; color: var(--mut); }
+.card.formule .primary { margin-top: auto; }

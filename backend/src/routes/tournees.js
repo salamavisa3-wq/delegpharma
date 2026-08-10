@@ -1,7 +1,7 @@
 // Tournées : planification d'une journée sur un district + checklist zone→PS.
 import { Router } from 'express';
 import { all, get, run, lastInsertId } from '../db.js';
-import { requireAuth, requireRole } from '../auth.js';
+import { requireAuth, requireRole, requireAboWrite } from '../auth.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -38,7 +38,7 @@ router.get('/tournees', async (req, res) => {
   return res.json(rows);
 });
 
-router.post('/tournees', requireRole('delegue', 'manager', 'admin'), async (req, res) => {
+router.post('/tournees', requireRole('delegue', 'manager', 'admin'), requireAboWrite, async (req, res) => {
   const { date, district_id, ps_list } = req.body || {};
   if (!date || !district_id) return res.status(400).json({ error: 'date et district_id requis' });
   const r = await run(
@@ -48,7 +48,7 @@ router.post('/tournees', requireRole('delegue', 'manager', 'admin'), async (req,
   return res.status(201).json({ id: lastInsertId(r) });
 });
 
-router.post('/tournees/:id/faire', requireRole('delegue', 'manager', 'admin'), async (req, res) => {
+router.post('/tournees/:id/faire', requireRole('delegue', 'manager', 'admin'), requireAboWrite, async (req, res) => {
   const t = await get('SELECT id, statut, user_id FROM tournee WHERE id = $1 AND laboratoire_id = $2',
     [req.params.id, req.user.laboratoire_id]);
   if (!t) return res.status(404).json({ error: 'Tournée introuvable' });
@@ -57,7 +57,7 @@ router.post('/tournees/:id/faire', requireRole('delegue', 'manager', 'admin'), a
   return res.json({ ok: true });
 });
 
-router.post('/tournees/:id/annuler', requireRole('delegue', 'manager', 'admin'), async (req, res) => {
+router.post('/tournees/:id/annuler', requireRole('delegue', 'manager', 'admin'), requireAboWrite, async (req, res) => {
   const t = await get('SELECT id, statut, user_id FROM tournee WHERE id = $1 AND laboratoire_id = $2',
     [req.params.id, req.user.laboratoire_id]);
   if (!t) return res.status(404).json({ error: 'Tournée introuvable' });

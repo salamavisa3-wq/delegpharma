@@ -79,6 +79,22 @@ export const USERS_DEMO = [
   { nom: 'Compte Laboratoire', email: 'labo.pharma', role: 'laboratoire', password: 'Labo@2026Pharma' },
 ];
 
+/** Formules d'abonnement mensuel (spec §3). */
+export const FORMULES = [
+  { nom: 'Essentiel', prix: 5000, duree_jours: 30,
+    fonctionnalites: ['Rapports de visite', 'Fiche professionnel de santé', 'Tableau de bord personnel'] },
+  { nom: 'Standard', prix: 10000, duree_jours: 30,
+    fonctionnalites: ['Tout Essentiel', 'Suivi des objectifs produit phare par zone', 'Exports (CSV/PDF)', 'Notifications de relance'] },
+  { nom: 'Premium', prix: 15000, duree_jours: 30,
+    fonctionnalites: ['Tout Standard', 'Statistiques comparatives', 'Historique étendu', 'Support prioritaire'] },
+];
+
+/** Comptes étendus (seed idempotent séparé — disponibles même si seeded_v1 existe). */
+export const USERS_EXT = [
+  { nom: 'Admin Plateforme', email: 'admin.plateforme', role: 'plateforme', password: 'Admin@2026Plateforme' },
+  { nom: 'Dr Awa Ndiaye', email: 'ps.demo', role: 'professionnel', password: 'Ps@2026Deleg', professionnelNom: 'Dr Awa Ndiaye' },
+];
+
 export function countDistricts() {
   return Object.values(REGIONS).reduce((n, d) => n + d.length, 0);
 }

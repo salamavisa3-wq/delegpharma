@@ -8,6 +8,7 @@ import { initSchema } from './schema.js';
 import {
   PAYS, REGIONS, TYPES_STRUCTURE, SPECIALITES, TENANT_DEMO,
   STRUCTURES, PROFESSIONNELS, PRODUITS, CAMPAGNE, USERS_DEMO,
+  FORMULES, USERS_EXT, LABORATOIRES,
 } from './seed-data.js';
 
 /** Placeholder adaptatif : $n pour Postgres, ? pour SQLite. */
@@ -114,10 +115,63 @@ export async function seed() {
   );
 }
 
+/** Seed idempotent des ajouts monétisation (§3) : formules + comptes étendus.
+ *  Exécuté indépendamment de seeded_v1 pour être appliqué aussi aux bases déjà seedées. */
+export async function seedExtras() {
+  await initSchema();
+
+  // Laboratoires de la place (multi-tenant §2) — uniquement ceux absents (MEDIS est créé par seed()).
+  for (const nom of LABORATOIRES) {
+    const has = await get(`SELECT id FROM laboratoire WHERE nom = ${ph(1)}`, [nom]);
+    if (!has) await run('INSERT INTO laboratoire (nom) VALUES ($1)', [nom]);
+  }
+
+  // Formules d'abonnement
+  const alreadyF = await get(`SELECT value FROM meta WHERE key = ${ph(1)}`, ['formules_v1']);
+  if (!alreadyF) {
+    for (const f of FORMULES) {
+      await run('INSERT INTO formule (nom, prix, duree_jours, fonctionnalites) VALUES ($1,$2,$3,$4)',
+        [f.nom, f.prix, f.duree_jours, JSON.stringify(f.fonctionnalites)]);
+    }
+    const metaSql = isPg()
+      ? 'INSERT INTO meta (key, value) VALUES ($1, $2) RETURNING id'
+      : `INSERT INTO meta (key, value) VALUES (${ph(1)}, ${ph(2)})`;
+    await run(metaSql, ['formules_v1', String(Date.now())]);
+    console.log('Formules seedées : Essentiel 5000 / Standard 10000 / Premium 15000 FCFA.');
+  }
+
+  // Comptes étendus : admin plateforme (sans tenant) + professionnel de santé (lecture seule)
+  const alreadyE = await get(`SELECT value FROM meta WHERE key = ${ph(1)}`, ['users_ext_v1']);
+  if (!alreadyE) {
+    const hasP = await get(`SELECT id FROM users WHERE email = ${ph(1)}`, ['admin.plateforme']);
+    if (!hasP) {
+      const hash = bcrypt.hashSync('Admin@2026Plateforme', 10);
+      await run('INSERT INTO users (laboratoire_id, role, nom, email, password_hash) VALUES (NULL, $1, $2, $3, $4)',
+        ['plateforme', 'Admin Plateforme', 'admin.plateforme', hash]);
+    }
+    const hasPs = await get(`SELECT id FROM users WHERE email = ${ph(1)}`, ['ps.demo']);
+    if (!hasPs) {
+      const ps = await get(`SELECT id, laboratoire_id FROM professionnel WHERE nom = ${ph(1)} ORDER BY id LIMIT 1`,
+        ['Dr Awa Ndiaye']);
+      if (ps) {
+        const hash = bcrypt.hashSync('Ps@2026Deleg', 10);
+        await run('INSERT INTO users (laboratoire_id, role, nom, email, password_hash, professionnel_id) VALUES ($1,$2,$3,$4,$5,$6)',
+          [ps.laboratoire_id, 'professionnel', 'Dr Awa Ndiaye', 'ps.demo', hash, ps.id]);
+      }
+    }
+    const metaSql = isPg()
+      ? 'INSERT INTO meta (key, value) VALUES ($1, $2) RETURNING id'
+      : `INSERT INTO meta (key, value) VALUES (${ph(1)}, ${ph(2)})`;
+    await run(metaSql, ['users_ext_v1', String(Date.now())]);
+    console.log('Comptes étendus créés : admin.plateforme + ps.demo.');
+  }
+}
+
 // Exécution directe : `npm run seed`
 const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   seed()
+    .then(() => seedExtras())
     .then(() => close())
     .then(() => process.exit(0))
     .catch((e) => {

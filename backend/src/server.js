@@ -5,7 +5,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { initSchema } from './schema.js';
-import { seed, seedExtras } from './seed.js';
+import { seed, seedExtras, seedDemoActivity } from './seed.js';
 import { requireAuth, requireRole } from './auth.js';
 import authRoutes from './routes/auth.js';
 import referentielRoutes from './routes/referentiel.js';
@@ -66,6 +66,7 @@ const PORT = process.env.PORT || 10000;
 initSchema()
   .then(() => seed())      // idempotent : ne fait rien si meta.seeded_v1 existe déjà
   .then(() => seedExtras()) // idempotent : formules + comptes plateforme/professionnel
+  .then(() => seedDemoActivity()) // idempotent : activité démo (CRV/tournées/objectifs/abonnement)
   .then(() => {
     app.listen(PORT, () => {
       console.log(`DelegPharma API écoute sur :${PORT} (${process.env.NODE_ENV || 'dev'})`);

@@ -21,7 +21,7 @@ async function progression(obj) {
   let realise = 0;
   for (const row of rows) {
     for (const p of JSON.parse(row.produits || '[]')) {
-      if (Number(p.produit_id) === Number(obj.produit_id)) realise += Number(p.quantite || 0);
+      if (Number(p.produit_id) === Number(obj.produit_id)) realise += Number(p.qty ?? p.quantite ?? 0);
     }
   }
   return realise;

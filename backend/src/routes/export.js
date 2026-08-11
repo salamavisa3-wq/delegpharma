@@ -43,7 +43,7 @@ router.get('/export/visites.csv', async (req, res) => {
     row.date, row.professionnel, row.structure, row.district, row.region, row.delegue,
     row.resultat, row.compte_rendu, row.statut,
     (JSON.parse(row.produits || '[]'))
-      .map((p) => `${p.nom || p.produit_id || ''}:${p.quantite ?? ''}`).join(' ; '),
+      .map((p) => `${p.nom || p.produit_id || ''}:${p.qty ?? p.quantite ?? ''}`).join(' ; '),
   ]);
   const csv = '﻿' + [header, ...lines].map((l) => l.map(esc).join(',')).join('\r\n');
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');

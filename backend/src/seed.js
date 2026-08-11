@@ -8,7 +8,7 @@ import { initSchema } from './schema.js';
 import {
   PAYS, REGIONS, TYPES_STRUCTURE, SPECIALITES, TENANT_DEMO,
   STRUCTURES, PROFESSIONNELS, PRODUITS, CAMPAGNE, USERS_DEMO,
-  FORMULES, USERS_EXT, LABORATOIRES,
+  FORMULES, USERS_EXT, LABORATOIRES, DEMO_ACTIVITY,
 } from './seed-data.js';
 
 /** Placeholder adaptatif : $n pour Postgres, ? pour SQLite. */
@@ -167,11 +167,142 @@ export async function seedExtras() {
   }
 }
 
+/** Seed idempotent de l'activité démo (rubriques CRV / tournées / objectifs / couverture).
+ *  Auto-suffisant : s'applique aussi aux bases déjà seedées (seeded_v1 présent).
+ *  Crée l'abonnement actif du délégué démo (sinon §3.2 bloque ses écritures),
+ *  des structures/professionnels supplémentaires, des CRV aux 4 statuts liés aux
+ *  produits (alimente taux de couverture + objectifs), des tournées avec checklist,
+ *  et des objectifs produit/zone. Guard : meta.demo_activity_v1. */
+export async function seedDemoActivity() {
+  await initSchema();
+
+  const already = await get(`SELECT value FROM meta WHERE key = ${ph(1)}`, ['demo_activity_v1']);
+  if (already) {
+    console.log('Activité démo déjà appliquée (meta.demo_activity_v1). Rien à faire.');
+    return;
+  }
+
+  const labo = await get(`SELECT id, nom FROM laboratoire WHERE nom = ${ph(1)}`, [TENANT_DEMO]);
+  if (!labo) throw new Error(`seedDemoActivity : laboratoire « ${TENANT_DEMO} » introuvable — lancer seed() d'abord`);
+
+  // --- Helpers de lookup (échec = fail fast : ce seed tourne APRÈS seed()) ---
+  const lookup = (sql, args, label) => get(sql, args).then((row) => {
+    if (!row) throw new Error(`seedDemoActivity : ${label} introuvable`);
+    return row;
+  });
+  const regionId = (nom) => lookup(`SELECT id FROM region WHERE nom = ${ph(1)}`, [nom], `région « ${nom} »`);
+  const districtId = async (region, nom) => {
+    const r = await regionId(region);
+    return (await lookup(`SELECT id FROM district WHERE nom = ${ph(1)} AND region_id = ${ph(2)}`, [nom, r.id], `district « ${nom} » (${region})`)).id;
+  };
+  const typeId = (nom) => lookup(`SELECT id FROM type_structure WHERE nom = ${ph(1)}`, [nom], `type_structure « ${nom} »`);
+  const specId = (nom) => lookup(`SELECT id FROM specialite WHERE nom = ${ph(1)}`, [nom], `spécialité « ${nom} »`);
+  const userId = (email) => lookup(`SELECT id FROM users WHERE email = ${ph(1)}`, [email], `utilisateur « ${email} »`);
+  const psRow = (nom) => lookup(
+    `SELECT id, structure_id FROM professionnel WHERE nom = ${ph(1)} AND laboratoire_id = ${ph(2)} ORDER BY id LIMIT 1`,
+    [nom, labo.id], `professionnel « ${nom} »`);
+
+  // --- 1) Abonnement actif du délégué démo (monétisation §3.2) ---
+  const a = DEMO_ACTIVITY.abonnement;
+  const aboUser = await userId(a.userEmail);
+  const formule = await get(`SELECT id, prix FROM formule WHERE nom = ${ph(1)}`, [a.formule]);
+  if (formule) {
+    const has = await get(`SELECT id FROM abonnement WHERE user_id = ${ph(1)} AND statut = ${ph(2)}`, [aboUser.id, 'actif']);
+    if (!has) {
+      await run(
+        `INSERT INTO abonnement (user_id, formule_id, montant, date_debut, date_expiration, statut, renouvellement_auto, ref_transaction)
+         VALUES (${ph(1)},${ph(2)},${ph(3)},${ph(4)},${ph(5)},${ph(6)},0,${ph(7)})`,
+        [aboUser.id, formule.id, formule.prix, a.date_debut, a.date_expiration, 'actif', 'DEMO-ABO-DELEGUE-' + Date.now()]);
+    }
+  }
+
+  // --- 2) Structures + professionnels supplémentaires (référentiel enrichi) ---
+  const structureIdByNom = {};
+  for (const s of DEMO_ACTIVITY.structures) {
+    const r = await run(
+      `INSERT INTO structure (laboratoire_id, type_structure_id, region_id, district_id, localite)
+       VALUES (${ph(1)},${ph(2)},${ph(3)},${ph(4)},${ph(5)})`,
+      [labo.id, (await typeId(s.type)).id, (await regionId(s.region)).id, await districtId(s.region, s.district), s.localite]);
+    structureIdByNom[s.nom] = lastInsertId(r);
+  }
+  const psIdByNom = {};
+  for (const p of DEMO_ACTIVITY.professionnels) {
+    const sid = structureIdByNom[p.structure];
+    if (!sid) throw new Error(`seedDemoActivity : structure « ${p.structure} » introuvable (professionnel ${p.nom})`);
+    const r = await run(
+      `INSERT INTO professionnel (laboratoire_id, nom, structure_id, specialite_id, potentiel, telephone)
+       VALUES (${ph(1)},${ph(2)},${ph(3)},${ph(4)},${ph(5)},${ph(6)})`,
+      [labo.id, p.nom, sid, (await specId(p.specialite)).id, p.potentiel, p.telephone]);
+    psIdByNom[p.nom] = lastInsertId(r);
+  }
+
+  // --- 3) CRV aux 4 statuts (auteur = délégué démo) ---
+  const dm = await userId('dm.senegal');
+  const produitIdByArp = {};
+  for (const pr of PRODUITS) {
+    const row = await get(`SELECT id FROM produit WHERE laboratoire_id = ${ph(1)} AND agrement_arp = ${ph(2)}`,
+      [labo.id, pr.agrement_arp]);
+    if (!row) throw new Error(`seedDemoActivity : produit « ${pr.nom} » introuvable`);
+    produitIdByArp[pr.agrement_arp] = row.id;
+  }
+  for (const v of DEMO_ACTIVITY.visites) {
+    const ps = await psRow(v.professionnel);
+    const produits = (v.produits || []).map((pp) => {
+      const pid = produitIdByArp[pp.arp];
+      if (!pid) throw new Error(`seedDemoActivity : arp « ${pp.arp} » inconnu (visite ${v.professionnel})`);
+      return { produit_id: pid, qty: pp.qty };
+    });
+    await run(
+      `INSERT INTO visite (laboratoire_id, user_id, professionnel_id, structure_id, date, produits, resultat, compte_rendu, prochaine_visite, statut, motif_refus)
+       VALUES (${ph(1)},${ph(2)},${ph(3)},${ph(4)},${ph(5)},${ph(6)},${ph(7)},${ph(8)},${ph(9)},${ph(10)},${ph(11)})`,
+      [labo.id, dm.id, ps.id, ps.structure_id, v.date, JSON.stringify(produits),
+        v.resultat || '', v.compte_rendu || '', v.prochaine_visite || '', v.statut, v.motif_refus || '']);
+  }
+
+  // --- 4) Tournées (checklist par district) ---
+  for (const t of DEMO_ACTIVITY.tournees) {
+    const did = await districtId(t.region, t.district);
+    const list = [];
+    for (const nom of (t.ps_list || [])) {
+      list.push(psIdByNom[nom] ?? (await psRow(nom)).id);
+    }
+    await run(
+      `INSERT INTO tournee (laboratoire_id, user_id, date, district_id, ps_list, statut)
+       VALUES (${ph(1)},${ph(2)},${ph(3)},${ph(4)},${ph(5)},${ph(6)})`,
+      [labo.id, dm.id, t.date, did, JSON.stringify(list), t.statut]);
+  }
+
+  // --- 5) Objectifs produit/zone ---
+  for (const o of DEMO_ACTIVITY.objectifs) {
+    const rid = o.region ? await regionId(o.region) : null;
+    const uid = o.userEmail ? (await userId(o.userEmail)).id : null;
+    const pid = produitIdByArp[o.arp];
+    if (!pid) throw new Error(`seedDemoActivity : arp « ${o.arp} » inconnu (objectif)`);
+    await run(
+      `INSERT INTO objectif (laboratoire_id, campagne_id, produit_id, user_id, region_id, district_id, objectif, debut, fin)
+       VALUES (${ph(1)},NULL,${ph(2)},${ph(3)},${ph(4)},NULL,${ph(5)},${ph(6)},${ph(7)})`,
+      [labo.id, pid, uid, rid ? rid.id : null, o.objectif, o.debut, o.fin]);
+  }
+
+  const metaSql = isPg()
+    ? 'INSERT INTO meta (key, value) VALUES ($1, $2) RETURNING id'
+    : `INSERT INTO meta (key, value) VALUES (${ph(1)}, ${ph(2)})`;
+  await run(metaSql, ['demo_activity_v1', String(Date.now())]);
+
+  console.log(
+    `Activité démo OK — abonnement actif ${a.userEmail}, ` +
+    `${DEMO_ACTIVITY.structures.length} structures + ${DEMO_ACTIVITY.professionnels.length} professionnels, ` +
+    `${DEMO_ACTIVITY.visites.length} CRV (4 statuts), ${DEMO_ACTIVITY.tournees.length} tournées, ` +
+    `${DEMO_ACTIVITY.objectifs.length} objectifs.`,
+  );
+}
+
 // Exécution directe : `npm run seed`
 const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   seed()
     .then(() => seedExtras())
+    .then(() => seedDemoActivity())
     .then(() => close())
     .then(() => process.exit(0))
     .catch((e) => {

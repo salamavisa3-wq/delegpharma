@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { initSchema } from './schema.js';
 import { seed, seedExtras, seedDemoActivity } from './seed.js';
 import { requireAuth, requireRole } from './auth.js';
+import { seoShell, robotsTxt, sitemapXml, warmTarifs } from './seo.js';
 import authRoutes from './routes/auth.js';
 import referentielRoutes from './routes/referentiel.js';
 import crvRoutes from './routes/crv.js';
@@ -51,11 +52,15 @@ app.use('/api/plateforme', requireAuth, requireRole('plateforme'), plateformeRou
 app.use('/api/professionnel', requireAuth, requireRole('professionnel'), professionnelRoutes);
 app.use('/api', exportRoutes);
 
-// Frontend statique + fallback SPA (toutes routes non-/api → index.html)
-app.use(express.static(frontendDir));
+// SEO : robots.txt + sitemap.xml (avant le fallback SPA qui les capturerait sinon)
+app.get('/robots.txt', (req, res) => res.type('text/plain').send(robotsTxt()));
+app.get('/sitemap.xml', (req, res) => res.type('application/xml').send(sitemapXml()));
+
+// Frontend statique (app.js, app.css, og-image.png) sans index.html auto (fallback SSR ci-dessous)
+app.use(express.static(frontendDir, { index: false }));
 app.use((req, res) => {
   if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Route API inconnue' });
-  return res.sendFile(resolve(frontendDir, 'index.html'));
+  return res.type('html').send(seoShell(req)); // head SEO + SSR des pages publiques
 });
 
 // Filet de survie : une promesse rejetée ou une exception ne doit pas crash-loop le service.
@@ -67,6 +72,7 @@ initSchema()
   .then(() => seed())      // idempotent : ne fait rien si meta.seeded_v1 existe déjà
   .then(() => seedExtras()) // idempotent : formules + comptes plateforme/professionnel
   .then(() => seedDemoActivity()) // idempotent : activité démo (CRV/tournées/objectifs/abonnement)
+  .then(() => warmTarifs()) // SSR des tarifs (cache base réelle, fallback statique)
   .then(() => {
     app.listen(PORT, () => {
       console.log(`DelegPharma API écoute sur :${PORT} (${process.env.NODE_ENV || 'dev'})`);

@@ -39,6 +39,13 @@ const can = (roles) => state.user && roles.includes(state.user.role);
 
 /* ---------- Démarrage ---------- */
 async function init() {
+  // SEO : les URLs publiques /tarifs, /login, /inscription (SSR) doivent hydrater la vue
+  // hash-routing correspondante — sinon le JS écraserait le pré-rendu par la landing.
+  if (!location.hash) {
+    const p = location.pathname.replace(/\/+$/, '');
+    const map = { '/tarifs': '#/tarifs', '/login': '#/login', '/inscription': '#/inscription', '/landing': '#/landing' };
+    if (map[p]) { location.hash = map[p]; state.hash = map[p]; }
+  }
   try {
     const me = await api('/auth/me');
     state.user = me.user;

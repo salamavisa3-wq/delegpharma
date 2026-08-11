@@ -126,3 +126,16 @@ export function requireAboRead(req, res, next) {
     })
     .catch(next);
 }
+
+/** Accès aux tâches (rubriques §2) : un délégué DOIT avoir un abonnement
+ *  actif (ou à ≤3 j de l'échéance). Sans abonnement actif ('aucun', 'en_attente',
+ *  'expire'), AUCUN accès aux tâches — lecture comprise. Non délégués : non concernés. */
+export function requireAboActive(req, res, next) {
+  if (!req.user || req.user.role !== 'delegue') return next();
+  return getSubscriptionState(req.user)
+    .then((s) => {
+      if (s.statut === 'actif' || s.statut === 'arrive_expiration') return next();
+      return res.status(403).json({ error: 'Abonnement actif requis pour accéder aux tâches', code: s.statut });
+    })
+    .catch(next);
+}

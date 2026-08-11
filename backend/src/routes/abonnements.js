@@ -17,7 +17,7 @@ router.get('/tarifs', async (req, res) => {
 });
 
 router.get('/laboratoires', async (req, res) => {
-  const rows = await all('SELECT id, nom FROM laboratoire ORDER BY nom');
+  const rows = await all('SELECT id, nom, agrement_arp, adresse, ville, telephone, email, actif FROM laboratoire WHERE actif = 1 ORDER BY nom');
   return res.json(rows);
 });
 

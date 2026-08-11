@@ -29,8 +29,55 @@ export const SPECIALITES = [
   'Médecine interne', 'Chirurgie', 'Odontologie', 'Ophtalmologie', 'Santé publique',
 ];
 
-/** Laboratoires de la place (clients potentiels du SaaS — référence multi-tenant). */
-export const LABORATOIRES = ['MEDIS', 'UBIPHARM', 'LABOREX', 'DUOPHARM', 'SODIPHARM', 'GENEPHARM', 'PHARMALAB'];
+/** Laboratoires pharmaceutiques présents au Sénégal (clients potentiels / référence multi-tenant).
+ *  Cette liste n'est pas exhaustive ; elle est conçue pour être complétée via l'admin plateforme
+ *  ou un import CSV. Chaque entrée peut être un simple nom (compatibilité ascendante) ou un objet. */
+export const LABORATOIRES = [
+  // Gros distributeurs/importateurs/pharmaceutiques historiques
+  { nom: 'MEDIS', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'UBIPHARM', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'LABOREX', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'DUOPHARM', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'SODIPHARM', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'GENEPHARM', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'PHARMALAB', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  // Laboratoires / industriels / génériques couramment référencés en Afrique de l’Ouest
+  { nom: 'CIPLA', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'HAPPYPHARM', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'SENEGALAISE DES INDUSTRIES PHARMACEUTIQUES (SIPH)', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'SUNPHARMA', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'ZYDUS', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'ASTRAZENECA', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'SANOFI', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'GSK', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'MSD', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'NOVARTIS', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'BAYER', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'PFIZER', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'BOEHRINGER INGELHEIM', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'NOVO NORDISK', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'SERVIER', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'ABBOTT', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'ROCHE', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'JOHNSON & JOHNSON', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'MENARINI', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'CHIESI', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'MEDA PHARMA', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'TEVA', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'SANDOZ', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'Mylan (Viatris)', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'BIOGARAN', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'EGIS', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'RPG', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'RANBAXY', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'DR. REDDY’S', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'AUROBINDO', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'LUPIN', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'TORRENT', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'ZENTIVA', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'KRKA', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+  { nom: 'STADA', ville: 'Dakar', agrement_arp: '', email: '', telephone: '', adresse: '', actif: 1 },
+];
 
 /** Tenant de démonstration : le laboratoire propriétaire des données démo. */
 export const TENANT_DEMO = 'MEDIS';

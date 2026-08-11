@@ -43,7 +43,7 @@ async function init() {
   // hash-routing correspondante — sinon le JS écraserait le pré-rendu par la landing.
   if (!location.hash) {
     const p = location.pathname.replace(/\/+$/, '');
-    const map = { '/tarifs': '#/tarifs', '/login': '#/login', '/inscription': '#/inscription', '/landing': '#/landing' };
+    const map = { '/tarifs': '#/tarifs', '/login': '#/login', '/inscription': '#/inscription', '/landing': '#/landing', '/laboratoires': '#/laboratoires' };
     if (map[p]) { location.hash = map[p]; state.hash = map[p]; }
   }
   try {
@@ -59,6 +59,7 @@ function route() {
   if (!state.user) {
     const h = state.hash;
     if (h === '#/tarifs') { render(publicPage('Nos tarifs', '<div data-slot="body" class="muted">Chargement…</div>')); loadTarifs(); return; }
+    if (h === '#/laboratoires') { render(publicPage('Laboratoires au Sénégal', '<div data-slot="body" class="muted">Chargement…</div>')); loadLaboratoires(); return; }
     if (h === '#/inscription') { render(publicPage('Inscription délégué', '<div data-slot="body" class="muted">Chargement…</div>')); loadInscription(); return; }
     render(h === '#/login' ? loginView() : landingView());
     return;
@@ -119,6 +120,7 @@ function landingView() {
     <p style="margin-top:18px">
       <button class="primary" data-action="go-login" style="padding:11px 26px;font-size:15px">Se connecter</button>
       <button class="primary" data-action="go-tarifs" style="padding:11px 26px;font-size:15px">Voir les tarifs</button>
+      <button class="primary" data-action="go-laboratoires" style="padding:11px 26px;font-size:15px">Les laboratoires</button>
     </p>
   </div>
   <div class="features">
@@ -431,11 +433,21 @@ function publicPage(title, body) {
   <div style="max-width:920px;margin:0 auto;padding:28px 16px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
       <div class="brand">DelegPharma</div>
-      <div><a href="#/landing">Accueil</a> · <a href="#/tarifs">Tarifs</a> · <a href="#/login">Connexion</a></div>
+      <div><a href="#/landing">Accueil</a> · <a href="#/laboratoires">Laboratoires</a> · <a href="#/tarifs">Tarifs</a> · <a href="#/login">Connexion</a></div>
     </div>
     <h1 style="font-size:26px;margin-bottom:20px">${title}</h1>
     <div id="public">${body}</div>
   </div>`;
+}
+async function loadLaboratoires() {
+  const slot = $('#public [data-slot="body"]');
+  try {
+    const laboratoires = await api('/laboratoires');
+    state.laboratoires = laboratoires;
+    slot.innerHTML = `
+    <p class="hint" style="margin-bottom:16px">Annuaire des laboratoires pharmaceutiques présents au Sénégal. La liste est enrichie régulièrement.</p>
+    <ul style="line-height:1.8;column-count:2;column-gap:32px">${laboratoires.map((l) => `<li style="margin:8px 0"><b>${esc(l.nom)}</b>${l.ville ? ` — ${esc(l.ville)}` : ''}</li>`).join('') || '<li class="muted">Aucun laboratoire référencé.</li>'}</ul>`;
+  } catch (e) { slot.innerHTML = `<div class="error">${esc(e.message)}</div>`; }
 }
 async function loadTarifs() {
   const slot = $('#public [data-slot="body"]');
@@ -796,6 +808,7 @@ function bind() {
 
       // ---- Monétisation & modules SaaS ----
       if (act === 'go-tarifs') { location.hash = '#/tarifs'; return; }
+      if (act === 'go-laboratoires') { location.hash = '#/laboratoires'; return; }
       if (act === 'go-inscription') { state.selFormule = el.dataset.formule; location.hash = '#/inscription'; return; }
       if (act === 'abo-initier') { await aboInitier(el.dataset.id); return; }
       if (act === 'abo-payer') { await aboPayer(el.dataset.id); return; }

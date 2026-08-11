@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { initSchema } from './schema.js';
 import { seed, seedExtras, seedDemoActivity } from './seed.js';
 import { requireAuth, requireRole } from './auth.js';
-import { seoShell, robotsTxt, sitemapXml, warmTarifs } from './seo.js';
+import { seoShell, robotsTxt, sitemapXml, warmTarifs, warmLaboratoires } from './seo.js';
 import authRoutes from './routes/auth.js';
 import referentielRoutes from './routes/referentiel.js';
 import crvRoutes from './routes/crv.js';
@@ -20,6 +20,7 @@ import notificationsRoutes from './routes/notifications.js';
 import plateformeRoutes from './routes/plateforme.js';
 import professionnelRoutes from './routes/professionnel.js';
 import exportRoutes from './routes/export.js';
+import plateformeLaboratoiresRoutes from './routes/plateforme-laboratoires.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const frontendDir = resolve(here, '../../frontend');
@@ -49,6 +50,7 @@ app.use('/api', dashboardRoutes);
 app.use('/api', objectifsRoutes);
 app.use('/api', notificationsRoutes);
 app.use('/api/plateforme', requireAuth, requireRole('plateforme'), plateformeRoutes);
+app.use('/api/plateforme/laboratoires', requireAuth, requireRole('plateforme'), plateformeLaboratoiresRoutes);
 app.use('/api/professionnel', requireAuth, requireRole('professionnel'), professionnelRoutes);
 app.use('/api', exportRoutes);
 
@@ -73,6 +75,7 @@ initSchema()
   .then(() => seedExtras()) // idempotent : formules + comptes plateforme/professionnel
   .then(() => seedDemoActivity()) // idempotent : activité démo (CRV/tournées/objectifs/abonnement)
   .then(() => warmTarifs()) // SSR des tarifs (cache base réelle, fallback statique)
+  .then(() => warmLaboratoires()) // SSR des laboratoires (cache base réelle)
   .then(() => {
     app.listen(PORT, () => {
       console.log(`DelegPharma API écoute sur :${PORT} (${process.env.NODE_ENV || 'dev'})`);

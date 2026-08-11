@@ -16,9 +16,14 @@ const jd = (o) => JSON.stringify(o).replace(/</g, '\\u003c'); // JSON-LD sûr da
 
 // Tarifs réels (base seedée) mis en cache au démarrage ; fallback = valeurs officielles du seed.
 let tarifsCache = null;
-export async function warmTarifs() {
+let laboratoiresCache = null;
+async function warmTarifs() {
   try { tarifsCache = await all('SELECT id, nom, prix, duree_jours, fonctionnalites FROM formule ORDER BY prix'); }
   catch (e) { console.error('[seo] warmTarifs échoué (fallback statique) :', e.message); }
+}
+async function warmLaboratoires() {
+  try { laboratoiresCache = await all('SELECT id, nom, agrement_arp, adresse, ville, telephone, email FROM laboratoire WHERE actif = 1 ORDER BY nom'); }
+  catch (e) { console.error('[seo] warmLaboratoires échoué :', e.message); }
 }
 function tarifs() {
   return tarifsCache || [
@@ -86,6 +91,22 @@ function loginBody() {
   </div>`;
 }
 
+function laboratoiresBody() {
+  const list = (laboratoiresCache || []).map((l) =>
+    `<li style="margin:8px 0"><b>${esc(l.nom)}</b>${l.ville ? ` — ${esc(l.ville)}` : ''}</li>`
+  ).join('');
+  return `
+  <div style="max-width:920px;margin:0 auto;padding:28px 16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div class="brand">DelegPharma</div>
+      <div><a href="/">Accueil</a> · <a href="/tarifs">Tarifs</a> · <a href="/login">Connexion</a></div>
+    </div>
+    <h1 style="font-size:26px;margin-bottom:12px">Laboratoires pharmaceutiques au Sénégal</h1>
+    <p class="hint" style="margin-bottom:20px">Annuaire des laboratoires référencés sur DelegPharma. La liste est enrichie régulièrement.</p>
+    <ul style="line-height:1.8;column-count:2;column-gap:32px">${list || '<li class="muted">Aucun laboratoire référencé pour le moment.</li>'}</ul>
+  </div>`;
+}
+
 /* ---------- Métadonnées par route ---------- */
 
 const LANDING_JD = {
@@ -126,6 +147,18 @@ const PAGES = {
       itemListElement: tarifs().map((t, i) => ({ '@type': 'Offer', position: i + 1, name: t.nom, price: String(t.prix), priceCurrency: 'XOF', url: BASE + '/tarifs' })),
     },
     body: tarifsBody,
+  },
+  '/laboratoires': {
+    index: true,
+    title: 'Laboratoires pharmaceutiques au Sénégal — Référencés sur DelegPharma',
+    desc: 'Annuaire des laboratoires pharmaceutiques présents au Sénégal : industriels, distributeurs, génériques. DelegPharma les accompagne dans le suivi des délégués médicaux, des tournées et des comptes rendus de visite.',
+    canonical: '/laboratoires',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      itemListElement: (laboratoiresCache || []).map((l, i) => ({ '@type': 'ListItem', position: i + 1, name: l.nom })),
+    },
+    body: laboratoiresBody,
   },
   '/login': { index: false, title: 'Connexion — DelegPharma', desc: 'Accédez à votre espace délégué médical DelegPharma.', canonical: '/login', jsonLd: null, body: loginBody },
   '/inscription': { index: false, title: 'Inscription délégué médical — DelegPharma', desc: 'Créez votre compte délégué médical et abonnez-vous en Mobile Money.', canonical: '/inscription', jsonLd: null, body: loginBody },
@@ -182,8 +215,10 @@ const SITEMAP = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>${BASE}/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>${BASE}/tarifs</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>${BASE}/laboratoires</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
 </urlset>
 `;
 
 export function robotsTxt() { return ROBOTS; }
 export function sitemapXml() { return SITEMAP; }
+export { warmTarifs, warmLaboratoires };

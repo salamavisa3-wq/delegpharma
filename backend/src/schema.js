@@ -42,6 +42,11 @@ CREATE TABLE IF NOT EXISTS laboratoire (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
   nom          TEXT NOT NULL,
   agrement_arp TEXT NOT NULL DEFAULT '',
+  adresse      TEXT NOT NULL DEFAULT '',
+  ville        TEXT NOT NULL DEFAULT '',
+  telephone    TEXT NOT NULL DEFAULT '',
+  email        TEXT NOT NULL DEFAULT '',
+  actif        INTEGER NOT NULL DEFAULT 1,
   created_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -273,9 +278,24 @@ export async function initSchema() {
     await run('ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check');
     await run('ALTER TABLE users ALTER COLUMN laboratoire_id DROP NOT NULL');
     await run('ALTER TABLE users ADD COLUMN IF NOT EXISTS professionnel_id INTEGER');
+    // Migration table laboratoire (ajout colonnes + index) pour bases antérieures au 2026-08-11
+    await run('ALTER TABLE laboratoire ADD COLUMN IF NOT EXISTS adresse TEXT NOT NULL DEFAULT \'\'');
+    await run('ALTER TABLE laboratoire ADD COLUMN IF NOT EXISTS ville TEXT NOT NULL DEFAULT \'\'');
+    await run('ALTER TABLE laboratoire ADD COLUMN IF NOT EXISTS telephone TEXT NOT NULL DEFAULT \'\'');
+    await run('ALTER TABLE laboratoire ADD COLUMN IF NOT EXISTS email TEXT NOT NULL DEFAULT \'\'');
+    await run('ALTER TABLE laboratoire ADD COLUMN IF NOT EXISTS actif INTEGER NOT NULL DEFAULT 1');
   } else {
     // SQLite : ALTER ADD COLUMN est supporté ; le CHECK de rôle d'origine ne bloque pas les
     // rôles historiques (le code valide le rôle). Base de dev jetable pour la nouvelle définition.
     await run('ALTER TABLE users ADD COLUMN professionnel_id INTEGER').catch(() => {});
+    await run('ALTER TABLE laboratoire ADD COLUMN adresse TEXT NOT NULL DEFAULT \'\'').catch(() => {});
+    await run('ALTER TABLE laboratoire ADD COLUMN ville TEXT NOT NULL DEFAULT \'\'').catch(() => {});
+    await run('ALTER TABLE laboratoire ADD COLUMN telephone TEXT NOT NULL DEFAULT \'\'').catch(() => {});
+    await run('ALTER TABLE laboratoire ADD COLUMN email TEXT NOT NULL DEFAULT \'\'').catch(() => {});
+    await run('ALTER TABLE laboratoire ADD COLUMN actif INTEGER NOT NULL DEFAULT 1').catch(() => {});
   }
+
+  // Index laboratoire (créé en dehors du CREATE TABLE pour supporter les migrations)
+  await run('CREATE INDEX IF NOT EXISTS idx_laboratoire_actif ON laboratoire(actif)').catch((e) => console.log('[schema] index actif:', e.message));
+  await run('CREATE INDEX IF NOT EXISTS idx_laboratoire_nom ON laboratoire(nom)').catch((e) => console.log('[schema] index nom:', e.message));
 }

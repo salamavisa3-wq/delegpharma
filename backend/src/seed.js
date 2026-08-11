@@ -121,9 +121,16 @@ export async function seedExtras() {
   await initSchema();
 
   // Laboratoires de la place (multi-tenant §2) — uniquement ceux absents (MEDIS est créé par seed()).
-  for (const nom of LABORATOIRES) {
+  for (const lab of LABORATOIRES) {
+    const nom = typeof lab === 'string' ? lab : lab.nom;
     const has = await get(`SELECT id FROM laboratoire WHERE nom = ${ph(1)}`, [nom]);
-    if (!has) await run('INSERT INTO laboratoire (nom) VALUES ($1)', [nom]);
+    if (!has) {
+      const { agrement_arp = '', adresse = '', ville = '', telephone = '', email = '', actif = 1 } = typeof lab === 'string' ? {} : lab;
+      await run(
+        'INSERT INTO laboratoire (nom, agrement_arp, adresse, ville, telephone, email, actif) VALUES ($1,$2,$3,$4,$5,$6,$7)',
+        [nom, agrement_arp, adresse, ville, telephone, email, actif],
+      );
+    }
   }
 
   // Formules d'abonnement

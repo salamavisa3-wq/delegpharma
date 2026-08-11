@@ -31,9 +31,9 @@ router.post('/campagnes', requireRole('manager', 'admin', 'laboratoire'), async 
   const { nom, produit_id, agrement_arp, debut, fin, objectif, region_id, district_id } = req.body || {};
   if (!nom || !produit_id) return res.status(400).json({ error: 'nom et produit_id requis' });
   const r = await run(
-    `INSERT INTO campagne (laboratoire_id, produit_id, agrement_arp, debut, fin, objectif, statut, region_id, district_id)
-     VALUES ($1,$2,$3,$4,$5,$6,'active',$7,$8)`,
-    [req.user.laboratoire_id, produit_id, agrement_arp || '', debut || '', fin || '', objectif || 0,
+    `INSERT INTO campagne (laboratoire_id, nom, produit_id, agrement_arp, debut, fin, objectif, statut, region_id, district_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,'active',$8,$9)`,
+    [req.user.laboratoire_id, nom, produit_id, agrement_arp || '', debut || '', fin || '', objectif || 0,
       region_id || null, district_id || null],
   );
   return res.status(201).json({ id: lastInsertId(r) });

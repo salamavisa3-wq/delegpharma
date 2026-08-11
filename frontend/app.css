@@ -67,7 +67,8 @@ nav.main a.active { background: var(--teal); color: #fff; }
 .hero h1 span { color: var(--teal); }
 .hero p { color: var(--mut); font-size: 16px; max-width: 620px; margin: 0 auto; }
 .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 26px auto; max-width: 860px; }
-.feature { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
+.feature { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); cursor: pointer; transition: border-color .15s ease, transform .15s ease; }
+.feature:hover { border-color: var(--teal); transform: translateY(-2px); }
 .feature .ico { font-size: 22px; }
 .feature h3 { margin: 8px 0 4px; font-size: 15px; }
 .feature p { margin: 0; color: var(--mut); font-size: 13px; }

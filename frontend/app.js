@@ -115,10 +115,10 @@ function landingView() {
     </p>
   </div>
   <div class="features">
-    <div class="feature"><div class="ico">🗺️</div><h3>Référentiel national</h3><p>14 régions médicales, 79 districts sanitaires, structures et professionnels de santé ciblés.</p></div>
-    <div class="feature"><div class="ico">📋</div><h3>Comptes rendus de visite</h3><p>CRV brouillon → soumis → validé, pièces jointes et PDF signé généré en une seconde.</p></div>
-    <div class="feature"><div class="ico">🧭</div><h3>Tournées terrain</h3><p>Checklist des professionnels par district pour ne rater aucune visite.</p></div>
-    <div class="feature"><div class="ico">📈</div><h3>Campagnes & couverture</h3><p>Objectifs validés, taux de couverture par produit, pilotage par laboratoire.</p></div>
+    <div class="feature" data-action="rubrique" data-h="referentiel"><div class="ico">🗺️</div><h3>Référentiel national</h3><p>14 régions médicales, 79 districts sanitaires, structures et professionnels de santé ciblés.</p></div>
+    <div class="feature" data-action="rubrique" data-h="crv"><div class="ico">📋</div><h3>Comptes rendus de visite</h3><p>CRV brouillon → soumis → validé, pièces jointes et PDF signé généré en une seconde.</p></div>
+    <div class="feature" data-action="rubrique" data-h="tournees"><div class="ico">🧭</div><h3>Tournées terrain</h3><p>Checklist des professionnels par district pour ne rater aucune visite.</p></div>
+    <div class="feature" data-action="rubrique" data-h="campagnes"><div class="ico">📈</div><h3>Campagnes & couverture</h3><p>Objectifs validés, taux de couverture par produit, pilotage par laboratoire.</p></div>
   </div>`;
 }
 function loginView() {
@@ -738,6 +738,12 @@ function bind() {
     const act = el.dataset.action;
     try {
       if (act === 'go-login') { location.hash = '#/login'; return; }
+      if (act === 'rubrique') {
+        const h = el.dataset.h;
+        if (!state.user) { state.pendingHash = '#/' + h; location.hash = '#/login'; return; }
+        location.hash = '#/' + h;
+        return;
+      }
       if (act === 'logout') { await api('/auth/logout', { method: 'POST' }); state.user = null; state.hash = '#/landing'; render(); return; }
       if (act === 'modal-close') { if (!e.target.closest('[data-stop]')) closeModal(); return; }
 
@@ -834,7 +840,8 @@ function bind() {
         const email = form.email.value, password = form.password.value;
         const me = await api('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
         state.user = me.user; state.labo = me.laboratoire; state.abonnement = null;
-        location.hash = '#/dashboard';
+        location.hash = state.pendingHash || '#/dashboard';
+        state.pendingHash = null;
         return;
       }
       if (name === 'ps-new') {

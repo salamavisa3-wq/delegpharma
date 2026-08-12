@@ -386,7 +386,8 @@ const GUIDES = [
     intro: 'Le délégué médical (DM) est le représentant terrain des laboratoires pharmaceutiques auprès des professionnels de santé. Voici le parcours complet pour exercer ce métier au Sénégal.',
     sections: [
       { h: 'Quelles formations pour devenir délégué médical ?', p: [
-        'Au Sénégal, le métier s\'apprend principalement via la licence professionnelle en délégué médical, proposée notamment par l\'Institut des sciences du médicament (ISMED) de l\'UCAD, l\'IUP-Santé et des instituts privés comme le CEFAS. La formation dure généralement 2 à 3 ans et couvre la pharmacologie, la visite médicale, la communication et la réglementation pharmaceutique.',
+        'Deux voies existent au Sénégal. La licence professionnelle en délégué médical (2 à 3 ans) est proposée notamment par l\'Institut des sciences du médicament (ISMED) de l\'UCAD (admission Bac + 2) et par l\'IUP-Santé. Des formations courtes de 8 à 10 mois sont également proposées par des instituts privés : l\'IPAM (diplôme d\'études spéciales en visite médicale, 8 mois en cours du soir), l\'IFAA (10 mois, dont 1 mois de stage), l\'ICOA Santé (10 mois) et l\'IUP-Santé (admission dès le BFEM).',
+        'Ces formations couvrent la pharmacologie, la visite médicale, la communication et la réglementation pharmaceutique. Les frais sont variables selon l\'institut (à titre indicatif, 2026 : IPAM 555 000 FCFA pour le DESMV, IFAA 55 000 FCFA/mois, ICOA Santé 60 000 FCFA/mois, IUP-Santé 50 000 FCFA/mois) ; vérifiez les conditions d\'admission et les tarifs auprès de chaque école.',
         'Un profil en pharmacie, biologie ou sciences de la santé est un atout. Les laboratoires recrutent aussi des profils commerciaux formés sur le tas, mais la licence pro reste la voie la plus reconnue.',
       ] },
       { h: 'Les compétences indispensables', p: [
@@ -399,7 +400,7 @@ const GUIDES = [
       ] },
     ],
     faq: [
-      { q: 'Quelle formation faut-il pour être délégué médical au Sénégal ?', a: 'La licence professionnelle en délégué médical (ISMED UCAD, IUP-Santé, CEFAS) est la voie principale. Un profil pharmacie ou sciences de la santé est un atout.' },
+      { q: 'Quelle formation faut-il pour être délégué médical au Sénégal ?', a: 'La licence professionnelle (ISMED UCAD, IUP-Santé) est la voie la plus reconnue, sur 2 à 3 ans. Des instituts privés (IPAM, IFAA, ICOA Santé) proposent aussi des formations courtes de 8 à 10 mois. Un profil pharmacie ou sciences de la santé est un atout.' },
       { q: 'Combien gagne un délégué médical au Sénégal ?', a: 'Le salaire se compose d\'un fixe et de primes sur objectifs, variable selon le laboratoire et l\'expérience. Les postes de manager de zone sont accessibles avec l\'expérience.' },
       { q: 'Quels sont les outils du délégué médical ?', a: 'Le délégué médical utilise un CRM métier pour planifier ses tournées, suivre les professionnels de santé et rédiger ses comptes rendus de visite (CRV).' },
     ],
@@ -445,11 +446,12 @@ const GUIDES = [
         'DelegPharma automatise tout ce cycle : saisie en une minute, pièces jointes, PDF signé en une seconde, historique complet. <a href="/tarifs">Voir les formules</a>.',
       ] },
       { h: 'Bonnes pratiques', p: [
-        'Rédigez le CRV le jour même, soyez précis sur les quantités et le résultat, et planifiez systématiquement la prochaine visite. Un CRV bien renseigné alimente des statistiques fiables pour le laboratoire.',
+        'Identifiez chaque professionnel avec une convention claire : « Dr NOM Prénom – Spécialité – Ville ». Pour chaque produit présenté, notez les quantités d\'échantillons laissés (EMG) et les produits présentés (PRES), ainsi que le niveau d\'intérêt du prescripteur (froid, tiède ou chaud).',
+        'Rédigez le CRV dans les 30 minutes suivant la visite, soyez précis sur les quantités et le résultat, et planifiez systématiquement la prochaine visite. Un CRV bien renseigné alimente des statistiques fiables pour le laboratoire.',
       ] },
     ],
     faq: [
-      { q: 'Que contient un compte rendu de visite ?', a: 'Le professionnel visité, la structure, les produits présentés avec quantités, le résultat (accord, réserve, refus) et la prochaine visite planifiée.' },
+      { q: 'Que contient un compte rendu de visite ?', a: 'Le professionnel visité (Dr NOM Prénom – Spécialité – Ville), les produits présentés avec quantités d\'échantillons (EMG), le niveau d\'intérêt (froid, tiède, chaud), le résultat (accord, réserve, refus) et la prochaine visite planifiée.' },
       { q: 'Pourquoi le CRV est-il important ?', a: 'Il prouve l\'activité du délégué et alimente les statistiques de couverture et d\'objectifs du laboratoire.' },
       { q: 'Comment générer un CRV en PDF ?', a: 'Avec DelegPharma, le CRV validé est généré en PDF signé automatiquement, avec les pièces jointes du terrain.' },
     ],

@@ -133,6 +133,27 @@ function landingView() {
     <div class="feature" data-action="rubrique" data-h="crv"><div class="ico">📋</div><h3>Comptes rendus de visite</h3><p>CRV brouillon → soumis → validé, pièces jointes et PDF signé généré en une seconde.</p></div>
     <div class="feature" data-action="rubrique" data-h="tournees"><div class="ico">🧭</div><h3>Tournées terrain</h3><p>Checklist des professionnels par district pour ne rater aucune visite.</p></div>
     <div class="feature" data-action="rubrique" data-h="campagnes"><div class="ico">📈</div><h3>Campagnes & couverture</h3><p>Objectifs validés, taux de couverture par produit, pilotage par laboratoire.</p></div>
+  </div>
+  <div class="stats" style="max-width:860px;margin:26px auto 6px">
+    <div class="stat"><div class="n">14</div><div class="l">régions médicales</div></div>
+    <div class="stat"><div class="n">79</div><div class="l">districts sanitaires</div></div>
+    <div class="stat"><div class="n">3 915</div><div class="l">structures de santé</div></div>
+    <div class="stat"><div class="n">34 388</div><div class="l">professionnels recensés</div></div>
+    <div class="stat"><div class="n">18,6 M</div><div class="l">habitants couverts</div></div>
+  </div>
+  <p class="hint" style="text-align:center;margin:-2px 0 0">Référentiel officiel MSAS / ANSD — la maille exacte pour répartir votre force de vente. <a href="/carte-sanitaire">Explorer la carte sanitaire →</a></p>
+  <div class="lab-band">
+    <h2>Le CRM pensé pour les laboratoires pharmaceutiques</h2>
+    <p class="hint">Pilotez vos délégués médicaux, vos objectifs produits et votre couverture territoriale — et développez le chiffre d'affaires de vos campagnes.</p>
+    <div class="features" style="margin-top:16px">
+      <div class="feature" data-action="rubrique" data-h="objectifs"><div class="ico">🎯</div><h3>Objectifs produits</h3><p>Objectifs par produit phare et par zone, taux de réalisation, campagnes mesurées sur le chiffre d'affaires.</p></div>
+      <div class="feature" data-action="rubrique" data-h="referentiel"><div class="ico">🗺️</div><h3>Couverture sans doublon</h3><p>Force de vente répartie sur le référentiel officiel : chaque district a sa checklist, chaque zone est mesurée.</p></div>
+      <div class="feature" data-action="rubrique" data-h="crv"><div class="ico">📊</div><h3>Terrain en temps réel</h3><p>CRV validés depuis le terrain, couverture par district, exports CSV/PDF — fini les CRV papier et les tableurs.</p></div>
+    </div>
+    <p style="text-align:center;margin-top:18px">
+      <button class="primary" data-action="go-inscription" style="padding:11px 26px;font-size:15px">Équiper mon laboratoire</button>
+      <button class="primary" data-action="go-laboratoires" style="padding:11px 26px;font-size:15px">Voir les laboratoires référencés</button>
+    </p>
   </div>`;
 }
 function loginView() {

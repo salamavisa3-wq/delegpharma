@@ -56,6 +56,7 @@ function tarifs() {
 /* ---------- Contenu SSR (identique au rendu SPA pour éviter tout flicker) ---------- */
 
 function landingBody() {
+  const popM = (NATIONAL.population / 1000000).toFixed(1).replace('.', ',');
   return `
   <div class="hero">
     <h1><span>DelegPharma</span> — CRM du délégué médical</h1>
@@ -72,7 +73,28 @@ function landingBody() {
     <div class="feature"><div class="ico">🧭</div><h3>Tournées terrain</h3><p>Checklist des professionnels par district pour ne rater aucune visite.</p></div>
     <div class="feature"><div class="ico">📈</div><h3>Campagnes & couverture</h3><p>Objectifs validés, taux de couverture par produit, pilotage par laboratoire.</p></div>
   </div>
-  <div style="text-align:center;margin-top:26px">
+  <div class="stats" style="max-width:860px;margin:26px auto 6px">
+    <div class="stat"><div class="n">14</div><div class="l">régions médicales</div></div>
+    <div class="stat"><div class="n">79</div><div class="l">districts sanitaires</div></div>
+    <div class="stat"><div class="n">3 915</div><div class="l">structures de santé</div></div>
+    <div class="stat"><div class="n">34 388</div><div class="l">professionnels recensés</div></div>
+    <div class="stat"><div class="n">${popM} M</div><div class="l">habitants couverts</div></div>
+  </div>
+  <p class="hint" style="text-align:center;margin:-2px 0 0">Référentiel officiel MSAS / ANSD — la maille exacte pour répartir votre force de vente. <a href="/carte-sanitaire">Explorer la carte sanitaire →</a></p>
+  <div class="lab-band">
+    <h2>Le CRM pensé pour les laboratoires pharmaceutiques</h2>
+    <p class="hint">Pilotez vos délégués médicaux, vos objectifs produits et votre couverture territoriale — et développez le chiffre d'affaires de vos campagnes.</p>
+    <div class="features" style="margin-top:16px">
+      <div class="feature"><div class="ico">🎯</div><h3>Objectifs produits</h3><p>Objectifs par produit phare et par zone, taux de réalisation, campagnes mesurées sur le chiffre d'affaires.</p></div>
+      <div class="feature"><div class="ico">🗺️</div><h3>Couverture sans doublon</h3><p>Force de vente répartie sur le référentiel officiel : chaque district a sa checklist, chaque zone est mesurée.</p></div>
+      <div class="feature"><div class="ico">📊</div><h3>Terrain en temps réel</h3><p>CRV validés depuis le terrain, couverture par district, exports CSV/PDF — fini les CRV papier et les tableurs.</p></div>
+    </div>
+    <p style="text-align:center;margin-top:18px">
+      <a class="primary" href="/inscription" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Équiper mon laboratoire</a>
+      <a class="primary" href="/laboratoires" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Voir les laboratoires référencés</a>
+    </p>
+  </div>
+  <div style="text-align:center;margin-top:30px">
     <a class="primary" href="/carte-sanitaire" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Explorer la carte sanitaire du Sénégal</a>
   </div>`;
 }
@@ -531,6 +553,58 @@ const GUIDES = [
       { q: 'Combien de structures de santé recense la carte sanitaire ?', a: 'Le référentiel MSAS/ANSD recense 3 915 structures de santé et plus de 34 000 professionnels de santé.' },
       { q: 'Comment un laboratoire mesure-t-il la couverture ?', a: 'En rapportant les professionnels visités par les délégués au total des professionnels ciblés dans chaque district. DelegPharma calcule ce taux automatiquement.' },
       { q: 'Pourquoi utiliser le référentiel officiel pour les campagnes ?', a: 'Il offre une maille commune (districts, structures, professionnels) qui aligne les managers et les délégués et rend les objectifs comparables entre zones.' },
+    ],
+  },
+  {
+    path: '/blog/objectifs-campagnes-chiffre-affaires-laboratoire',
+    title: 'Objectifs commerciaux et campagnes : piloter le chiffre d\'affaires d\'un laboratoire au Sénégal',
+    desc: 'Comment un laboratoire pharmaceutique au Sénégal définit des objectifs par produit, lance des campagnes de visite médicale et mesure leur impact sur le chiffre d\'affaires : indicateurs, couverture, reporting.',
+    h1: 'Objectifs commerciaux et campagnes : le levier de chiffre d\'affaires d\'un laboratoire',
+    intro: 'Le chiffre d\'affaires d\'un laboratoire repose sur sa force de vente : chaque visite médicale doit contribuer à un objectif produit, chaque campagne doit être mesurée. Encore faut-il définir les objectifs sur la bonne maille — les 14 régions et 79 districts de la carte sanitaire — et les suivre jusqu\'au terrain.',
+    sections: [
+      { h: 'Définir des objectifs par produit phare et par zone', p: [
+        'Un objectif commercial pertinent se décline par produit phare et par zone (région ou district sanitaire). Le laboratoire fixe, pour chaque produit, un objectif de prescriptions ou de volumes sur la maille officielle, puis l\'assigne aux délégués concernés.',
+        'DelegPharma permet de créer des objectifs par produit, de les affecter aux délégués et de suivre le taux de réalisation en temps réel, zone par zone. <a href="/carte-sanitaire">Consulter le découpage de la carte sanitaire</a>.',
+      ] },
+      { h: 'Lancer une campagne : cibler les bons prescripteurs', p: [
+        'Une campagne de visite médicale sélectionne les professionnels de santé à visiter (médecins, pharmaciens, sages-femmes, infirmiers), priorise les districts stratégiques et définit les produits à promouvoir.',
+        'Le suivi se fait par comptes rendus de visite : produit présenté, résultat (accord, réserve, refus), quantité. Ces données alimentent le pilotage de la campagne au jour le jour. <a href="/blog/crm-laboratoire-pharmaceutique-delegues-medicaux">Comprendre le CRM de visite médicale</a>.',
+      ] },
+      { h: 'Mesurer l\'impact sur le chiffre d\'affaires', p: [
+        'Les indicateurs de pilotage : taux de couverture des professionnels ciblés, réalisation des objectifs par produit, CRV validés par délégué, délai de remontée du terrain.',
+        'Avec ces données, le laboratoire réalloue les délégués vers les zones sous-couvertes, recentre la promotion sur les produits en retard et justifie l\'investissement de la force de vente. <a href="/blog/choisir-crm-force-de-vente-laboratoire-pharmaceutique">Comment choisir le bon CRM</a> · <a href="/laboratoires">Voir les laboratoires référencés</a> · <a href="/tarifs">Les formules</a>.',
+      ] },
+    ],
+    faq: [
+      { q: 'Comment fixer des objectifs commerciaux à une force de vente ?', a: 'Par produit phare et par zone : le laboratoire assigne à chaque délégué un objectif de réalisation sur un district ou une région, suivi en temps réel dans le CRM.' },
+      { q: 'Comment mesurer l\'impact d\'une campagne de visite médicale ?', a: 'En croisant la couverture (professionnels visités / ciblés), les résultats des CRV et la réalisation des objectifs produits par zone.' },
+      { q: 'Quels indicateurs pour piloter le chiffre d\'affaires ?', a: 'Couverture par district, réalisation des objectifs par produit, CRV validés par délégué et délai de remontée des comptes rendus.' },
+    ],
+  },
+  {
+    path: '/blog/choisir-crm-force-de-vente-laboratoire-pharmaceutique',
+    title: 'Choisir son CRM de force de vente pharmaceutique : le guide pour laboratoires',
+    desc: 'Le guide pour choisir le CRM de votre force de vente pharmaceutique au Sénégal : référentiel carte sanitaire, tournées, CRV, objectifs produits, couverture, prix et critères de sélection.',
+    h1: 'Choisir le CRM de votre force de vente pharmaceutique',
+    intro: 'Tournées, comptes rendus de visite, objectifs produits, couverture : le CRM de force de vente concentre toute l\'activité terrain d\'un laboratoire. Le bon choix se joue sur quelques critères précis, adaptés au contexte sénégalais.',
+    sections: [
+      { h: 'Les critères essentiels d\'un CRM de visite médicale', p: [
+        'Le référentiel territorial d\'abord : l\'outil doit couvrir les 14 régions médicales et 79 districts sanitaires du Sénégal pour répartir la force de vente sur la maille officielle. Viennent ensuite les tournées par district avec checklist, la saisie des CRV depuis le terrain et leur validation.',
+        'Enfin, le pilotage : objectifs par produit phare, taux de couverture par zone et exports pour le reporting, comme le montre notre guide sur <a href="/blog/objectifs-campagnes-chiffre-affaires-laboratoire">le pilotage du chiffre d\'affaires</a>. Sans ces briques, le CRM reste une simple base de contacts. <a href="/carte-sanitaire">Découvrir le référentiel</a>.',
+      ] },
+      { h: 'Les pièges à éviter', p: [
+        'Un outil non adapté à la visite médicale (un simple CRM de contacts) ne gère ni les tournées, ni les CRV, ni les objectifs produits. Un outil sans référentiel local oblige à tout recréer, district par district.',
+        'Méfiez-vous aussi des prix en devises et des abonnements sans paiement local : au Sénégal, le Mobile Money (Wave, Orange Money) est le mode de paiement naturel des PME. <a href="/tarifs">Comparer les formules DelegPharma</a>.',
+      ] },
+      { h: 'Le déploiement pas à pas', p: [
+        'Commencez par référencer les professionnels de votre zone, créez vos produits avec leur agrément ARP, définissez les objectifs par produit, puis lancez les premières tournées.',
+        'Un déploiement progressif par district permet de tester la prise en main par les délégués avant d\'étendre à tout le territoire. <a href="/inscription">Créer un compte gratuit pour découvrir l\'outil</a>.',
+      ] },
+    ],
+    faq: [
+      { q: 'Quel CRM choisir pour une force de vente pharmaceutique ?', a: 'Un CRM dédié à la visite médicale, adossé au référentiel carte sanitaire (régions, districts, professionnels), avec tournées, CRV, objectifs produits et suivi de couverture.' },
+      { q: 'Combien coûte un CRM de force de vente au Sénégal ?', a: 'Chez DelegPharma, de 5 000 FCFA (Essentiel) à 15 000 FCFA (Premium) par mois et par utilisateur, réglables en Mobile Money (Wave, Orange Money).' },
+      { q: 'Peut-on tester avant d\'acheter ?', a: 'Oui. DelegPharma permet de créer un compte gratuit en lecture seule pour découvrir le CRM avant de souscrire une formule.' },
     ],
   },
 ];

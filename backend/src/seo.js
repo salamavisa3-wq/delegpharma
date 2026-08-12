@@ -670,8 +670,8 @@ const LANDING_JD = {
 const PAGES = {
   '/': {
     index: true,
-    title: 'DelegPharma — CRM du délégué médical au Sénégal | Tournées, CRV, objectifs',
-    desc: 'Le CRM des délégués médicaux au Sénégal : planifiez vos tournées de Dakar à Kédougou, suivez les professionnels de santé, rédigez vos comptes rendus de visite (CRV) et pilotez vos campagnes laboratoires. Dès 5 000 FCFA/mois.',
+    title: 'DelegPharma — CRM des laboratoires et délégués médicaux au Sénégal',
+    desc: 'Le CRM des laboratoires et délégués médicaux au Sénégal : tournées, CRV, objectifs, couverture par district. Compte gratuit. Dès 5 000 FCFA/mois.',
     canonical: '/',
     jsonLd: LANDING_JD,
     body: landingBody,
@@ -719,7 +719,7 @@ const PAGES = {
   },
 };
 for (const g of GUIDES) PAGES[g.path] = articlePage(g);
-const FALLBACK = { index: false, title: 'DelegPharma — CRM du délégué médical', desc: 'CRM du délégué médical au Sénégal.', canonical: '/', jsonLd: null, body: landingBody };
+const FALLBACK = { index: false, title: 'DelegPharma — CRM des laboratoires et délégués médicaux', desc: 'CRM des laboratoires pharmaceutiques et délégués médicaux au Sénégal.', canonical: '/', jsonLd: null, body: landingBody };
 
 /* ---------- Assembleur de shell ---------- */
 
@@ -794,7 +794,7 @@ function sitemapUrls() {
 
 export function robotsTxt() { return ROBOTS; }
 export function sitemapXml() {
-  const urls = sitemapUrls().map((u) => `  <url><loc>${BASE}${u.loc}</loc><changefreq>${u.freq}</changefreq><priority>${u.prio}</priority></url>`).join('\n');
+  const urls = sitemapUrls().map((u) => `  <url><loc>${BASE}${u.loc}</loc><lastmod>2026-08-12</lastmod><changefreq>${u.freq}</changefreq><priority>${u.prio}</priority></url>`).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 export { warmTarifs, warmLaboratoires, warmCarteSanitaire };

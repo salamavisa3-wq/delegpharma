@@ -96,7 +96,43 @@ function landingBody() {
   </div>
   <div style="text-align:center;margin-top:30px">
     <a class="primary" href="/carte-sanitaire" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Explorer la carte sanitaire du Sénégal</a>
-  </div>`;
+  </div>
+  <footer style="max-width:860px;margin:34px auto 8px;text-align:center;font-size:13px;color:var(--mut)">
+    <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a> · <a href="/tarifs">Tarifs</a> · <a href="/a-propos">À propos</a> · <a href="/login">Connexion</a> · <a href="/inscription">Compte gratuit</a>
+  </footer>`;
+}
+
+function aProposBody() {
+  return `
+  <main style="max-width:860px;margin:0 auto;padding:28px 16px">
+    ${publicHeader()}
+    <nav class="breadcrumb"><a href="/">Accueil</a> › À propos</nav>
+    <h1 style="font-size:28px;margin-bottom:12px">À propos de DelegPharma</h1>
+    <p class="hint" style="margin-bottom:20px">Le CRM des délégués médicaux et des laboratoires pharmaceutiques du Sénégal, construit sur le référentiel officiel de la carte sanitaire.</p>
+    <section style="margin-bottom:22px">
+      <h2 style="font-size:19px;margin-bottom:10px">Un outil né du terrain</h2>
+      <p style="line-height:1.7">DelegPharma est conçu par un docteur en pharmacie, délégué médical en exercice au Sénégal, qui a vécu les contraintes du métier : les comptes rendus de visite sur papier, les tournées planifiées de mémoire, les tableurs qui ne remontent jamais à temps, et l'impossibilité de prouver la couverture réelle d'une zone.</p>
+      <p style="line-height:1.7">L'outil répond à ces contraintes : une checklist par district pour ne rater aucun professionnel de santé, des CRV saisis depuis le terrain et validés en une chaîne, des objectifs produits suivis zone par zone, et une couverture mesurée à la maille officielle.</p>
+    </section>
+    <section style="margin-bottom:22px">
+      <h2 style="font-size:19px;margin-bottom:10px">Une base officielle : la carte sanitaire du Sénégal</h2>
+      <p style="line-height:1.7">DelegPharma s'appuie sur la <a href="/carte-sanitaire">carte sanitaire et sociale</a> (référentiel MSAS/ANSD) : <b>14 régions médicales</b>, <b>79 districts sanitaires</b>, 3 915 structures et plus de 34 000 professionnels de santé recensés. Les données publiques sont utilisées telles quelles — une règle absolue : on n'invente jamais une donnée, une population ou un chiffre.</p>
+      <p style="line-height:1.7">C'est la même maille que les managers et les délégués utilisent déjà : les tournées s'ancrent dans les districts, les objectifs se comparent entre zones, la couverture se calcule sans doublon. <a href="/laboratoires">Découvrir les laboratoires référencés</a>.</p>
+    </section>
+    <section style="margin-bottom:22px">
+      <h2 style="font-size:19px;margin-bottom:10px">Pour les laboratoires pharmaceutiques</h2>
+      <p style="line-height:1.7">Piloter une force de délégués médicaux sans outil, c'est renoncer à la visibilité. DelegPharma donne au laboratoire : la planification des tournées par district, la validation des CRV, les objectifs par produit phare et le taux de couverture par zone — la matière première du <a href="/blog/objectifs-campagnes-chiffre-affaires-laboratoire">pilotage du chiffre d'affaires</a>.</p>
+    </section>
+    <section style="margin-bottom:22px">
+      <h2 style="font-size:19px;margin-bottom:10px">Pour les délégués médicaux</h2>
+      <p style="line-height:1.7">Un délégué gagne du temps à chaque tournée : la checklist est prête, le CRV se rédige sur place, le PDF validé se génère en une seconde. Le délégué concentre son énergie sur la visite — pas sur la paperasse. <a href="/blog/tournees-terrain-delegue-medical">Bien organiser ses tournées</a>.</p>
+    </section>
+    <div style="text-align:center;margin:26px 0">
+      <a class="primary" href="/inscription" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Créer un compte gratuit</a>
+      <a class="primary" href="/tarifs" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Voir les tarifs</a>
+    </div>
+    <p class="hint" style="text-align:center">Données du référentiel MSAS / ANSD — utilisées sans invention.</p>
+  </main>`;
 }
 
 function tarifsBody() {
@@ -159,7 +195,7 @@ function publicHeader() {
   return `
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
     <div class="brand">DelegPharma</div>
-    <div><a href="/">Accueil</a> · <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a> · <a href="/tarifs">Tarifs</a> · <a href="/login">Connexion</a></div>
+    <div><a href="/">Accueil</a> · <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a> · <a href="/tarifs">Tarifs</a> · <a href="/a-propos">À propos</a> · <a href="/login">Connexion</a></div>
   </div>`;
 }
 
@@ -664,6 +700,21 @@ const PAGES = {
   },
   '/login': { index: false, title: 'Connexion — DelegPharma', desc: 'Accédez à votre espace délégué médical DelegPharma.', canonical: '/login', jsonLd: null, body: loginBody },
   '/inscription': { index: false, title: 'Inscription délégué médical — DelegPharma', desc: 'Créez votre compte délégué médical et abonnez-vous en Mobile Money.', canonical: '/inscription', jsonLd: null, body: loginBody },
+  '/a-propos': {
+    index: true,
+    title: 'À propos — DelegPharma, le CRM des laboratoires et délégués médicaux du Sénégal',
+    desc: 'DelegPharma est conçu par un docteur en pharmacie, délégué médical au Sénégal, sur le référentiel officiel de la carte sanitaire (MSAS/ANSD) : 14 régions, 79 districts, pour les laboratoires et les délégués médicaux.',
+    canonical: '/a-propos',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@graph': [
+        { '@type': 'Organization', '@id': BASE + '/#org', name: 'DelegPharma', url: BASE + '/', description: 'CRM des délégués médicaux et des laboratoires pharmaceutiques au Sénégal, construit sur la carte sanitaire (MSAS/ANSD).', areaServed: { '@type': 'Country', name: 'Sénégal' } },
+        { '@type': 'WebSite', '@id': BASE + '/#website', url: BASE + '/', name: 'DelegPharma', publisher: { '@id': BASE + '/#org' } },
+        { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Accueil', item: BASE + '/' }, { '@type': 'ListItem', position: 2, name: 'À propos', item: BASE + '/a-propos' }] },
+      ],
+    },
+    body: aProposBody,
+  },
 };
 for (const g of GUIDES) PAGES[g.path] = articlePage(g);
 const FALLBACK = { index: false, title: 'DelegPharma — CRM du délégué médical', desc: 'CRM du délégué médical au Sénégal.', canonical: '/', jsonLd: null, body: landingBody };
@@ -729,6 +780,7 @@ function sitemapUrls() {
     { loc: '/tarifs', freq: 'monthly', prio: '0.8' },
     { loc: '/laboratoires', freq: 'weekly', prio: '0.7' },
     { loc: '/carte-sanitaire', freq: 'weekly', prio: '0.9' },
+    { loc: '/a-propos', freq: 'monthly', prio: '0.5' },
   ];
   for (const g of GUIDES) urls.push({ loc: g.path, freq: 'monthly', prio: '0.7' });
   for (const r of carteRegions()) {

@@ -42,7 +42,7 @@ async function init() {
   const p = location.pathname.replace(/\/+$/, '');
   // Garde « contenu statique » : /carte-sanitaire/* et /blog/* sont entièrement rendus
   // serveur (SSR). La SPA ne doit pas écraser le pré-rendu — on sort immédiatement.
-  if (p.startsWith('/carte-sanitaire') || p.startsWith('/blog')) return;
+  if (p.startsWith('/carte-sanitaire') || p.startsWith('/blog') || p === '/a-propos') return;
   // SEO : les URLs publiques /tarifs, /login, /inscription (SSR) doivent hydrater la vue
   // hash-routing correspondante — sinon le JS écraserait le pré-rendu par la landing.
   if (!location.hash) {
@@ -154,7 +154,10 @@ function landingView() {
       <button class="primary" data-action="go-inscription" style="padding:11px 26px;font-size:15px">Équiper mon laboratoire</button>
       <button class="primary" data-action="go-laboratoires" style="padding:11px 26px;font-size:15px">Voir les laboratoires référencés</button>
     </p>
-  </div>`;
+  </div>
+  <footer style="max-width:860px;margin:34px auto 8px;text-align:center;font-size:13px;color:var(--mut)">
+    <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a> · <a href="/tarifs">Tarifs</a> · <a href="/a-propos">À propos</a> · <a href="/login">Connexion</a> · <a href="/inscription">Compte gratuit</a>
+  </footer>`;
 }
 function loginView() {
   return `
@@ -459,7 +462,7 @@ function publicPage(title, body) {
   <div style="max-width:920px;margin:0 auto;padding:28px 16px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
       <div class="brand">DelegPharma</div>
-      <div><a href="#/landing">Accueil</a> · <a href="#/laboratoires">Laboratoires</a> · <a href="#/tarifs">Tarifs</a> · <a href="#/login">Connexion</a></div>
+      <div><a href="#/landing">Accueil</a> · <a href="#/laboratoires">Laboratoires</a> · <a href="#/tarifs">Tarifs</a> · <a href="/a-propos">À propos</a> · <a href="#/login">Connexion</a></div>
     </div>
     <h1 style="font-size:26px;margin-bottom:20px">${title}</h1>
     <div id="public">${body}</div>

@@ -10,8 +10,14 @@ const base = () => process.env.APP_BASE_URL || 'http://localhost:10000';
 const form = (obj) => new URLSearchParams(obj).toString();
 
 export const cinetpay = {
-  async createPayment({ reference, montant, description, email, phone }) {
+  async createPayment({ reference, montant, description, email, phone, customer }) {
     if (!apikey() || !siteId()) throw new Error('CinetPay : CINETPAY_APIKEY / CINETPAY_SITE_ID manquants');
+    // Univers CREDIT_CARD (carte Visa/Mastercard, 3DS) : les champs customer_* sont
+    // obligatoires (erreur 608 sinon). channels='ALL' affiche Mobile Money + Carte sur
+    // la page CinetPay ; le client choisit son moyen à ce moment.
+    const c = customer || {};
+    const nom = String(c.nom || '').trim();
+    const [prenom, ...reste] = nom.split(/\s+/);
     const resp = await fetch(`${API}?method=createPayment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -26,9 +32,16 @@ export const cinetpay = {
         notify_url: `${base()}/api/webhooks/cinetpay`,
         return_url: `${base()}/#/abonnement`,
         custom: `dp:${reference}`,
+        channels: 'ALL',                        // MOBILE_MONEY + CREDIT_CARD
+        customer_name: reste.join(' ') || prenom || nom,
+        customer_surname: prenom || '',
         customer_email: email || '',
         customer_phone: phone || '',
-        customer_name: description,
+        customer_address: c.adresse || '',
+        customer_city: c.ville || '',
+        customer_country: c.pays || 'SN',
+        customer_state: c.state || '',
+        customer_zip_code: c.code_postal || '',
       }),
     });
     const json = await resp.json().catch(() => ({}));

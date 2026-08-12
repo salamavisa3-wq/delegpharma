@@ -32,7 +32,7 @@ router.post('/login', async (req, res) => {
 // abonnement → statut « aucun » → lecture seule). L'abonnement se prend ensuite
 // via /abonnements/initier depuis le dashboard.
 router.post('/inscription', async (req, res) => {
-  const { nom, email, telephone, password, laboratoire_id, formule_id } = req.body || {};
+  const { nom, email, telephone, password, laboratoire_id, formule_id, adresse, ville, pays, code_postal } = req.body || {};
   if (!nom || !email || !password) return res.status(400).json({ error: 'nom, email et mot de passe requis' });
   if (!laboratoire_id) return res.status(400).json({ error: 'laboratoire_id requis' });
 
@@ -50,9 +50,9 @@ router.post('/inscription', async (req, res) => {
 
   const hash = await hashPassword(password);
   const r = await run(
-    `INSERT INTO users (laboratoire_id, role, nom, email, telephone, password_hash)
-     VALUES ($1,'delegue',$2,$3,$4,$5)`,
-    [laboratoire_id, nom, cleanEmail, telephone || '', hash]);
+    `INSERT INTO users (laboratoire_id, role, nom, email, telephone, adresse, ville, pays, code_postal, password_hash)
+     VALUES ($1,'delegue',$2,$3,$4,$5,$6,$7,$8,$9)`,
+    [laboratoire_id, nom, cleanEmail, telephone || '', adresse || '', ville || '', pays || 'SN', code_postal || '', hash]);
   const userId = lastInsertId(r);
 
   let aboId = null, reference = null, payResult = null, paymentError = null;
@@ -70,6 +70,7 @@ router.post('/inscription', async (req, res) => {
         reference, montant: formule.prix,
         description: `Abonnement ${formule.nom} — ${nom}`,
         email: cleanEmail, phone: telephone || '',
+        customer: { nom, adresse, ville, pays, code_postal },
       });
     } catch (e) { paymentError = e.message; }
   }

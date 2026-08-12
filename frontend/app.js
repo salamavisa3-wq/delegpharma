@@ -493,7 +493,7 @@ async function loadTarifs() {
         <button class="primary" data-action="go-inscription" data-formule="${t.id}">S'abonner</button>
       </div>`).join('')}
     </div>
-    <p class="hint">Abonnement mensuel (30 jours), renouvelable à tout moment. Paiement Mobile Money (Wave, Orange Money…).</p>`;
+    <p class="hint">Abonnement mensuel (30 jours), renouvelable à tout moment. Paiement par carte Visa/Mastercard ou Mobile Money (Wave, Orange Money…).</p>`;
   } catch (e) { slot.innerHTML = `<div class="error">${esc(e.message)}</div>`; }
 }
 async function loadInscription() {
@@ -513,9 +513,13 @@ async function loadInscription() {
           <div><label>Laboratoire</label><select name="laboratoire_id" required>${laboratoires.map((l) => `<option value="${l.id}">${esc(l.nom)}</option>`).join('')}</select></div>
           <div><label>Formule</label><select name="formule_id"><option value="">Compte gratuit — lecture seule</option>${tarifs.map((t) => `<option value="${t.id}" ${String(state.selFormule) === String(t.id) ? 'selected' : ''}>${esc(t.nom)} — ${Number(t.prix).toLocaleString('fr-FR')} FCFA</option>`).join('')}</select></div>
         </div>
+        <div class="form-row">
+          <div><label>Adresse (optionnel, paiement carte)</label><input name="adresse" placeholder="Ex. : Rue 10, Medina"></div>
+          <div><label>Ville (optionnel, paiement carte)</label><input name="ville" placeholder="Ex. : Dakar"></div>
+        </div>
         <div><label>Mot de passe</label><input name="password" type="password" minlength="8" required></div>
         <button class="primary" type="submit">Créer mon compte</button>
-        <p class="hint" style="margin-top:10px">Sans formule : découverte du CRM en lecture seule. Avec formule : abonnement réglé par Mobile Money (Wave, Orange Money).</p>
+        <p class="hint" style="margin-top:10px">Sans formule : découverte du CRM en lecture seule. Avec formule : abonnement réglé par carte Visa/Mastercard ou Mobile Money (Wave, Orange Money).</p>
         <div class="error" data-slot="error"></div>
       </form>
     </div>

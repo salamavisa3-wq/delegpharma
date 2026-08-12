@@ -96,6 +96,10 @@ CREATE TABLE IF NOT EXISTS users (
   nom            TEXT NOT NULL,
   email          TEXT NOT NULL UNIQUE,
   telephone      TEXT NOT NULL DEFAULT '',
+  adresse        TEXT NOT NULL DEFAULT '',
+  ville          TEXT NOT NULL DEFAULT '',
+  pays           TEXT NOT NULL DEFAULT 'SN',
+  code_postal    TEXT NOT NULL DEFAULT '',
   password_hash  TEXT NOT NULL,
   professionnel_id INTEGER REFERENCES professionnel(id),
   created_at     TEXT NOT NULL DEFAULT (datetime('now'))
@@ -278,6 +282,11 @@ export async function initSchema() {
     await run('ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check');
     await run('ALTER TABLE users ALTER COLUMN laboratoire_id DROP NOT NULL');
     await run('ALTER TABLE users ADD COLUMN IF NOT EXISTS professionnel_id INTEGER');
+    // Migration : champs client pour paiement par carte (CREDIT_CARD CinetPay exige adresse/ville/pays)
+    await run('ALTER TABLE users ADD COLUMN IF NOT EXISTS adresse TEXT NOT NULL DEFAULT \'\'');
+    await run('ALTER TABLE users ADD COLUMN IF NOT EXISTS ville TEXT NOT NULL DEFAULT \'\'');
+    await run('ALTER TABLE users ADD COLUMN IF NOT EXISTS pays TEXT NOT NULL DEFAULT \'SN\'');
+    await run('ALTER TABLE users ADD COLUMN IF NOT EXISTS code_postal TEXT NOT NULL DEFAULT \'\'');
     // Migration table laboratoire (ajout colonnes + index) pour bases antérieures au 2026-08-11
     await run('ALTER TABLE laboratoire ADD COLUMN IF NOT EXISTS adresse TEXT NOT NULL DEFAULT \'\'');
     await run('ALTER TABLE laboratoire ADD COLUMN IF NOT EXISTS ville TEXT NOT NULL DEFAULT \'\'');
@@ -288,6 +297,10 @@ export async function initSchema() {
     // SQLite : ALTER ADD COLUMN est supporté ; le CHECK de rôle d'origine ne bloque pas les
     // rôles historiques (le code valide le rôle). Base de dev jetable pour la nouvelle définition.
     await run('ALTER TABLE users ADD COLUMN professionnel_id INTEGER').catch(() => {});
+    await run('ALTER TABLE users ADD COLUMN adresse TEXT NOT NULL DEFAULT \'\'').catch(() => {});
+    await run('ALTER TABLE users ADD COLUMN ville TEXT NOT NULL DEFAULT \'\'').catch(() => {});
+    await run('ALTER TABLE users ADD COLUMN pays TEXT NOT NULL DEFAULT \'SN\'').catch(() => {});
+    await run('ALTER TABLE users ADD COLUMN code_postal TEXT NOT NULL DEFAULT \'\'').catch(() => {});
     await run('ALTER TABLE laboratoire ADD COLUMN adresse TEXT NOT NULL DEFAULT \'\'').catch(() => {});
     await run('ALTER TABLE laboratoire ADD COLUMN ville TEXT NOT NULL DEFAULT \'\'').catch(() => {});
     await run('ALTER TABLE laboratoire ADD COLUMN telephone TEXT NOT NULL DEFAULT \'\'').catch(() => {});

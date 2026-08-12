@@ -110,7 +110,7 @@ router.post('/abonnements/initier', requireRole('delegue', 'manager', 'admin', '
   if (!formule_id) return res.status(400).json({ error: 'formule_id requis' });
   const formule = await get('SELECT * FROM formule WHERE id = $1', [formule_id]);
   if (!formule) return res.status(400).json({ error: 'Formule inconnue' });
-  const user = await get('SELECT nom, email, telephone FROM users WHERE id = $1', [req.user.id]);
+  const user = await get('SELECT nom, email, telephone, adresse, ville, pays, code_postal FROM users WHERE id = $1', [req.user.id]);
 
   const reference = makeReference();
   const rAbo = await run(
@@ -127,6 +127,7 @@ router.post('/abonnements/initier', requireRole('delegue', 'manager', 'admin', '
       reference, montant: formule.prix,
       description: `Abonnement ${formule.nom} — ${user.nom}`,
       email: user.email, phone: user.telephone,
+      customer: { nom: user.nom, adresse: user.adresse, ville: user.ville, pays: user.pays, code_postal: user.code_postal },
     });
   } catch (e) { paymentError = e.message; }
 
@@ -139,7 +140,7 @@ router.post('/abonnements/payer', requireRole('delegue'), async (req, res) => {
   const abo = await get('SELECT * FROM abonnement WHERE id = $1 AND user_id = $2', [abonnement_id, req.user.id]);
   if (!abo) return res.status(404).json({ error: 'Abonnement introuvable' });
   if (abo.statut !== 'en_attente') return res.status(400).json({ error: "Cet abonnement n'est plus en attente de paiement" });
-  const user = await get('SELECT nom, email, telephone FROM users WHERE id = $1', [req.user.id]);
+  const user = await get('SELECT nom, email, telephone, adresse, ville, pays, code_postal FROM users WHERE id = $1', [req.user.id]);
   const formule = await get('SELECT * FROM formule WHERE id = $1', [abo.formule_id]);
 
   const reference = makeReference();
@@ -152,6 +153,7 @@ router.post('/abonnements/payer', requireRole('delegue'), async (req, res) => {
       reference, montant: abo.montant,
       description: `Abonnement ${formule?.nom || ''} — ${user.nom}`,
       email: user.email, phone: user.telephone,
+      customer: { nom: user.nom, adresse: user.adresse, ville: user.ville, pays: user.pays, code_postal: user.code_postal },
     });
   } catch (e) { paymentError = e.message; }
   return res.json({ abonnement_id: abo.id, reference, payment: payResult, payment_error: paymentError });

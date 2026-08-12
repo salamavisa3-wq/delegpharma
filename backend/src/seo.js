@@ -470,6 +470,68 @@ const GUIDES = [
       { q: 'Comment éviter les doublons de visite ?', a: 'En centralisant les tournées et les CRV dans un CRM : chaque professionnel visité est tracé, et la checklist par district évite les oublis.' },
     ],
   },
+  {
+    path: '/blog/crm-laboratoire-pharmaceutique-delegues-medicaux',
+    title: 'CRM pour laboratoire pharmaceutique au Sénégal : piloter ses délégués médicaux',
+    desc: 'Pourquoi un laboratoire pharmaceutique au Sénégal a besoin d\'un CRM dédié : piloter ses délégués médicaux, suivre les comptes rendus de visite, mesurer la couverture par district et les objectifs produits.',
+    h1: 'CRM pour laboratoire pharmaceutique : piloter sa force de délégués médicaux',
+    intro: 'Un laboratoire pharmaceutique sénégalais qui déploie des délégués médicaux doit savoir qui visite qui, où, avec quel produit et avec quel résultat. Le CRM dédié à la visite médicale apporte cette visibilité — du référentiel national au taux de couverture par district.',
+    sections: [
+      { h: 'Pourquoi un laboratoire a besoin d\'un CRM de visite médicale', p: [
+        'Sans outil centralisé, l\'activité terrain d\'un laboratoire repose sur des CRV papier, des tableurs et la mémoire des managers. Résultat : aucune vision fiable de la couverture réelle des zones, des objectifs produits non suivis et des campagnes impossibles à évaluer.',
+        'Un CRM de visite médicale transforme chaque visite en donnée : professionnel rencontré, structure, produits présentés, quantités, résultat (accord, réserve, refus) et prochaine visite planifiée. C\'est la matière première du pilotage commercial du laboratoire.',
+      ] },
+      { h: 'Ce qu\'un CRM doit couvrir : tournées, CRV, objectifs, couverture', p: [
+        'Le périmètre minimal : planification des tournées par district avec checklist des professionnels, saisie des comptes rendus de visite depuis le terrain (avec pièces jointes), validation par le manager, suivi des objectifs par produit phare et calcul du taux de couverture par zone.',
+        'Les 14 régions médicales et 79 districts sanitaires du Sénégal sont la maille naturelle de ce pilotage : chaque tournée s\'ancre dans un district, chaque objectif se mesure sur une zone, chaque campagne se pilote par produit.',
+      ] },
+      { h: 'Le référentiel carte sanitaire : la base du découpage territorial', p: [
+        'La <a href="/carte-sanitaire">carte sanitaire et sociale du Sénégal</a> (MSAS/ANSD) recense 14 régions médicales, 79 districts sanitaires, 3 915 structures et plus de 34 000 professionnels de santé. C\'est le découpage officiel sur lequel un laboratoire peut répartir sa force de vente sans doublon ni zone blanche.',
+        'DelegPharma intègre ce référentiel : tournées par district, professionnels ciblables, couverture mesurée à la maille officielle. Consultez aussi <a href="/laboratoires">l\'annuaire des laboratoires pharmaceutiques présents au Sénégal</a>.',
+      ] },
+      { h: 'Mesurer la performance : couverture et objectifs produits', p: [
+        'Les indicateurs qui comptent pour un laboratoire : taux de professionnels visités par district (couverture), réalisation des objectifs par produit phare et par zone, nombre de CRV validés par délégué, délai de remontée des comptes rendus.',
+        'Ces indicateurs alimentent les campagnes suivantes : réallouer les délégués vers les districts sous-couverts, recentrer la promotion sur les produits en retard d\'objectif, et justifier le retour sur investissement de la force de vente. <a href="/tarifs">Découvrir les formules DelegPharma</a>.',
+      ] },
+    ],
+    faq: [
+      { q: 'Qu\'est-ce qu\'un CRM pour laboratoire pharmaceutique ?', a: 'C\'est un logiciel qui pilote l\'activité des délégués médicaux : tournées, comptes rendus de visite, objectifs produits et taux de couverture par zone. Il transforme le terrain en données exploitables.' },
+      { q: 'Combien coûte un CRM de visite médicale au Sénégal ?', a: 'Chez DelegPharma, les formules vont de 5 000 FCFA (Essentiel) à 15 000 FCFA (Premium) par mois et par utilisateur, avec paiement Mobile Money (Wave, Orange Money).' },
+      { q: 'Le CRM couvre-t-il les 14 régions du Sénégal ?', a: 'Oui. DelegPharma intègre la carte sanitaire complète : 14 régions médicales et 79 districts sanitaires, soit la maille officielle de répartition de votre force de vente.' },
+      { q: 'Peut-on suivre les objectifs par produit ?', a: 'Oui. L\'outil suit les objectifs par produit phare et par zone, avec un taux de réalisation visible et des exports CSV/PDF pour vos rapports.' },
+    ],
+  },
+  {
+    path: '/blog/carte-sanitaire-laboratoire-couverture-territoriale',
+    title: 'Carte sanitaire et laboratoire : découpage territorial, couverture et objectifs',
+    desc: 'Comment les laboratoires pharmaceutiques utilisent la carte sanitaire du Sénégal (14 régions, 79 districts, 3 915 structures) pour répartir leurs délégués médicaux et mesurer la couverture des campagnes.',
+    h1: 'La carte sanitaire au service des laboratoires pharmaceutiques',
+    intro: 'La carte sanitaire et sociale est bien plus qu\'un document administratif : c\'est l\'outil de découpage territorial qui permet à un laboratoire de répartir ses délégués médicaux, de cibler les prescripteurs et de mesurer la couverture réelle de ses campagnes.',
+    sections: [
+      { h: '14 régions médicales, 79 districts : le découpage officiel', p: [
+        'Le Sénégal est organisé en 14 régions médicales et 79 districts sanitaires, chacun doté de structures de santé : hôpitaux, centres de santé, postes de santé et cases de santé. Le référentiel officiel (MSAS/ANSD) recense 3 915 structures et plus de 34 000 professionnels.',
+        'Pour un laboratoire, ce découpage est la maille idéale : il suit la réalité du système de santé et permet d\'aligner la force de vente sur la carte des prescripteurs. Explorez le <a href="/carte-sanitaire">référentiel complet région par région et district par district</a>.',
+      ] },
+      { h: 'De la carte sanitaire à la tournée : cibler les prescripteurs', p: [
+        'Médecins, pharmaciens, sages-femmes et infirmiers sont répartis sur l\'ensemble du territoire. La carte sanitaire permet de prioriser les districts à forte densité de prescripteurs et de planifier des tournées sans doublon : chaque district a sa checklist, chaque professionnel a son historique de visites.',
+        'C\'est particulièrement utile pour le lancement d\'un nouveau produit : le laboratoire concentre d\'abord les districts stratégiques (Dakar, Thiès, Saint-Louis…), puis élargit la couverture par vagues.',
+      ] },
+      { h: 'Couverture et objectifs : mesurer l\'atteinte par produit et par zone', p: [
+        'Le taux de couverture — professionnels visités sur professionnels ciblés — est l\'indicateur central d\'une campagne. Rapporté au district, il révèle les zones blanches ; rapporté au produit, il montre où l\'objectif de prescriptions est en retard.',
+        'DelegPharma calcule ces indicateurs automatiquement : couverture par district, objectifs par produit phare, CRV validés par délégué. <a href="/tarifs">Voir les formules</a> · <a href="/laboratoires">Les laboratoires référencés</a>.',
+      ] },
+      { h: 'Un avantage concurrentiel : s\'appuyer sur les données officielles', p: [
+        'Travailler sur le référentiel officiel plutôt que sur une base maison donne au laboratoire un langage commun avec le terrain et une crédibilité accrue : les managers parlent des mêmes districts, les délégués couvrent les mêmes zones, les objectifs se comparent sur la même maille.',
+        'La carte sanitaire est aussi un argument de recrutement : les délégués médicaux la connaissent et se repèrent immédiatement dans un outil construit dessus.',
+      ] },
+    ],
+    faq: [
+      { q: 'Combien de régions médicales compte le Sénégal ?', a: '14 régions médicales, de Dakar à Kédougou, chacune découpée en districts sanitaires.' },
+      { q: 'Combien de structures de santé recense la carte sanitaire ?', a: 'Le référentiel MSAS/ANSD recense 3 915 structures de santé et plus de 34 000 professionnels de santé.' },
+      { q: 'Comment un laboratoire mesure-t-il la couverture ?', a: 'En rapportant les professionnels visités par les délégués au total des professionnels ciblés dans chaque district. DelegPharma calcule ce taux automatiquement.' },
+      { q: 'Pourquoi utiliser le référentiel officiel pour les campagnes ?', a: 'Il offre une maille commune (districts, structures, professionnels) qui aligne les managers et les délégués et rend les objectifs comparables entre zones.' },
+    ],
+  },
 ];
 
 /* ---------- Métadonnées par route ---------- */

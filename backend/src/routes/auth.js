@@ -28,11 +28,13 @@ router.post('/login', async (req, res) => {
 
 // Inscription publique délégué (spec §3.1) : choix laboratoire + formule →
 // compte + abonnement en_attente + transaction + paiement, puis auto-login.
+// formule_id OPTIONNEL : sans formule, création d'un compte gratuit (aucun
+// abonnement → statut « aucun » → lecture seule). L'abonnement se prend ensuite
+// via /abonnements/initier depuis le dashboard.
 router.post('/inscription', async (req, res) => {
   const { nom, email, telephone, password, laboratoire_id, formule_id } = req.body || {};
   if (!nom || !email || !password) return res.status(400).json({ error: 'nom, email et mot de passe requis' });
   if (!laboratoire_id) return res.status(400).json({ error: 'laboratoire_id requis' });
-  if (!formule_id) return res.status(400).json({ error: 'formule_id requis' });
 
   const cleanEmail = String(email).toLowerCase().trim();
   const existing = await get('SELECT id FROM users WHERE email = $1', [cleanEmail]);
@@ -40,8 +42,11 @@ router.post('/inscription', async (req, res) => {
 
   const labo = await get('SELECT id, nom, agrement_arp FROM laboratoire WHERE id = $1', [laboratoire_id]);
   if (!labo) return res.status(400).json({ error: 'Laboratoire inconnu' });
-  const formule = await get('SELECT * FROM formule WHERE id = $1', [formule_id]);
-  if (!formule) return res.status(400).json({ error: 'Formule inconnue' });
+  let formule = null;
+  if (formule_id) {
+    formule = await get('SELECT * FROM formule WHERE id = $1', [formule_id]);
+    if (!formule) return res.status(400).json({ error: 'Formule inconnue' });
+  }
 
   const hash = await hashPassword(password);
   const r = await run(
@@ -50,29 +55,31 @@ router.post('/inscription', async (req, res) => {
     [laboratoire_id, nom, cleanEmail, telephone || '', hash]);
   const userId = lastInsertId(r);
 
-  const reference = makeReference();
-  const rAbo = await run(
-    'INSERT INTO abonnement (user_id, formule_id, montant, statut, ref_transaction) VALUES ($1,$2,$3,$4,$5)',
-    [userId, formule.id, formule.prix, 'en_attente', reference]);
-  const aboId = lastInsertId(rAbo);
-  await run(
-    'INSERT INTO transaction_paiement (abonnement_id, user_id, montant, moyen, statut, reference, provider) VALUES ($1,$2,$3,$4,$5,$6,$7)',
-    [aboId, userId, formule.prix, 'cinetpay', 'en_attente', reference, payMode]);
-
-  let payResult = null, paymentError = null;
-  try {
-    payResult = await payment.createPayment({
-      reference, montant: formule.prix,
-      description: `Abonnement ${formule.nom} — ${nom}`,
-      email: cleanEmail, phone: telephone || '',
-    });
-  } catch (e) { paymentError = e.message; }
+  let aboId = null, reference = null, payResult = null, paymentError = null;
+  if (formule) {
+    reference = makeReference();
+    const rAbo = await run(
+      'INSERT INTO abonnement (user_id, formule_id, montant, statut, ref_transaction) VALUES ($1,$2,$3,$4,$5)',
+      [userId, formule.id, formule.prix, 'en_attente', reference]);
+    aboId = lastInsertId(rAbo);
+    await run(
+      'INSERT INTO transaction_paiement (abonnement_id, user_id, montant, moyen, statut, reference, provider) VALUES ($1,$2,$3,$4,$5,$6,$7)',
+      [aboId, userId, formule.prix, 'cinetpay', 'en_attente', reference, payMode]);
+    try {
+      payResult = await payment.createPayment({
+        reference, montant: formule.prix,
+        description: `Abonnement ${formule.nom} — ${nom}`,
+        email: cleanEmail, phone: telephone || '',
+      });
+    } catch (e) { paymentError = e.message; }
+  }
 
   const user = { id: userId, laboratoire_id, role: 'delegue', nom, email: cleanEmail, telephone: telephone || '' };
   setAuthCookie(res, signToken(user));
   return res.status(201).json({
     user: publicUser(user), laboratoire: labo,
     abonnement_id: aboId, reference, payment: payResult, payment_error: paymentError, pay_mode: payMode,
+    compte_gratuit: !formule,
   });
 });
 

@@ -61,6 +61,7 @@ function landingBody() {
     <h1><span>DelegPharma</span> — CRM du délégué médical</h1>
     <p>Planifiez vos tournées, suivez chaque professionnel de santé, rédigez vos comptes rendus de visite et pilotez vos campagnes — de Dakar à Kédougou.</p>
     <p style="margin-top:18px">
+      <a class="primary" href="/inscription" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Créer un compte gratuit</a>
       <a class="primary" href="/login" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Se connecter</a>
       <a class="primary" href="/tarifs" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Voir les tarifs</a>
     </p>

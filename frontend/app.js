@@ -105,9 +105,11 @@ async function showView() {
   if (state.user.role === 'delegue') await refreshMe(); // abonnement frais (verrouillage progressif §3.2)
   if (state.user.role === 'delegue') refreshAboBanner(); // le shell a pu être rendu avant le refreshMe (login/auto-login)
   const h = state.hash.split('?')[0];
-  // Porte d'entrée monétisation : sans abonnement actif, le délégué est dirigé vers #/abonnement.
+  // Porte d'entrée monétisation : abonnement expiré → #/abonnement pour se réabonner.
+  // Compte gratuit (statut « aucun ») = découverte en lecture seule : navigation libre,
+  // l'écriture est bloquée côté API (403) et le bandeau invite à souscrire.
   const a = state.abonnement;
-  if (state.user.role === 'delegue' && a && (a.statut === 'aucun' || a.statut === 'expire') && h !== '#/abonnement') {
+  if (state.user.role === 'delegue' && a && a.statut === 'expire' && h !== '#/abonnement') {
     state.hash = '#/abonnement';
     if (location.hash !== '#/abonnement') location.hash = '#/abonnement';
   }
@@ -121,9 +123,9 @@ function landingView() {
     <h1><span>DelegPharma</span> — CRM du délégué médical</h1>
     <p>Planifiez vos tournées, suivez chaque professionnel de santé, rédigez vos comptes rendus de visite et pilotez vos campagnes — de Dakar à Kédougou.</p>
     <p style="margin-top:18px">
+      <button class="primary" data-action="go-inscription" style="padding:11px 26px;font-size:15px">Créer un compte gratuit</button>
       <button class="primary" data-action="go-login" style="padding:11px 26px;font-size:15px">Se connecter</button>
       <button class="primary" data-action="go-tarifs" style="padding:11px 26px;font-size:15px">Voir les tarifs</button>
-      <button class="primary" data-action="go-laboratoires" style="padding:11px 26px;font-size:15px">Les laboratoires</button>
     </p>
   </div>
   <div class="features">
@@ -485,10 +487,11 @@ async function loadInscription() {
         </div>
         <div class="form-row">
           <div><label>Laboratoire</label><select name="laboratoire_id" required>${laboratoires.map((l) => `<option value="${l.id}">${esc(l.nom)}</option>`).join('')}</select></div>
-          <div><label>Formule</label><select name="formule_id" required>${tarifs.map((t) => `<option value="${t.id}" ${String(state.selFormule) === String(t.id) ? 'selected' : ''}>${esc(t.nom)} — ${Number(t.prix).toLocaleString('fr-FR')} FCFA</option>`).join('')}</select></div>
+          <div><label>Formule</label><select name="formule_id"><option value="">Compte gratuit — lecture seule</option>${tarifs.map((t) => `<option value="${t.id}" ${String(state.selFormule) === String(t.id) ? 'selected' : ''}>${esc(t.nom)} — ${Number(t.prix).toLocaleString('fr-FR')} FCFA</option>`).join('')}</select></div>
         </div>
         <div><label>Mot de passe</label><input name="password" type="password" minlength="8" required></div>
-        <button class="primary" type="submit">Créer mon compte et payer</button>
+        <button class="primary" type="submit">Créer mon compte</button>
+        <p class="hint" style="margin-top:10px">Sans formule : découverte du CRM en lecture seule. Avec formule : abonnement réglé par Mobile Money (Wave, Orange Money).</p>
         <div class="error" data-slot="error"></div>
       </form>
     </div>
@@ -507,7 +510,7 @@ function aboBanner() {
   if (s === 'actif') return `<div class="abo-banner ok">Abonnement ${esc(a.formule_nom || '')} actif — ${a.jours_restants} j restants</div>`;
   if (s === 'arrive_expiration') return `<div class="abo-banner warn">Abonnement ${esc(a.formule_nom || '')} expire dans ${a.jours_restants} j — renouvelez pour éviter le blocage.</div>`;
   if (s === 'expire') return `<div class="abo-banner bad">Abonnement expiré — accès en lecture seule. <a href="#/abonnement">Renouveler</a></div>`;
-  if (s === 'aucun') return `<div class="abo-banner bad">Aucun abonnement actif — <a href="#/abonnement">souscrivez pour utiliser l'application</a>.</div>`;
+  if (s === 'aucun') return `<div class="abo-banner bad">Compte gratuit — lecture seule. <a href="#/abonnement">Souscrivez pour activer l'écriture</a>.</div>`;
   return '';
 }
 /* Le shell rend le banner avec state.abonnement tel qu'au moment du rendu ; au login/
@@ -893,12 +896,13 @@ function bind() {
       }
       if (name === 'inscription') {
         const body = read(form);
-        body.formule_id = Number(body.formule_id); body.laboratoire_id = Number(body.laboratoire_id);
+        body.laboratoire_id = Number(body.laboratoire_id);
+        if (body.formule_id !== '') body.formule_id = Number(body.formule_id); else delete body.formule_id;
         const r = await api('/auth/inscription', { method: 'POST', body: JSON.stringify(body) });
         if (r.payment?.redirect_url) { window.location.href = r.payment.redirect_url; return; }
         state.user = r.user; state.labo = r.laboratoire; state.abonnement = null;
-        toast('Compte créé — ' + (r.pay_mode === 'demo' ? 'abonnement en attente de validation' : 'paiement en attente'));
-        return location.hash = '#/abonnement';
+        toast(r.compte_gratuit ? 'Compte gratuit créé — découverte en lecture seule' : 'Compte créé — ' + (r.pay_mode === 'demo' ? 'abonnement en attente de validation' : 'paiement en attente'));
+        return location.hash = r.compte_gratuit ? '#/dashboard' : '#/abonnement';
       }
       if (name === 'objectif-new') {
         const body = read(form);

@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { initSchema } from './schema.js';
 import { seed, seedExtras, seedDemoActivity } from './seed.js';
 import { requireAuth, requireRole } from './auth.js';
-import { seoShell, robotsTxt, sitemapXml, warmTarifs, warmLaboratoires } from './seo.js';
+import { seoShell, robotsTxt, sitemapXml, warmTarifs, warmLaboratoires, warmCarteSanitaire } from './seo.js';
 import authRoutes from './routes/auth.js';
 import referentielRoutes from './routes/referentiel.js';
 import crvRoutes from './routes/crv.js';
@@ -76,6 +76,7 @@ initSchema()
   .then(() => seedDemoActivity()) // idempotent : activité démo (CRV/tournées/objectifs/abonnement)
   .then(() => warmTarifs()) // SSR des tarifs (cache base réelle, fallback statique)
   .then(() => warmLaboratoires()) // SSR des laboratoires (cache base réelle)
+  .then(() => warmCarteSanitaire()) // SSR carte sanitaire (régions/districts depuis la base)
   .then(() => {
     app.listen(PORT, () => {
       console.log(`DelegPharma API écoute sur :${PORT} (${process.env.NODE_ENV || 'dev'})`);

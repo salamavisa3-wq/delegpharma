@@ -39,10 +39,13 @@ const can = (roles) => state.user && roles.includes(state.user.role);
 
 /* ---------- Démarrage ---------- */
 async function init() {
+  const p = location.pathname.replace(/\/+$/, '');
+  // Garde « contenu statique » : /carte-sanitaire/* et /blog/* sont entièrement rendus
+  // serveur (SSR). La SPA ne doit pas écraser le pré-rendu — on sort immédiatement.
+  if (p.startsWith('/carte-sanitaire') || p.startsWith('/blog')) return;
   // SEO : les URLs publiques /tarifs, /login, /inscription (SSR) doivent hydrater la vue
   // hash-routing correspondante — sinon le JS écraserait le pré-rendu par la landing.
   if (!location.hash) {
-    const p = location.pathname.replace(/\/+$/, '');
     const map = { '/tarifs': '#/tarifs', '/login': '#/login', '/inscription': '#/inscription', '/landing': '#/landing', '/laboratoires': '#/laboratoires' };
     if (map[p]) { location.hash = map[p]; state.hash = map[p]; }
   }

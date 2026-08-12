@@ -645,6 +645,37 @@ const GUIDES = [
       { q: 'Peut-on tester avant d\'acheter ?', a: 'Oui. DelegPharma permet de créer un compte gratuit en lecture seule pour découvrir le CRM avant de souscrire une formule.' },
     ],
   },
+  {
+    path: '/blog/reporting-kpi-laboratoire-force-de-vente',
+    title: 'Reporting et KPIs d\'un laboratoire : piloter la force de vente pharmaceutique',
+    desc: 'Les indicateurs clés pour piloter une force de vente pharmaceutique au Sénégal : couverture, objectifs, CRV, taux de conversion, tableau de bord et exports pour le manager de laboratoire.',
+    h1: 'Reporting et KPIs : piloter la force de vente d\'un laboratoire',
+    intro: 'Un laboratoire qui déploie des délégués médicaux ne peut pas piloter sans indicateurs. Le reporting transforme l\'activité terrain en décisions : réallouer les efforts, recentrer une campagne, valider le retour sur investissement de la force de vente.',
+    sections: [
+      { h: 'Les KPIs essentiels du laboratoire', p: [
+        'Les indicateurs se déclinent en quatre familles. La couverture territoriale : taux de professionnels de santé visités par rapport aux professionnels ciblés, par district et par région. L\'activité : nombre de visites réalisées, CRV validés, délai de remontée. Les objectifs : taux de réalisation par produit phare et par zone. Enfin la conversion : résultats des CRV (accord, réserve, refus) et prochaines visites planifiées.',
+        'Ces KPIs donnent au manager une vision en temps réel de la performance de chaque délégué et de chaque zone, sans dépendre des tableurs. <a href="/blog/objectifs-campagnes-chiffre-affaires-laboratoire">Voir le guide pilotage CA et campagnes</a>.',
+      ] },
+      { h: 'Du tableau de bord à la décision', p: [
+        'Un bon reporting ne s\'arrête pas à l\'affichage. Il doit permettre de comparer les périodes (semaine, mois, trimestre), d\'identifier les zones sous-couvertes et de détecter les délégués qui remontent leurs CRV en retard.',
+        'DelegPharma fournit un tableau de bord avec les statistiques par délégué, par produit et par district, directement alimenté par les CRV validés. Les managers peuvent ensuite exporter les données en CSV ou PDF pour leurs réunions.',
+      ] },
+      { h: 'Fréquence et rituels de pilotage', p: [
+        'Le rituel recommandé : un point hebdomadaire sur l\'activité et la couverture, un point mensuel sur les objectifs produits, et un bilan trimestriel sur le retour sur investissement de la force de vente. Chaque point s\'appuie sur les mêmes données du CRM.',
+        'La régularité du reporting est aussi un moteur de motivation pour les délégués : les objectifs sont clairs, la performance est transparente, et les bonnes zones sont reconnues.',
+      ] },
+      { h: 'Exports et conformité', p: [
+        'Les exports CSV/PDF permettent d\'archiver les CRV et les tableaux de bord, de justifier l\'activité auprès de la direction et de préparer les audits internes. Ils conservent la traçabilité : qui a visité qui, quand, avec quel résultat.',
+        'Pour démarrer le pilotage, créez un <a href="/inscription">compte gratuit</a> ou consultez les <a href="/tarifs">formules DelegPharma</a>. Pour choisir l\'outil adapté, lisez le guide <a href="/blog/choisir-crm-force-de-vente-laboratoire-pharmaceutique">choisir un CRM de force de vente</a>.',
+      ] },
+    ],
+    faq: [
+      { q: 'Quels sont les KPIs d\'une force de vente pharmaceutique ?', a: 'Couverture par district, CRV validés, objectifs par produit phare, résultats des visites (accord, réserve, refus) et délai de remontée des comptes rendus.' },
+      { q: 'À quelle fréquence piloter la force de vente ?', a: 'Hebdomadaire sur l\'activité, mensuel sur les objectifs produits, trimestriel sur le retour sur investissement.' },
+      { q: 'Comment exporter les données de suivi ?', a: 'DelegPharma propose des exports CSV/PDF des CRV et des tableaux de bord par délégué, produit et district.' },
+      { q: 'Le reporting permet-il de comparer les délégués ?', a: 'Oui, le tableau de bord compare l\'activité, la couverture et la conversion par délégué, sur la même base de données du CRM.' },
+    ],
+  },
 ];
 
 /* ---------- Métadonnées par route ---------- */

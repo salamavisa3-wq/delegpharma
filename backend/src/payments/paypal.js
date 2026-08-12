@@ -71,7 +71,9 @@ export const paypal = {
       body: '{}',
     });
     const json = await resp.json().catch(() => ({}));
-    const status = String(json.status || '').toUpperCase();
+    // json.status = état de la commande (CREATED/APPROVED/COMPLETED) ; json.name = erreur PayPal
+    // (ex. UNPROCESSABLE_ENTITY si la commande n'est pas encore approuvée) — remonté pour le débogage.
+    const status = String(json.status || json.name || '').toUpperCase();
     const capture = json.purchase_units?.[0]?.payments?.captures?.[0];
     return {
       paid: status === 'COMPLETED' && capture?.status === 'COMPLETED',

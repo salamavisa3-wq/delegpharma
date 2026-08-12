@@ -506,11 +506,11 @@ const PAGES = {
     title: 'Tarifs DelegPharma — 5 000 / 10 000 / 15 000 FCFA par mois',
     desc: 'Abonnez-vous à DelegPharma : Essentiel 5 000 FCFA, Standard 10 000 FCFA ou Premium 15 000 FCFA par mois. Paiement Mobile Money (Wave, Orange Money). 30 jours, renouvelable.',
     canonical: '/tarifs',
-    jsonLd: {
+    jsonLd: () => ({
       '@context': 'https://schema.org',
       '@type': 'ItemList',
-      itemListElement: tarifs().map((t, i) => ({ '@type': 'Offer', position: i + 1, name: t.nom, price: String(t.prix), priceCurrency: 'XOF', url: BASE + '/tarifs' })),
-    },
+      itemListElement: tarifs().map((t, i) => ({ '@type': 'ListItem', position: i + 1, name: t.nom, item: BASE + '/tarifs', offers: { '@type': 'Offer', price: String(t.prix), priceCurrency: 'XOF' } })),
+    }),
     body: tarifsBody,
   },
   '/laboratoires': {
@@ -518,11 +518,11 @@ const PAGES = {
     title: 'Laboratoires pharmaceutiques au Sénégal — Référencés sur DelegPharma',
     desc: 'Annuaire des laboratoires pharmaceutiques présents au Sénégal : industriels, distributeurs, génériques. DelegPharma les accompagne dans le suivi des délégués médicaux, des tournées et des comptes rendus de visite.',
     canonical: '/laboratoires',
-    jsonLd: {
+    jsonLd: () => ({
       '@context': 'https://schema.org',
       '@type': 'ItemList',
-      itemListElement: (laboratoiresCache || []).map((l, i) => ({ '@type': 'ListItem', position: i + 1, name: l.nom })),
-    },
+      itemListElement: (laboratoiresCache || []).map((l, i) => ({ '@type': 'ListItem', position: i + 1, name: l.nom, item: BASE + '/laboratoires' })),
+    }),
     body: laboratoiresBody,
   },
   '/login': { index: false, title: 'Connexion — DelegPharma', desc: 'Accédez à votre espace délégué médical DelegPharma.', canonical: '/login', jsonLd: null, body: loginBody },
@@ -548,7 +548,9 @@ function head(page) {
     `<meta name="twitter:description" content="${esc(page.desc)}">`,
     `<meta name="twitter:image" content="${BASE}/og-image-1200x630.png">`,
   ].join('\n  ');
-  const jdHtml = page.jsonLd ? `\n  <script type="application/ld+json">${jd(page.jsonLd)}</script>` : '';
+  // jsonLd peut être un objet statique ou une fonction évaluée à la requête (caches warmés : tarifs, laboratoires).
+  const jsonLd = typeof page.jsonLd === 'function' ? page.jsonLd() : page.jsonLd;
+  const jdHtml = jsonLd ? `\n  <script type="application/ld+json">${jd(jsonLd)}</script>` : '';
   return [
     `<title>${esc(page.title)}</title>`,
     `<meta name="description" content="${esc(page.desc)}">`,

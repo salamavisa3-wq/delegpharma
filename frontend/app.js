@@ -105,6 +105,13 @@ async function showView() {
   if (state.user.role === 'delegue') await refreshMe(); // abonnement frais (verrouillage progressif §3.2)
   if (state.user.role === 'delegue') refreshAboBanner(); // le shell a pu être rendu avant le refreshMe (login/auto-login)
   const h = state.hash.split('?')[0];
+  // Retour PayPal : capture la commande approuvée puis nettoie l'URL (évite une re-capture au refresh).
+  const q = new URLSearchParams(state.hash.split('?')[1] || '');
+  if (q.get('paypal') && q.get('token')) {
+    await capturePayPal(q.get('token'));
+    history.replaceState(null, '', '#/abonnement');
+    state.hash = '#/abonnement';
+  }
   // Porte d'entrée monétisation : abonnement expiré → #/abonnement pour se réabonner.
   // Compte gratuit (statut « aucun ») = découverte en lecture seule : navigation libre,
   // l'écriture est bloquée côté API (403) et le bandeau invite à souscrire.
@@ -547,9 +554,13 @@ function refreshAboBanner() {
   const slot = $('#abo-banner-slot');
   if (slot) slot.innerHTML = aboBanner();
 }
+function selectedMoyen() {
+  const el = $('input[name="moyen"]:checked');
+  return el ? el.value : undefined;
+}
 async function aboInitier(formuleId) {
   try {
-    const r = await api('/abonnements/initier', { method: 'POST', body: JSON.stringify({ formule_id: Number(formuleId) }) });
+    const r = await api('/abonnements/initier', { method: 'POST', body: JSON.stringify({ formule_id: Number(formuleId), moyen: selectedMoyen() }) });
     if (r.payment?.redirect_url) { window.location.href = r.payment.redirect_url; return; }
     toast('Souscription en attente de paiement' + (r.pay_mode === 'demo' ? ' (validation admin requise)' : ''));
     await refreshMe();
@@ -558,10 +569,17 @@ async function aboInitier(formuleId) {
 }
 async function aboPayer(aboId) {
   try {
-    const r = await api('/abonnements/payer', { method: 'POST', body: JSON.stringify({ abonnement_id: Number(aboId) }) });
+    const r = await api('/abonnements/payer', { method: 'POST', body: JSON.stringify({ abonnement_id: Number(aboId), moyen: selectedMoyen() }) });
     if (r.payment?.redirect_url) { window.location.href = r.payment.redirect_url; return; }
     toast('Relance de paiement' + (r.pay_mode === 'demo' ? ' (validation admin requise)' : ''));
     return showView();
+  } catch (e) { toast(e.message); }
+}
+/** Retour PayPal : capture la commande approuvée (order_id = param `token` ajouté par PayPal). */
+async function capturePayPal(orderId) {
+  try {
+    const r = await api('/abonnements/paypal-capture', { method: 'POST', body: JSON.stringify({ order_id: orderId }) });
+    toast(r.ok ? 'Paiement PayPal confirmé — abonnement activé' : 'Paiement PayPal non confirmé');
   } catch (e) { toast(e.message); }
 }
 async function abonnementView() {
@@ -585,6 +603,12 @@ async function abonnementView() {
         <h3 class="section-title">Paiement en attente — ${esc(d.en_attente.formule_nom)} (${Number(d.en_attente.montant).toLocaleString('fr-FR')} FCFA)</h3>
         <p class="muted">Référence : <code>${esc(d.en_attente.ref_transaction)}</code></p>
         <button class="primary" data-action="abo-payer" data-id="${d.en_attente.id}">Relancer / payer</button>
+      </div>`;
+    }
+    if (d.pay_mode !== 'demo') {
+      html += `<div class="card" style="margin:16px 0"><h3 class="section-title">Moyen de paiement</h3>
+        <label style="display:block;margin:6px 0"><input type="radio" name="moyen" value="cinetpay" checked> Mobile Money &amp; Carte (Wave, Orange Money, Visa/Mastercard)</label>
+        <label style="display:block;margin:6px 0"><input type="radio" name="moyen" value="paypal"> PayPal (carte ou compte PayPal)</label>
       </div>`;
     }
     if (!state.tarifs) state.tarifs = await api('/tarifs');

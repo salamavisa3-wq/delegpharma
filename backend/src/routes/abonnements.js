@@ -5,8 +5,9 @@
 import { Router } from 'express';
 import { all, get, run, lastInsertId, isPg } from '../db.js';
 import { requireAuth, requireRole, getSubscriptionState } from '../auth.js';
-import { payment, makeReference, payMode } from '../payments/adapter.js';
+import { resolveProvider, makeReference, payMode } from '../payments/adapter.js';
 import { cinetpay } from '../payments/cinetpay.js';
+import { paypal } from '../payments/paypal.js';
 
 const router = Router();
 
@@ -101,17 +102,18 @@ router.get('/abonnements/mon', async (req, res) => {
                  LEFT JOIN formule f ON f.id = a.formule_id
                  WHERE a.user_id = $1 AND a.statut = 'en_attente' ORDER BY a.id DESC LIMIT 1`, [req.user.id])
     : null;
-  return res.json({ abonnement: state, en_attente: pending, historique: await getTransactionHistory(req.user) });
+  return res.json({ abonnement: state, en_attente: pending, historique: await getTransactionHistory(req.user), pay_mode: payMode });
 });
 
 /** Initier une souscription/renouvellement : abonnement en_attente + transaction + paiement. */
 router.post('/abonnements/initier', requireRole('delegue', 'manager', 'admin', 'laboratoire'), async (req, res) => {
-  const { formule_id } = req.body || {};
+  const { formule_id, moyen } = req.body || {};
   if (!formule_id) return res.status(400).json({ error: 'formule_id requis' });
   const formule = await get('SELECT * FROM formule WHERE id = $1', [formule_id]);
   if (!formule) return res.status(400).json({ error: 'Formule inconnue' });
   const user = await get('SELECT nom, email, telephone, adresse, ville, pays, code_postal FROM users WHERE id = $1', [req.user.id]);
 
+  const { key, provider } = resolveProvider(moyen);
   const reference = makeReference();
   const rAbo = await run(
     'INSERT INTO abonnement (user_id, formule_id, montant, statut, ref_transaction) VALUES ($1,$2,$3,$4,$5)',
@@ -119,11 +121,11 @@ router.post('/abonnements/initier', requireRole('delegue', 'manager', 'admin', '
   const aboId = lastInsertId(rAbo);
   await run(
     'INSERT INTO transaction_paiement (abonnement_id, user_id, montant, moyen, statut, reference, provider) VALUES ($1,$2,$3,$4,$5,$6,$7)',
-    [aboId, req.user.id, formule.prix, 'cinetpay', 'en_attente', reference, payMode]);
+    [aboId, req.user.id, formule.prix, key, 'en_attente', reference, key]);
 
   let payResult = null, paymentError = null;
   try {
-    payResult = await payment.createPayment({
+    payResult = await provider.createPayment({
       reference, montant: formule.prix,
       description: `Abonnement ${formule.nom} — ${user.nom}`,
       email: user.email, phone: user.telephone,
@@ -136,20 +138,21 @@ router.post('/abonnements/initier', requireRole('delegue', 'manager', 'admin', '
 
 /** Relancer le paiement d'un abonnement resté en attente (ex. paiement abandonné). */
 router.post('/abonnements/payer', requireRole('delegue'), async (req, res) => {
-  const { abonnement_id } = req.body || {};
+  const { abonnement_id, moyen } = req.body || {};
   const abo = await get('SELECT * FROM abonnement WHERE id = $1 AND user_id = $2', [abonnement_id, req.user.id]);
   if (!abo) return res.status(404).json({ error: 'Abonnement introuvable' });
   if (abo.statut !== 'en_attente') return res.status(400).json({ error: "Cet abonnement n'est plus en attente de paiement" });
   const user = await get('SELECT nom, email, telephone, adresse, ville, pays, code_postal FROM users WHERE id = $1', [req.user.id]);
   const formule = await get('SELECT * FROM formule WHERE id = $1', [abo.formule_id]);
 
+  const { key, provider } = resolveProvider(moyen);
   const reference = makeReference();
   await run(
     'INSERT INTO transaction_paiement (abonnement_id, user_id, montant, moyen, statut, reference, provider) VALUES ($1,$2,$3,$4,$5,$6,$7)',
-    [abo.id, req.user.id, abo.montant, 'cinetpay', 'en_attente', reference, payMode]);
+    [abo.id, req.user.id, abo.montant, key, 'en_attente', reference, key]);
   let payResult = null, paymentError = null;
   try {
-    payResult = await payment.createPayment({
+    payResult = await provider.createPayment({
       reference, montant: abo.montant,
       description: `Abonnement ${formule?.nom || ''} — ${user.nom}`,
       email: user.email, phone: user.telephone,
@@ -157,6 +160,22 @@ router.post('/abonnements/payer', requireRole('delegue'), async (req, res) => {
     });
   } catch (e) { paymentError = e.message; }
   return res.json({ abonnement_id: abo.id, reference, payment: payResult, payment_error: paymentError });
+});
+
+/** Retour PayPal : capture la commande approuvée et active l'abonnement (idempotent).
+ *  L'autorité est l'appel capture (jamais le corps d'un webhook non vérifié). */
+router.post('/abonnements/paypal-capture', requireAuth, async (req, res) => {
+  const { order_id } = req.body || {};
+  if (!order_id) return res.status(400).json({ error: 'order_id requis' });
+  let cap;
+  try { cap = await paypal.capture({ order_id }); }
+  catch (e) { return res.status(502).json({ error: 'capture PayPal échouée' }); }
+  if (!cap.paid) return res.status(400).json({ ok: false, status: cap.status, message: 'paiement non confirmé' });
+  const tx = await get('SELECT * FROM transaction_paiement WHERE reference = $1', [cap.reference]);
+  if (!tx) return res.status(404).json({ error: 'Transaction inconnue' });
+  if (tx.user_id !== req.user.id) return res.status(403).json({ error: 'Transaction non autorisée' });
+  const r = await applyPaymentSuccess({ reference: cap.reference, providerRef: cap.provider_ref });
+  return res.json(r);
 });
 
 /** Mode démo : validation manuelle d'un paiement simulé (spéc §3.1, §6.2). */

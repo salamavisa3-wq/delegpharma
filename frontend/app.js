@@ -7,6 +7,7 @@ const fmtDate = (d) => (d ? String(d).slice(0, 10) : '—');
 
 const state = { user: null, labo: null, catalog: null, abonnement: null, tarifs: null, laboratoires: null, selFormule: null, hash: location.hash || '#/landing' };
 let draft = { produits: [], docs: [] };
+let chatHistory = []; // historique de l'Assistant IA (en mémoire, reset au logout)
 let psFilters = { region_id: '', district_id: '', specialite_id: '', potentiel: '', q: '' };
 let crvFilters = { statut: '', region_id: '', district_id: '' };
 
@@ -80,10 +81,10 @@ function renderMain(html) { $('#view').innerHTML = html; }
 
 /* ---------- Shell + nav ---------- */
 const NAV = {
-  delegue: [['dashboard', 'Tableau de bord'], ['referentiel', 'Référentiel'], ['crv', 'CRV'], ['tournees', 'Tournées'], ['objectifs', 'Objectifs'], ['messagerie', 'Messagerie'], ['abonnement', 'Abonnement']],
-  manager: [['dashboard', 'Tableau de bord'], ['referentiel', 'Référentiel'], ['crv', 'CRV'], ['tournees', 'Tournées'], ['campagnes', 'Campagnes'], ['objectifs', 'Objectifs'], ['messagerie', 'Messagerie'], ['abonnement', 'Abonnement'], ['revenus', 'Revenus']],
-  laboratoire: [['dashboard', 'Tableau de bord'], ['referentiel', 'Référentiel'], ['crv', 'CRV'], ['campagnes', 'Campagnes'], ['objectifs', 'Objectifs'], ['messagerie', 'Messagerie'], ['abonnement', 'Abonnement'], ['revenus', 'Revenus']],
-  admin: [['dashboard', 'Tableau de bord'], ['referentiel', 'Référentiel'], ['crv', 'CRV'], ['tournees', 'Tournées'], ['campagnes', 'Campagnes'], ['objectifs', 'Objectifs'], ['messagerie', 'Messagerie'], ['abonnement', 'Abonnement'], ['revenus', 'Revenus']],
+  delegue: [['dashboard', 'Tableau de bord'], ['referentiel', 'Référentiel'], ['crv', 'CRV'], ['tournees', 'Tournées'], ['objectifs', 'Objectifs'], ['messagerie', 'Messagerie'], ['assistant', 'Assistant IA'], ['abonnement', 'Abonnement']],
+  manager: [['dashboard', 'Tableau de bord'], ['referentiel', 'Référentiel'], ['crv', 'CRV'], ['tournees', 'Tournées'], ['campagnes', 'Campagnes'], ['objectifs', 'Objectifs'], ['messagerie', 'Messagerie'], ['assistant', 'Assistant IA'], ['abonnement', 'Abonnement'], ['revenus', 'Revenus']],
+  laboratoire: [['dashboard', 'Tableau de bord'], ['referentiel', 'Référentiel'], ['crv', 'CRV'], ['campagnes', 'Campagnes'], ['objectifs', 'Objectifs'], ['messagerie', 'Messagerie'], ['assistant', 'Assistant IA'], ['abonnement', 'Abonnement'], ['revenus', 'Revenus']],
+  admin: [['dashboard', 'Tableau de bord'], ['referentiel', 'Référentiel'], ['crv', 'CRV'], ['tournees', 'Tournées'], ['campagnes', 'Campagnes'], ['objectifs', 'Objectifs'], ['messagerie', 'Messagerie'], ['assistant', 'Assistant IA'], ['abonnement', 'Abonnement'], ['revenus', 'Revenus']],
   plateforme: [['plateforme', 'Plateforme'], ['revenus', 'Revenus'], ['referentiel', 'Référentiel']],
   professionnel: [['professionnel', 'Mes visites']],
 };
@@ -695,6 +696,18 @@ async function notifSendModal() {
     <div><label>Destinataire</label><select name="to_user_id"><option value="">Toute l'équipe (diffusion)</option>${delegues.map((d) => `<option value="${d.id}">${esc(d.nom)}</option>`).join('')}</select></div>
     <div><label>Message</label><textarea name="message" rows="3" required></textarea></div>`, 'notif-send');
 }
+async function assistantView() {
+  return `
+    <div class="card">
+      <h3 class="section-title">Assistant IA</h3>
+      <p class="hint">Posez vos questions sur les médicaments, les pathologies saisonnières, les bonnes pratiques de dispensation…</p>
+      <div id="chat-box" class="chat-box"><div class="chat-msg ia">Bonjour 👋 Je suis l'assistant de DelegPharma. Comment puis-je vous aider ?</div></div>
+      <form data-form="assistant" class="chat-form">
+        <input name="message" placeholder="Votre question…" autocomplete="off" required>
+        <button class="primary" type="submit">Envoyer</button>
+      </form>
+    </div>`;
+}
 async function plateformeView() {
   renderMain('<div class="muted">Chargement…</div>');
   try {
@@ -821,7 +834,7 @@ function bind() {
         location.hash = '#/' + h;
         return;
       }
-      if (act === 'logout') { await api('/auth/logout', { method: 'POST' }); state.user = null; state.hash = '#/landing'; render(); return; }
+      if (act === 'logout') { await api('/auth/logout', { method: 'POST' }); state.user = null; state.hash = '#/landing'; chatHistory = []; render(); return; }
       if (act === 'modal-close') { if (!e.target.closest('[data-stop]')) closeModal(); return; }
 
       if (act === 'ps-apply') {
@@ -971,6 +984,27 @@ function bind() {
         await api('/notifications', { method: 'POST', body: JSON.stringify(body) });
         closeModal(); toast('Message envoyé'); return showView();
       }
+      if (name === 'assistant') {
+        const msg = form.message.value.trim();
+        if (!msg) return;
+        const box = $('#chat-box');
+        box.insertAdjacentHTML('beforeend', `<div class="chat-msg user">${esc(msg)}</div>`);
+        form.message.value = '';
+        box.scrollTop = box.scrollHeight;
+        const typing = document.createElement('div');
+        typing.className = 'chat-msg ia muted';
+        typing.textContent = '…';
+        box.appendChild(typing);
+        try {
+          const r = await api('/assistant', { method: 'POST', body: JSON.stringify({ message: msg, history: chatHistory }) });
+          chatHistory.push({ role: 'user', content: msg }, { role: 'assistant', content: r.reply });
+          typing.outerHTML = `<div class="chat-msg ia">${esc(r.reply)}</div>`;
+        } catch (e) {
+          typing.outerHTML = `<div class="chat-msg ia error">${esc(e.message)}</div>`;
+        }
+        box.scrollTop = box.scrollHeight;
+        return;
+      }
     } catch (err) { if (errSlot) errSlot.textContent = err.message; else toast(err.message); }
   };
 }
@@ -1045,6 +1079,7 @@ async function runView() {
     if (h === '#/campagnes') return renderMain(await campagnesView());
     if (h === '#/objectifs') return renderMain(await objectifsView());
     if (h === '#/messagerie') return renderMain(await notificationsView());
+    if (h === '#/assistant') return renderMain(await assistantView());
     if (h === '#/abonnement') return renderMain(await abonnementView());
     if (h === '#/plateforme') return renderMain(await plateformeView());
     if (h === '#/revenus') return renderMain(await revenusView());

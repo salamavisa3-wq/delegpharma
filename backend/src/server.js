@@ -21,6 +21,7 @@ import plateformeRoutes from './routes/plateforme.js';
 import professionnelRoutes from './routes/professionnel.js';
 import exportRoutes from './routes/export.js';
 import plateformeLaboratoiresRoutes from './routes/plateforme-laboratoires.js';
+import assistantRoutes from './routes/assistant.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const frontendDir = resolve(here, '../../frontend');
@@ -53,6 +54,7 @@ app.use('/api/plateforme', requireAuth, requireRole('plateforme'), plateformeRou
 app.use('/api/plateforme/laboratoires', requireAuth, requireRole('plateforme'), plateformeLaboratoiresRoutes);
 app.use('/api/professionnel', requireAuth, requireRole('professionnel'), professionnelRoutes);
 app.use('/api', exportRoutes);
+app.use('/api', assistantRoutes);
 
 // SEO : robots.txt + sitemap.xml (avant le fallback SPA qui les capturerait sinon)
 app.get('/robots.txt', (req, res) => res.type('text/plain').send(robotsTxt()));

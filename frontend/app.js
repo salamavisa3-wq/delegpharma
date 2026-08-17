@@ -501,7 +501,7 @@ async function loadTarifs() {
         <button class="primary" data-action="go-inscription" data-formule="${t.id}">S'abonner</button>
       </div>`).join('')}
     </div>
-    <p class="hint">Abonnement mensuel (30 jours), renouvelable à tout moment. Paiement par carte Visa/Mastercard ou Mobile Money (Wave, Orange Money…).</p>`;
+    <p class="hint">Abonnement mensuel (30 jours), renouvelable à tout moment. Paiement par Mobile Money (Wave, Orange Money, QR), carte Visa/Mastercard ou PayPal.</p>`;
   } catch (e) { slot.innerHTML = `<div class="error">${esc(e.message)}</div>`; }
 }
 async function loadInscription() {
@@ -527,7 +527,7 @@ async function loadInscription() {
         </div>
         <div><label>Mot de passe</label><input name="password" type="password" minlength="8" required></div>
         <button class="primary" type="submit">Créer mon compte</button>
-        <p class="hint" style="margin-top:10px">Sans formule : découverte du CRM en lecture seule. Avec formule : abonnement réglé par carte Visa/Mastercard ou Mobile Money (Wave, Orange Money).</p>
+        <p class="hint" style="margin-top:10px">Sans formule : découverte du CRM en lecture seule. Avec formule : abonnement réglé par Mobile Money (Wave, Orange Money, QR), carte Visa/Mastercard ou PayPal.</p>
         <div class="error" data-slot="error"></div>
       </form>
     </div>
@@ -563,6 +563,11 @@ async function aboInitier(formuleId) {
   try {
     const r = await api('/abonnements/initier', { method: 'POST', body: JSON.stringify({ formule_id: Number(formuleId), moyen: selectedMoyen() }) });
     if (r.payment?.redirect_url) { window.location.href = r.payment.redirect_url; return; }
+    // Paiement QR : afficher les QR Wave/OM + référence, en attente de validation manuelle.
+    if (r.payment?.provider === 'qr') {
+      renderMain(qrPaymentView(r));
+      return;
+    }
     toast('Souscription en attente de paiement' + (r.pay_mode === 'demo' ? ' (validation admin requise)' : ''));
     await refreshMe();
     return showView();
@@ -572,10 +577,42 @@ async function aboPayer(aboId) {
   try {
     const r = await api('/abonnements/payer', { method: 'POST', body: JSON.stringify({ abonnement_id: Number(aboId), moyen: selectedMoyen() }) });
     if (r.payment?.redirect_url) { window.location.href = r.payment.redirect_url; return; }
+    if (r.payment?.provider === 'qr') {
+      renderMain(qrPaymentView(r));
+      return;
+    }
     toast('Relance de paiement' + (r.pay_mode === 'demo' ? ' (validation admin requise)' : ''));
     return showView();
   } catch (e) { toast(e.message); }
 }
+
+/** Vue de paiement QR Wave / Orange Money : affiche les QR et la référence à communiquer. */
+function qrPaymentView(r) {
+  const p = r.payment || {};
+  return `
+  <div class="card" style="max-width:560px;margin:0 auto;text-align:center">
+    <h3 class="section-title">Paiement par QR Wave / QR Orange Money</h3>
+    <p class="muted">Référence : <code style="font-size:18px">${esc(p.reference || r.reference)}</code></p>
+    <p>Montant : <b>${Number(p.montant || r.montant).toLocaleString('fr-FR')} FCFA</b></p>
+    <p style="font-size:14px;color:var(--mut);max-width:420px;margin:0 auto 14px">
+      Scannez l'un des QR codes ci-dessous depuis votre téléphone, effectuez le transfert,
+      puis indiquez la référence <b>${esc(p.reference || r.reference)}</b> dans la communication.
+      Votre abonnement sera activé après validation manuelle.
+    </p>
+    <div style="display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin:16px 0">
+      <div>
+        <div style="font-size:13px;color:var(--mut);margin-bottom:6px">Wave</div>
+        <img src="${esc(p.qr_wave_url || '/assets/qr-wave.jpg')}" alt="QR Wave" style="width:180px;height:180px;border:1px solid #e2e8f0;border-radius:8px">
+      </div>
+      <div>
+        <div style="font-size:13px;color:var(--mut);margin-bottom:6px">Orange Money</div>
+        <img src="${esc(p.qr_om_url || '/assets/qr-om.jpg')}" alt="QR OM" style="width:180px;height:180px;border:1px solid #e2e8f0;border-radius:8px">
+      </div>
+    </div>
+    <p style="margin-top:12px"><button class="ghost" data-action="go-abonnement">← Retour à l'abonnement</button></p>
+  </div>`;
+}
+
 /** Retour PayPal : capture la commande approuvée (order_id = param `token` ajouté par PayPal). */
 async function capturePayPal(orderId) {
   try {
@@ -610,6 +647,7 @@ async function abonnementView() {
       html += `<div class="card" style="margin:16px 0"><h3 class="section-title">Moyen de paiement</h3>
         <label style="display:block;margin:6px 0"><input type="radio" name="moyen" value="cinetpay" checked> Mobile Money &amp; Carte (Wave, Orange Money, Visa/Mastercard)</label>
         <label style="display:block;margin:6px 0"><input type="radio" name="moyen" value="paypal"> PayPal (carte ou compte PayPal)</label>
+        <label style="display:block;margin:6px 0"><input type="radio" name="moyen" value="qr"> QR Wave / QR Orange Money — paiement manuel</label>
       </div>`;
     }
     if (!state.tarifs) state.tarifs = await api('/tarifs');
@@ -881,6 +919,7 @@ function bind() {
       if (act === 'go-tarifs') { location.hash = '#/tarifs'; return; }
       if (act === 'go-laboratoires') { location.hash = '#/laboratoires'; return; }
       if (act === 'go-inscription') { state.selFormule = el.dataset.formule; location.hash = '#/inscription'; return; }
+      if (act === 'go-abonnement') { location.hash = '#/abonnement'; return; }
       if (act === 'abo-initier') { await aboInitier(el.dataset.id); return; }
       if (act === 'abo-payer') { await aboPayer(el.dataset.id); return; }
       if (act === 'objectif-new-open') { await objectifNewModal(); return; }

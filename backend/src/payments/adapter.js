@@ -1,16 +1,18 @@
-// Adapter de paiement pluggable (spec §6.2) : PAY_MODE=demo|cinetpay|paypal.
+// Adapter de paiement pluggable (spec §6.2) : PAY_MODE=demo|cinetpay|paypal|qr.
 //   demo    : paiement simulé, confirmé par l'admin plateforme (pattern SakeurImmo/PayTech).
 //   cinetpay: agrégateur Mobile Money (Wave, Orange Money…) + carte Visa/Mastercard (channels=ALL).
 //   paypal  : PayPal Orders API v2 (carte ou compte PayPal), EUR (conversion FCFA→EUR).
+//   qr      : paiement manuel par QR Wave / Orange Money, validé par un admin/plateforme.
 // Chaque module expose createPayment ; la confirmation est soit verify (webhook CinetPay),
 // soit capture (retour PayPal). Un autre agrégateur s'ajoute en créant un module du même
 // contrat et en l'enregistrant dans `providers`.
 import { cinetpay } from './cinetpay.js';
 import { paypal } from './paypal.js';
 import { demo } from './demo.js';
+import { qr } from './qr.js';
 
 export const payMode = process.env.PAY_MODE || 'demo';
-export const providers = { cinetpay, paypal, demo };
+export const providers = { cinetpay, paypal, demo, qr };
 
 /** Provider effectif pour un moyen donné. En mode demo, tout passe par demo (aucun appel réseau). */
 export function resolveProvider(moyen) {

@@ -155,7 +155,7 @@ function tarifsBody() {
     <h1 style="font-size:26px;margin-bottom:20px">Nos tarifs</h1>
     <div id="public">
       <div class="cards">${cards}</div>
-      <p class="hint">Abonnement mensuel (30 jours), renouvelable à tout moment. Paiement Mobile Money (Wave, Orange Money…).</p>
+      <p class="hint">Abonnement mensuel (30 jours), renouvelable à tout moment. Paiement par Mobile Money (Wave, Orange Money, QR), carte Visa/Mastercard ou PayPal.</p>
     </div>
   </div>`;
 }
@@ -185,7 +185,7 @@ function inscriptionBody() {
       <div><a href="/">Accueil</a> · <a href="/tarifs">Tarifs</a> · <a href="/login">Connexion</a></div>
     </div>
     <h1 style="font-size:26px;margin-bottom:12px">Créer un compte gratuit</h1>
-    <p class="hint" style="margin-bottom:20px">Le CRM des délégués médicaux et des laboratoires pharmaceutiques au Sénégal : tournées, comptes rendus de visite, objectifs et couverture par district. Sans formule : découverte en lecture seule. Avec formule : abonnement réglé par carte ou Mobile Money (Wave, Orange Money).</p>
+    <p class="hint" style="margin-bottom:20px">Le CRM des délégués médicaux et des laboratoires pharmaceutiques au Sénégal : tournées, comptes rendus de visite, objectifs et couverture par district. Sans formule : découverte en lecture seule. Avec formule : abonnement réglé par Mobile Money (Wave, Orange Money, QR), carte Visa/Mastercard ou PayPal.</p>
     <div class="card" style="max-width:600px">
       <form data-form="inscription">
         <div><label>Nom complet</label><input name="nom" required></div>
@@ -203,7 +203,7 @@ function inscriptionBody() {
         </div>
         <div><label>Mot de passe</label><input name="password" type="password" minlength="8" required></div>
         <button class="primary" type="submit">Créer mon compte</button>
-        <p class="hint" style="margin-top:10px">Sans formule : découverte du CRM en lecture seule. Avec formule : abonnement réglé par carte Visa/Mastercard ou Mobile Money (Wave, Orange Money).</p>
+        <p class="hint" style="margin-top:10px">Sans formule : découverte du CRM en lecture seule. Avec formule : abonnement réglé par Mobile Money (Wave, Orange Money, QR), carte Visa/Mastercard ou PayPal.</p>
       </form>
     </div>
     <p class="hint" style="margin-top:14px">Déjà inscrit ? <a href="/login">Se connecter</a> · <a href="/tarifs">Voir les tarifs</a></p>
@@ -610,7 +610,7 @@ const GUIDES = [
     ],
     faq: [
       { q: 'Qu\'est-ce qu\'un CRM pour laboratoire pharmaceutique ?', a: 'C\'est un logiciel qui pilote l\'activité des délégués médicaux : tournées, comptes rendus de visite, objectifs produits et taux de couverture par zone. Il transforme le terrain en données exploitables.' },
-      { q: 'Combien coûte un CRM de visite médicale au Sénégal ?', a: 'Chez DelegPharma, les formules vont de 5 000 FCFA (Essentiel) à 15 000 FCFA (Premium) par mois et par utilisateur, avec paiement Mobile Money (Wave, Orange Money).' },
+      { q: 'Combien coûte un CRM de visite médicale au Sénégal ?', a: 'Chez DelegPharma, les formules vont de 5 000 FCFA (Essentiel) à 15 000 FCFA (Premium) par mois et par utilisateur, avec paiement Mobile Money (Wave, Orange Money, QR Wave/OM), carte Visa/Mastercard ou PayPal.' },
       { q: 'Le CRM couvre-t-il les 14 régions du Sénégal ?', a: 'Oui. DelegPharma intègre la carte sanitaire complète : 14 régions médicales et 79 districts sanitaires, soit la maille officielle de répartition de votre force de vente.' },
       { q: 'Peut-on suivre les objectifs par produit ?', a: 'Oui. L\'outil suit les objectifs par produit phare et par zone, avec un taux de réalisation visible et des exports CSV/PDF pour vos rapports.' },
     ],
@@ -685,7 +685,7 @@ const GUIDES = [
       ] },
       { h: 'Les pièges à éviter', p: [
         'Un outil non adapté à la visite médicale (un simple CRM de contacts) ne gère ni les tournées, ni les CRV, ni les objectifs produits. Un outil sans référentiel local oblige à tout recréer, district par district.',
-        'Méfiez-vous aussi des prix en devises et des abonnements sans paiement local : au Sénégal, le Mobile Money (Wave, Orange Money) est le mode de paiement naturel des PME. <a href="/tarifs">Comparer les formules DelegPharma</a>.',
+        'Méfiez-vous aussi des prix en devises et des abonnements sans paiement local : au Sénégal, le Mobile Money (Wave, Orange Money, QR Wave/OM) est le mode de paiement naturel des PME. <a href="/tarifs">Comparer les formules DelegPharma</a>.',
       ] },
       { h: 'Le déploiement pas à pas', p: [
         'Commencez par référencer les professionnels de votre zone, créez vos produits avec leur agrément ARP, définissez les objectifs par produit, puis lancez les premières tournées.',
@@ -694,7 +694,7 @@ const GUIDES = [
     ],
     faq: [
       { q: 'Quel CRM choisir pour une force de vente pharmaceutique ?', a: 'Un CRM dédié à la visite médicale, adossé au référentiel carte sanitaire (régions, districts, professionnels), avec tournées, CRV, objectifs produits et suivi de couverture.' },
-      { q: 'Combien coûte un CRM de force de vente au Sénégal ?', a: 'Chez DelegPharma, de 5 000 FCFA (Essentiel) à 15 000 FCFA (Premium) par mois et par utilisateur, réglables en Mobile Money (Wave, Orange Money).' },
+      { q: 'Combien coûte un CRM de force de vente au Sénégal ?', a: 'Chez DelegPharma, de 5 000 FCFA (Essentiel) à 15 000 FCFA (Premium) par mois et par utilisateur, réglables en Mobile Money (Wave, Orange Money, QR Wave/OM), carte Visa/Mastercard ou PayPal.' },
       { q: 'Peut-on tester avant d\'acheter ?', a: 'Oui. DelegPharma permet de créer un compte gratuit en lecture seule pour découvrir le CRM avant de souscrire une formule.' },
     ],
   },
@@ -999,7 +999,7 @@ const LANDING_JD = {
       mainEntity: [
         { '@type': 'Question', name: 'Qu\'est-ce qu\'un CRM pour délégué médical ?', acceptedAnswer: { '@type': 'Answer', text: 'Un CRM dédié à la visite médicale : il permet au délégué de planifier ses tournées, de suivre les professionnels de santé de sa zone et de consigner ses comptes rendus de visite (CRV) directement depuis le terrain.' } },
         { '@type': 'Question', name: 'Comment planifier mes tournées terrain ?', acceptedAnswer: { '@type': 'Answer', text: 'DelegPharma propose des tournées par district avec checklist des professionnels de santé à visiter, couvrant les 14 régions et 79 districts sanitaires du Sénégal.' } },
-        { '@type': 'Question', name: 'Quels sont les tarifs de DelegPharma ?', acceptedAnswer: { '@type': 'Answer', text: 'Trois formules : Essentiel à 5 000 FCFA, Standard à 10 000 FCFA et Premium à 15 000 FCFA par mois, payables en Mobile Money (Wave, Orange Money).' } },
+        { '@type': 'Question', name: 'Quels sont les tarifs de DelegPharma ?', acceptedAnswer: { '@type': 'Answer', text: 'Trois formules : Essentiel à 5 000 FCFA, Standard à 10 000 FCFA et Premium à 15 000 FCFA par mois, payables en Mobile Money (Wave, Orange Money, QR Wave/OM), carte Visa/Mastercard ou PayPal.' } },
         { '@type': 'Question', name: 'Puis-je générer mes comptes rendus de visite en PDF ?', acceptedAnswer: { '@type': 'Answer', text: 'Oui, chaque CRV validé est généré en PDF signé en une seconde, avec les pièces jointes du terrain (photos, bons de commande, documents).' } },
         { '@type': 'Question', name: 'Quels professionnels de santé sont référencés ?', acceptedAnswer: { '@type': 'Answer', text: 'Le référentiel couvre les structures et professionnels de santé (médecins, pharmaciens, sages-femmes, infirmiers) répartis sur les 14 régions et 79 districts sanitaires du Sénégal.' } },
       ],
@@ -1019,7 +1019,7 @@ const PAGES = {
   '/tarifs': {
     index: true,
     title: 'Tarifs DelegPharma — 5 000 / 10 000 / 15 000 FCFA par mois',
-    desc: 'Abonnez-vous à DelegPharma : Essentiel 5 000 FCFA, Standard 10 000 FCFA ou Premium 15 000 FCFA par mois. Paiement Mobile Money (Wave, Orange Money). 30 jours, renouvelable.',
+    desc: 'Abonnez-vous à DelegPharma : Essentiel 5 000 FCFA, Standard 10 000 FCFA ou Premium 15 000 FCFA par mois. Paiement Mobile Money (Wave, Orange Money, QR Wave/OM), carte Visa/Mastercard ou PayPal. 30 jours, renouvelable.',
     canonical: '/tarifs',
     jsonLd: () => ({
       '@context': 'https://schema.org',
@@ -1041,7 +1041,7 @@ const PAGES = {
     body: laboratoiresBody,
   },
   '/login': { index: false, title: 'Connexion — DelegPharma', desc: 'Accédez à votre espace délégué médical DelegPharma.', canonical: '/login', jsonLd: null, body: loginBody },
-  '/inscription': { index: false, title: 'Créer un compte gratuit — DelegPharma', desc: 'Créez votre compte gratuit DelegPharma : découvrez le CRM des délégués médicaux et des laboratoires pharmaceutiques au Sénégal, puis abonnez-vous en Mobile Money.', canonical: '/inscription', jsonLd: null, body: inscriptionBody },
+  '/inscription': { index: false, title: 'Créer un compte gratuit — DelegPharma', desc: 'Créez votre compte gratuit DelegPharma : découvrez le CRM des délégués médicaux et des laboratoires pharmaceutiques au Sénégal, puis abonnez-vous en Mobile Money (Wave, Orange Money, QR), carte Visa/Mastercard ou PayPal.', canonical: '/inscription', jsonLd: null, body: inscriptionBody },
   '/a-propos': {
     index: true,
     title: 'À propos — DelegPharma, le CRM des laboratoires et délégués médicaux du Sénégal',

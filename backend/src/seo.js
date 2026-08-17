@@ -384,6 +384,7 @@ function articleBody({ h1, intro, sections, faq }) {
     <article>
       <h1 style="font-size:26px;margin-bottom:12px">${esc(h1)}</h1>
       <p class="hint" style="margin-bottom:20px">${intro}</p>
+      <p class="hint" style="font-size:13px;color:#667;margin-bottom:20px">Par DelegPharma — docteur en pharmacie, délégué médical au Sénégal · Mis à jour le 17 août 2026</p>
       ${secs}
       <section>
         <h2 style="font-size:19px;margin:18px 0 10px">Questions fréquentes</h2>
@@ -412,6 +413,21 @@ function articlePage({ path, title, desc, h1, intro, sections, faq }) {
     },
     body: () => articleBody({ h1, intro, sections, faq }),
   };
+}
+
+function legalBody({ h1, intro, sections }) {
+  const secs = sections.map((s) => `<section><h2 style="font-size:19px;margin:18px 0 10px">${esc(s.h)}</h2>${s.p.map((p) => `<p style="line-height:1.7;margin-bottom:10px">${p}</p>`).join('')}</section>`).join('');
+  return `
+  <main style="max-width:920px;margin:0 auto;padding:28px 16px">
+    ${publicHeader()}
+    <nav class="breadcrumb"><a href="/">Accueil</a> › ${esc(h1)}</nav>
+    <article>
+      <h1 style="font-size:26px;margin-bottom:12px">${esc(h1)}</h1>
+      <p class="hint" style="margin-bottom:20px">${intro}</p>
+      ${secs}
+    </article>
+    <p class="hint" style="margin-top:24px">DelegPharma, le CRM des délégués médicaux au Sénégal. <a href="/tarifs">Découvrir les tarifs</a> · <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a></p>
+  </main>`;
 }
 
 const GUIDES = [
@@ -898,6 +914,37 @@ const GUIDES = [
       { q: 'Comment contrôler sans freiner ?', a: 'Par les CRV validés et la couverture, en temps réel, avec un retour constructif : le contrôle est un outil de pilotage, pas de défiance.' },
     ],
   },
+  {
+    path: '/blog/formations-delegue-medical-senegal',
+    title: 'Formations de délégué médical au Sénégal : le guide des écoles',
+    desc: 'Les formations de délégué médical au Sénégal : licence pro ISMED UCAD, IUP-Santé, instituts IPAM, IFAA, ICOA Santé — durées et tarifs indicatifs.',
+    h1: 'Les formations de délégué médical au Sénégal',
+    intro: 'Devenir délégué médical passe par une formation reconnue. Voici les principales voies au Sénégal : la licence professionnelle et les formations courtes des instituts privés.',
+    sections: [
+      { h: 'La licence professionnelle (2 à 3 ans)', p: [
+        'La licence professionnelle en délégué médical est la voie la plus reconnue. Elle est proposée notamment par l\'Institut des sciences du médicament (ISMED) de l\'UCAD, avec une admission à Bac + 2, et par l\'IUP-Santé.',
+        'Ce parcours long apporte une base solide en pharmacologie, réglementation et visite médicale, très valorisée par les laboratoires.',
+      ] },
+      { h: 'Les formations courtes (8 à 10 mois)', p: [
+        'Des instituts privés proposent des formations accélérées : l\'IPAM (diplôme d\'études spéciales en visite médicale, 8 mois en cours du soir), l\'IFAA (10 mois, dont 1 mois de stage), l\'ICOA Santé (10 mois) et l\'IUP-Santé (admission dès le BFEM).',
+        'Les frais sont variables selon l\'institut — à titre indicatif, 2026 : IPAM 555 000 FCFA pour le DESMV, IFAA 55 000 FCFA/mois, ICOA Santé 60 000 FCFA/mois, IUP-Santé 50 000 FCFA/mois. Vérifiez les conditions d\'admission et les tarifs auprès de chaque école.',
+      ] },
+      { h: 'Le contenu des formations', p: [
+        'Les programmes couvrent la pharmacologie, la visite médicale, la communication et la réglementation pharmaceutique. Un profil en pharmacie, biologie ou sciences de la santé est un atout.',
+        'Le <a href="/blog/comment-devenir-delegue-medical-senegal">guide complet pour devenir délégué médical</a> détaille le parcours, les compétences et les débouchés.',
+      ] },
+      { h: 'Choisir sa formation', p: [
+        'L\'arbitrage se joue entre la reconnaissance (licence pro) et la rapidité d\'entrée sur le marché (formations courtes). Le budget et le niveau d\'admission (BFEM, Bac, Bac + 2) orientent aussi le choix.',
+        'Les laboratoires recrutent aussi des profils commerciaux formés sur le tas, mais la formation reste la voie la plus reconnue et la plus valorisée.',
+      ] },
+    ],
+    faq: [
+      { q: 'Quelle est la meilleure formation de délégué médical au Sénégal ?', a: 'La licence professionnelle (ISMED UCAD, IUP-Santé) est la plus reconnue. Les instituts privés (IPAM, IFAA, ICOA Santé) offrent des formations courtes pour entrer plus vite sur le marché.' },
+      { q: 'Combien coûte une formation de délégué médical ?', a: 'À titre indicatif (2026) : IPAM 555 000 FCFA pour le DESMV, IFAA 55 000 FCFA/mois, ICOA Santé 60 000 FCFA/mois, IUP-Santé 50 000 FCFA/mois. Vérifiez auprès de chaque école.' },
+      { q: 'Peut-on devenir délégué médical sans formation ?', a: 'Certains laboratoires recrutent des profils commerciaux formés sur le tas, mais la formation reste la voie la plus reconnue et la plus valorisée.' },
+      { q: 'Quel est le contenu d\'une formation de délégué médical ?', a: 'Pharmacologie, visite médicale, communication et réglementation pharmaceutique, complétés par un stage pour les formations courtes.' },
+    ],
+  },
 ];
 
 /* ---------- Métadonnées par route ---------- */
@@ -970,6 +1017,77 @@ const PAGES = {
     },
     body: aProposBody,
   },
+  '/mentions-legales': {
+    index: true,
+    title: 'Mentions légales — DelegPharma',
+    desc: 'Mentions légales du site DelegPharma (app.delegpharma.com) : éditeur, directeur de publication, hébergeur OVHcloud et contact.',
+    canonical: '/mentions-legales',
+    jsonLd: null,
+    body: () => legalBody({
+      h1: 'Mentions légales',
+      intro: 'Le site app.delegpharma.com est édité par DelegPharma, le CRM des délégués médicaux et des laboratoires pharmaceutiques au Sénégal.',
+      sections: [
+        { h: 'Éditeur', p: [
+          'DelegPharma — [Raison sociale et forme juridique à compléter] — [Adresse à compléter], Sénégal.',
+          'Directeur de la publication : [Nom à compléter].',
+        ] },
+        { h: 'Hébergeur', p: [
+          'Le site est hébergé par OVHcloud, 2 rue Kellermann, 59100 Roubaix, France (serveur dédié/VPS).',
+        ] },
+        { h: 'Contact', p: [
+          'Pour toute question : [adresse e-mail à compléter]. Pour les demandes professionnelles (laboratoires, délégués médicaux), voir la <a href="/contact">page contact</a>.',
+        ] },
+        { h: 'Propriété intellectuelle', p: [
+          'Les contenus du site (textes, données, marque DelegPharma) sont la propriété de DelegPharma. Toute reproduction sans autorisation est interdite.',
+        ] },
+      ],
+    }),
+  },
+  '/politique-de-confidentialite': {
+    index: true,
+    title: 'Politique de confidentialité — DelegPharma',
+    desc: 'Politique de confidentialité de DelegPharma : données collectées, finalités, base légale, durée de conservation et droits des utilisateurs.',
+    canonical: '/politique-de-confidentialite',
+    jsonLd: null,
+    body: () => legalBody({
+      h1: 'Politique de confidentialité',
+      intro: 'DelegPharma traite les données personnelles de ses utilisateurs (délégués médicaux, laboratoires) dans le cadre de la fourniture de son service CRM. Cette politique explique quelles données sont collectées et comment elles sont utilisées.',
+      sections: [
+        { h: 'Données collectées', p: [
+          'Lors de la création d\'un compte : nom, adresse e-mail, numéro de téléphone, laboratoire et formule choisie. Dans le cadre du service : données d\'activité (tournées, comptes rendus de visite, professionnels de santé visités).',
+        ] },
+        { h: 'Finalités', p: [
+          'Les données servent à fournir le service CRM (planification des tournées, CRV, suivi des objectifs), à la facturation et au support client. Elles ne sont jamais revendues à des tiers.',
+        ] },
+        { h: 'Base légale et conservation', p: [
+          'Le traitement repose sur l\'exécution du contrat de service et le consentement. Les données sont conservées pendant la durée de l\'abonnement, puis [durée à compléter].',
+        ] },
+        { h: 'Vos droits', p: [
+          'Conformément à la loi sénégalaise n° 2008-12 sur la protection des données personnelles et au RGPD, vous disposez d\'un droit d\'accès, de rectification et de suppression de vos données. Pour l\'exercer : [adresse e-mail à compléter].',
+        ] },
+      ],
+    }),
+  },
+  '/contact': {
+    index: true,
+    title: 'Contact — DelegPharma',
+    desc: 'Contacter DelegPharma : support utilisateurs, démonstration pour laboratoires, partenariats délégués médicaux au Sénégal.',
+    canonical: '/contact',
+    jsonLd: null,
+    body: () => legalBody({
+      h1: 'Contact',
+      intro: 'Une question sur DelegPharma, une démonstration pour votre laboratoire, un partenariat ? Voici comment nous joindre.',
+      sections: [
+        { h: 'Support et démonstration', p: [
+          'Pour les délégués médicaux et les laboratoires : [adresse e-mail à compléter].',
+          'WhatsApp : [numéro à compléter] — le canal le plus direct au Sénégal.',
+        ] },
+        { h: 'Créer un compte', p: [
+          'Vous pouvez aussi <a href="/inscription">créer un compte gratuit</a> pour découvrir le CRM, ou consulter les <a href="/tarifs">formules</a>.',
+        ] },
+      ],
+    }),
+  },
 };
 for (const g of GUIDES) PAGES[g.path] = articlePage(g);
 const FALLBACK = { index: false, title: 'DelegPharma — CRM des laboratoires et délégués médicaux', desc: 'CRM des laboratoires pharmaceutiques et délégués médicaux au Sénégal.', canonical: '/', jsonLd: null, body: landingBody };
@@ -1036,6 +1154,9 @@ function sitemapUrls() {
     { loc: '/laboratoires', freq: 'weekly', prio: '0.7' },
     { loc: '/carte-sanitaire', freq: 'weekly', prio: '0.9' },
     { loc: '/a-propos', freq: 'monthly', prio: '0.5' },
+    { loc: '/mentions-legales', freq: 'yearly', prio: '0.2' },
+    { loc: '/politique-de-confidentialite', freq: 'yearly', prio: '0.2' },
+    { loc: '/contact', freq: 'yearly', prio: '0.3' },
   ];
   for (const g of GUIDES) urls.push({ loc: g.path, freq: 'monthly', prio: '0.7' });
   for (const r of carteRegions()) {

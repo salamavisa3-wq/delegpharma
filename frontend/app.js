@@ -128,7 +128,7 @@ async function showView() {
 function landingView() {
   return `
   <div class="hero">
-    <h1><span>DelegPharma</span> — CRM du délégué médical</h1>
+    <h1><span>DelegPharma</span> — le CRM des délégués médicaux et des laboratoires au Sénégal</h1>
     <p>Planifiez vos tournées, suivez chaque professionnel de santé, rédigez vos comptes rendus de visite et pilotez vos campagnes — de Dakar à Kédougou.</p>
     <p style="margin-top:18px">
       <button class="primary" data-action="go-inscription" style="padding:11px 26px;font-size:15px">Créer un compte gratuit</button>

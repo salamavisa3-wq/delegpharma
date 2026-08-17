@@ -59,7 +59,7 @@ function landingBody() {
   const popM = (NATIONAL.population / 1000000).toFixed(1).replace('.', ',');
   return `
   <div class="hero">
-    <h1><span>DelegPharma</span> — CRM du délégué médical</h1>
+    <h1><span>DelegPharma</span> — le CRM des délégués médicaux et des laboratoires au Sénégal</h1>
     <p>Planifiez vos tournées, suivez chaque professionnel de santé, rédigez vos comptes rendus de visite et pilotez vos campagnes — de Dakar à Kédougou.</p>
     <p style="margin-top:18px">
       <a class="primary" href="/inscription" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Créer un compte gratuit</a>
@@ -170,6 +170,43 @@ function loginBody() {
       <button class="primary" type="submit">Se connecter</button>
     </form>
     <p class="hint">Pas encore de compte ? <a href="/inscription">Devenir délégué</a> · <a href="/tarifs">Tarifs</a> · <a href="/">← Retour</a></p>
+  </div>`;
+}
+
+// SSR de la page d'inscription : reflète le formulaire SPA (loadInscription) pour les
+// crawlers et les visiteurs sans JS — avant, la page servait le formulaire de connexion.
+function inscriptionBody() {
+  const labs = (laboratoiresCache || []).map((l) => `<option value="${l.id}">${esc(l.nom)}</option>`).join('');
+  const formules = tarifs().map((t) => `<option value="${t.id}">${esc(t.nom)} — ${toFr(t.prix)} FCFA</option>`).join('');
+  return `
+  <div style="max-width:920px;margin:0 auto;padding:28px 16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div class="brand">DelegPharma</div>
+      <div><a href="/">Accueil</a> · <a href="/tarifs">Tarifs</a> · <a href="/login">Connexion</a></div>
+    </div>
+    <h1 style="font-size:26px;margin-bottom:12px">Créer un compte gratuit</h1>
+    <p class="hint" style="margin-bottom:20px">Le CRM des délégués médicaux et des laboratoires pharmaceutiques au Sénégal : tournées, comptes rendus de visite, objectifs et couverture par district. Sans formule : découverte en lecture seule. Avec formule : abonnement réglé par carte ou Mobile Money (Wave, Orange Money).</p>
+    <div class="card" style="max-width:600px">
+      <form data-form="inscription">
+        <div><label>Nom complet</label><input name="nom" required></div>
+        <div class="form-row">
+          <div><label>Email</label><input name="email" type="email" required></div>
+          <div><label>Téléphone (Mobile Money)</label><input name="telephone" placeholder="77 000 00 00"></div>
+        </div>
+        <div class="form-row">
+          <div><label>Laboratoire</label><select name="laboratoire_id" required>${labs}</select></div>
+          <div><label>Formule</label><select name="formule_id"><option value="">Compte gratuit — lecture seule</option>${formules}</select></div>
+        </div>
+        <div class="form-row">
+          <div><label>Adresse (optionnel, paiement carte)</label><input name="adresse" placeholder="Ex. : Rue 10, Medina"></div>
+          <div><label>Ville (optionnel, paiement carte)</label><input name="ville" placeholder="Ex. : Dakar"></div>
+        </div>
+        <div><label>Mot de passe</label><input name="password" type="password" minlength="8" required></div>
+        <button class="primary" type="submit">Créer mon compte</button>
+        <p class="hint" style="margin-top:10px">Sans formule : découverte du CRM en lecture seule. Avec formule : abonnement réglé par carte Visa/Mastercard ou Mobile Money (Wave, Orange Money).</p>
+      </form>
+    </div>
+    <p class="hint" style="margin-top:14px">Déjà inscrit ? <a href="/login">Se connecter</a> · <a href="/tarifs">Voir les tarifs</a></p>
   </div>`;
 }
 
@@ -732,7 +769,7 @@ const PAGES = {
     body: laboratoiresBody,
   },
   '/login': { index: false, title: 'Connexion — DelegPharma', desc: 'Accédez à votre espace délégué médical DelegPharma.', canonical: '/login', jsonLd: null, body: loginBody },
-  '/inscription': { index: false, title: 'Inscription délégué médical — DelegPharma', desc: 'Créez votre compte délégué médical et abonnez-vous en Mobile Money.', canonical: '/inscription', jsonLd: null, body: loginBody },
+  '/inscription': { index: false, title: 'Créer un compte gratuit — DelegPharma', desc: 'Créez votre compte gratuit DelegPharma : découvrez le CRM des délégués médicaux et des laboratoires pharmaceutiques au Sénégal, puis abonnez-vous en Mobile Money.', canonical: '/inscription', jsonLd: null, body: inscriptionBody },
   '/a-propos': {
     index: true,
     title: 'À propos — DelegPharma, le CRM des laboratoires et délégués médicaux du Sénégal',

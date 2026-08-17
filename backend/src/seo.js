@@ -713,6 +713,191 @@ const GUIDES = [
       { q: 'Le reporting permet-il de comparer les délégués ?', a: 'Oui, le tableau de bord compare l\'activité, la couverture et la conversion par délégué, sur la même base de données du CRM.' },
     ],
   },
+  {
+    path: '/blog/preparer-visite-medicale-argumentaire-produit',
+    title: 'Préparer une visite médicale : argumentaire, objections, clôture',
+    desc: 'Préparer une visite médicale efficace : argumentaire produit, levée des objections, entretien en 4 temps et clôture avec une prochaine visite planifiée.',
+    h1: 'Préparer une visite médicale efficace',
+    intro: 'La visite médicale est courte — 10 à 20 minutes chez un professionnel de santé occupé. Sa qualité se joue avant : préparation, argumentaire, gestion des objections et clôture.',
+    sections: [
+      { h: 'La préparation avant la visite', p: [
+        'Avant chaque visite, identifiez le professionnel : nom, spécialité, structure, district, historique des visites et centres d\'intérêt. Fixez un objectif précis — obtenir un accord, laisser un échantillon, planifier la prochaine visite.',
+        'Préparez les documents : fiche produit, numéro d\'agrément ARP, données scientifiques ou études disponibles. Un délégué bien préparé est crédible et gagne du temps sur le terrain.',
+      ] },
+      { h: 'Structurer l\'entretien en quatre temps', p: [
+        'L\'accroche (se présenter, rappeler le contexte de la visite), la présentation du produit (les bénéfices pour le patient plus que les caractéristiques), la preuve (études, agrément, retours d\'expérience), et la clôture (demander un engagement : accord, échantillon, prochaine visite).',
+        'Chaque temps répond à une question du professionnel : pourquoi vous, pourquoi ce produit, pourquoi maintenant, pourquoi pour mes patients ?',
+      ] },
+      { h: 'Gérer les objections', p: [
+        'Une objection est un signal d\'intérêt, pas un refus. Classez-la : prix, concurrence, habitudes de prescription, crainte d\'effets indésirables. Répondez en écoutant, en reformulant et en apportant une preuve (donnée, agrément, essai).',
+        'Ne jamais inventer de donnée : si vous n\'avez pas la réponse, notez la question et revenez avec une source documentée à la prochaine visite. C\'est un signe de sérieux qui renforce votre crédibilité.',
+      ] },
+      { h: 'Clôturer et consigner', p: [
+        'Demandez un engagement clair : accord, réserve ou refus. Planifiez la prochaine visite. Consignez le tout dans le compte rendu de visite dans les 30 minutes — voir le <a href="/blog/crv-compte-rendu-de-visite-guide">guide du CRV</a>.',
+        'Une visite sans clôture ni CRV est une visite perdue pour le laboratoire : la discipline du compte rendu transforme chaque entretien en donnée exploitable.',
+      ] },
+    ],
+    faq: [
+      { q: 'Combien de temps doit durer une visite médicale ?', a: 'En moyenne 10 à 20 minutes selon le professionnel et la structure. L\'essentiel est d\'avoir un ordre du jour clair et une clôture avec un engagement.' },
+      { q: 'Comment gérer les objections d\'un médecin ?', a: 'Écouter, reformuler, apporter une preuve (étude, agrément ARP) et proposer un essai. Si vous n\'avez pas la réponse, notez-la et revenez avec une source officielle.' },
+      { q: 'Que faire si le professionnel est absent ?', a: 'Consigner « absent » dans le CRV pour ne pas perdre la trace, et replanifier une visite dans le même district.' },
+      { q: 'Quel est le bon moment pour une visite ?', a: 'Le délégué s\'adapte aux horaires du professionnel : fin de consultation, après-midi pour certains, début de matinée pour d\'autres. La tournée par district aide à optimiser l\'ordre de passage.' },
+    ],
+  },
+  {
+    path: '/blog/professionnels-de-sante-senegal-referentiel-delegue',
+    title: 'Professionnels de santé au Sénégal : le guide du délégué médical',
+    desc: 'Référentiel des professionnels de santé au Sénégal : médecins, pharmaciens, sages-femmes, infirmiers, dentistes — comment les cibler par district.',
+    h1: 'Le référentiel des professionnels de santé du délégué médical',
+    intro: 'Qui le délégué médical visite-t-il ? Médecins, pharmaciens, sages-femmes, infirmiers, dentistes… Chaque catégorie a ses besoins, ses horaires et son rôle dans la prescription. Le référentiel les structure pour une couverture complète.',
+    sections: [
+      { h: 'Les catégories et leur rôle dans la prescription', p: [
+        'Les médecins sont les prescripteurs principaux — généralistes et spécialistes. Les pharmaciens dispensent et conseillent, parfois en proposant une alternative. Les sages-femmes jouent un rôle clé en santé maternelle et néonatale. Les infirmiers sont en première ligne dans les postes de santé. Les dentistes forment un réseau distinct.',
+        'Chaque catégorie se visite avec un argumentaire adapté : le médecin attend des données, le pharmacien des conditions, la sage-femme des produits de santé maternelle, l\'infirmier une approche de soins.',
+      ] },
+      { h: 'Les structures où les rencontrer', p: [
+        'La pyramide sanitaire sénégalaise comprend les hôpitaux, les centres de santé, les postes de santé et les cases de santé. Le référentiel (MSAS/ANSD) recense 3 915 structures et plus de 34 000 professionnels de santé, dont près de 1 230 officines selon esante.sn.',
+        'Explorez le <a href="/carte-sanitaire">référentiel complet de la carte sanitaire</a>, région par région et district par district.',
+      ] },
+      { h: 'Cibler par district : la maille de la tournée', p: [
+        'Chaque tournée se découpe par district sanitaire, avec une checklist des professionnels à visiter par catégorie. Cela évite les doublons, ne rate aucun prescripteur clé et rend la couverture mesurable. Voir le <a href="/blog/tournees-terrain-delegue-medical">guide des tournées terrain</a>.',
+        'Les districts à forte densité de prescripteurs (Dakar, Thiès, Saint-Louis…) méritent une priorité dans le plan de couverture.',
+      ] },
+      { h: 'Le référentiel dans DelegPharma', p: [
+        'DelegPharma référence les professionnels de santé de la carte sanitaire : type, spécialité, structure et district. Chaque visite est tracée, chaque taux de couverture se calcule automatiquement. <a href="/inscription">Créer un compte gratuit</a> pour le découvrir.',
+      ] },
+    ],
+    faq: [
+      { q: 'Quels professionnels visite un délégué médical ?', a: 'Médecins, pharmaciens, sages-femmes, infirmiers, dentistes, et parfois les laboratoires privés d\'analyses. Chaque catégorie a un rôle et un argumentaire adapté.' },
+      { q: 'Combien de professionnels de santé y a-t-il au Sénégal ?', a: 'Le référentiel (MSAS/ANSD) recense plus de 34 000 professionnels de santé, répartis sur 3 915 structures, dont près de 1 230 officines selon esante.sn.' },
+      { q: 'Comment se répartit la couverture ?', a: 'Par district sanitaire : chaque professionnel a un type, une structure et un historique de visites. Le taux de professionnels visités rapporté au ciblé définit la couverture.' },
+      { q: 'Où trouver la liste des professionnels de santé ?', a: 'DelegPharma référence les professionnels de la carte sanitaire (14 régions, 79 districts) et permet de les filtrer par catégorie et par district.' },
+    ],
+  },
+  {
+    path: '/blog/salaire-remuneration-delegue-medical-senegal',
+    title: 'Salaire et rémunération du délégué médical au Sénégal',
+    desc: 'La rémunération du délégué médical au Sénégal : fixe, primes sur objectifs, avantages terrain — ce qui la compose et ce qui la fait varier.',
+    h1: 'Salaire et rémunération du délégué médical',
+    intro: 'Le salaire du délégué médical combine un fixe et des primes sur objectifs. Le total varie selon le laboratoire, la zone et l\'expérience : voici comment elle se structure et ce qui la fait évoluer.',
+    sections: [
+      { h: 'La structure de la rémunération', p: [
+        'La rémunération se compose en général d\'un fixe mensuel et de primes de performance (objectifs produits, couverture de zone, comptes rendus validés). S\'y ajoutent parfois des avantages : véhicule, carburant, téléphone.',
+        'Les montants précis se négocient avec chaque laboratoire. Aucune grille publique unique ne fait foi pour ce métier au Sénégal — méfiez-vous des chiffres présentés comme officiels.',
+      ] },
+      { h: 'Ce qui fait varier le salaire', p: [
+        'L\'expérience et l\'ancienneté, la taille du laboratoire, la zone couverte (Dakar et les grandes villes par rapport aux régions), le portefeuille de produits et le chiffre d\'affaires apporté.',
+        'Un délégué qui maîtrise sa zone et rend des comptes complets gagne en valeur : la couverture mesurable est un argument de négociation.',
+      ] },
+      { h: 'Les primes sur objectifs : le vrai levier', p: [
+        'Les primes se calculent sur des objectifs concrets : réalisation des objectifs produits, taux de couverture des professionnels ciblés, CRV validés dans les délais. Voir le <a href="/blog/objectifs-campagnes-chiffre-affaires-laboratoire">guide des objectifs commerciaux</a>.',
+        'Un CRM qui suit ces indicateurs en temps réel permet au délégué de piloter sa propre prime et au laboratoire de récompenser la performance réelle.',
+      ] },
+      { h: 'Négocier et évoluer', p: [
+        'À l\'embauche, négociez le fixe, la part variable et les conditions terrain (véhicule, téléphone). Le <a href="/blog/comment-devenir-delegue-medical-senegal">guide pour devenir délégué médical</a> détaille les formations qui valorisent un profil.',
+        'Avec de l\'expérience, les postes de manager de zone ou de responsable produits offrent un salaire plus élevé et des responsabilités élargies.',
+      ] },
+    ],
+    faq: [
+      { q: 'Combien gagne un délégué médical au Sénégal ?', a: 'Un fixe plus des primes sur objectifs, dont le total varie selon le laboratoire et l\'expérience. Pour un montant précis, demandez la grille au recruteur : aucune grille publique unique ne fait foi.' },
+      { q: 'Les primes sont-elles mensuelles ?', a: 'Elles sont souvent mensuelles ou trimestrielles, calculées sur les objectifs produits, la couverture de zone et les comptes rendus validés.' },
+      { q: 'Le délégué médical a-t-il une voiture ?', a: 'Souvent un véhicule de fonction ou une indemnité de carburant, selon le laboratoire et la zone couverte.' },
+      { q: 'Le salaire augmente-t-il avec l\'expérience ?', a: 'Oui, et les postes de manager de zone ou de chef de produit sont des évolutions naturelles pour les délégués confirmés.' },
+    ],
+  },
+  {
+    path: '/blog/recruter-delegues-medicaux-laboratoire',
+    title: 'Recruter des délégués médicaux : le guide du laboratoire',
+    desc: 'Recruter des délégués médicaux au Sénégal : profil type, sources (licence pro ISMED, IPAM, IFAA, ICOA), entretien, test terrain et formation.',
+    h1: 'Recruter des délégués médicaux : guide du laboratoire',
+    intro: 'Le délégué médical est le visage du laboratoire sur le terrain. Un bon recrutement évite une zone sous-couverte et un départ coûteux. Voici comment évaluer, recruter et former efficacement.',
+    sections: [
+      { h: 'Le profil type', p: [
+        'Les candidats formés à la licence professionnelle (ISMED UCAD, IUP-Santé) ou aux instituts privés (IPAM, IFAA, ICOA Santé) apportent la base pharmacologique et réglementaire. Détails dans <a href="/blog/comment-devenir-delegue-medical-senegal">devenir délégué médical</a>.',
+        'Le profil commercial est apprécié, à condition d\'ajouter la formation produit. Les qualités clés : rigueur, sens du terrain, écoute, communication, éthique.',
+      ] },
+      { h: 'Les canaux de recrutement', p: [
+        'Les écoles et instituts de formation fournissent un vivier régulier. Les annonces en ligne, la cooptation par les délégués actuels et le repérage de délégués expérimentés sont aussi efficaces.',
+        'Pour une reprise en main rapide, un délégué confirmé formé sur vos produits démarre plus vite qu\'un junior : l\'arbitrage entre potentiel et rapidité dépend de votre plan de couverture.',
+      ] },
+      { h: 'L\'entretien et le test terrain', p: [
+        'Évaluez la connaissance de la zone (districts, structures, prescripteurs), des produits et la posture éthique. Un test de visite simulée révèle le vrai savoir-faire.',
+        'Demandez comment le candidat rédige ses comptes rendus : un candidat qui ne rend pas de comptes de façon structurée sera difficile à piloter. Voir le <a href="/blog/crv-compte-rendu-de-visite-guide">guide du CRV</a>.',
+      ] },
+      { h: 'L\'intégration et la formation continue', p: [
+        'Programmez une immersion produits et agréments ARP, un parrainage par un délégué senior, des tournées d\'observation, puis une prise en main autonome suivie. La formation continue (nouveaux produits, campagnes) maintient la qualité de la force de vente.',
+        'Un délégué bien intégré dans un outil unique (tournées, CRV, objectifs) devient vite opérationnel. <a href="/blog/manager-force-de-vie-delegues-medicaux">Voir le guide management de force de vente</a>.',
+      ] },
+    ],
+    faq: [
+      { q: 'Quels profils pour devenir délégué médical ?', a: 'Une licence professionnelle (ISMED UCAD, IUP-Santé) ou une formation courte (IPAM, IFAA, ICOA Santé). Un atout en pharmacie ou sciences de la santé est apprécié.' },
+      { q: 'Combien de temps pour former un nouveau délégué ?', a: 'Quelques semaines d\'intégration produit et réglementaire, plus un parrainage terrain de plusieurs semaines avant l\'autonomie complète.' },
+      { q: 'Profil formation ou terrain, que privilégier ?', a: 'Le terrain compte dans la pratique, mais la formation apporte la base réglementaire et pharmacologique. Un délégué confirmé remonté est opérationnel plus vite.' },
+      { q: 'Comment évaluer un candidat efficacement ?', a: 'Par une présentation de visite simulée et l\'analyse de son approche du compte rendu : la structuration de la visite et de la trace est le meilleur indicateur.' },
+    ],
+  },
+  {
+    path: '/blog/lancer-produit-pharmaceutique-senegal',
+    title: 'Lancer un produit pharmaceutique au Sénégal : le plan complet',
+    desc: 'Lancer un médicament au Sénégal : agrément ARP, ciblage des prescripteurs par district, lancement par vagues et mesure de la couverture.',
+    h1: 'Lancer un produit pharmaceutique au Sénégal',
+    intro: 'Le lancement d\'un produit pharmaceutique repose sur la conformité (agrément), le ciblage (bon prescripteur, bon district) et la mesure (couverture, objectifs). Voici le plan en quatre étapes.',
+    sections: [
+      { h: 'La conformité : l\'agrément ARP', p: [
+        'Avant toute promotion, le produit doit être enregistré auprès de l\'Agence de Régulation Pharmaceutique (ARP) et disposer de son numéro d\'agrément. Sans cela, aucune visite ni distribution légale. <a href="/blog/agrement-arp-laboratoires">Comprendre l\'agrément ARP</a>.',
+        'Prévoyez ce délai dans votre plan de lancement : l\'instruction du dossier dépend du type de produit.',
+      ] },
+      { h: 'Le ciblage des prescripteurs', p: [
+        'Identifiez les prescripteurs potentiels par spécialité et par district, puis priorisez les districts à forte densité : Dakar, Thiès, Saint-Louis, puis les régions. Le <a href="/blog/professionnels-de-sante-senegal-referentiel-delegue">référentiel des professionnels de santé</a> structure ce ciblage.',
+        'Segmentez les messages : un médecin hospitalier, un pharmacien d\'officine et une sage-femme ne reçoivent pas le même argumentaire.',
+      ] },
+      { h: 'Le lancement par vagues', p: [
+        'Commencez par une zone pilote : un nombre de districts maîtrisé, une équipe dédiée, des objectifs de couverture explicites. Étendez ensuite par vagues en réallouant les moyens selon les résultats.',
+        'Assignez les objectifs par produit et par zone aux délégués concernés — voir le <a href="/blog/objectifs-campagnes-chiffre-affaires-laboratoire">guide objectifs et campagnes</a>.',
+      ] },
+      { h: 'La campagne et la mesure', p: [
+        'Organisez des tournées dédiées au lancement, consignez chaque visite par produit dans les comptes rendus, et mesurez : taux de couverture des prescripteurs ciblés, réalisation des objectifs produits, résultats des CRV (accord, réserve, refus).',
+        'Ces indicateurs disent en temps réel si le produit est adopté, où il faut accentuer la pression et quel argumentaire fonctionne. Une visibilité qu\'un CRM dédié, comme <a href="/blog/crm-laboratoire-pharmaceutique-delegues-medicaux">celui de la visite médicale</a>, rend possible.',
+      ] },
+    ],
+    faq: [
+      { q: 'L\'agrément ARP est-il obligatoire pour lancer ?', a: 'Oui. Le produit doit être enregistré auprès de l\'ARP pour être promu et distribué au Sénégal ; le numéro d\'agrément est la preuve de la conformité.' },
+      { q: 'Par où commencer le lancement ?', a: 'Par le district le plus dense en prescripteurs, généralement Dakar, puis élargir par vagues en fonction de la couverture atteinte.' },
+      { q: 'Comment mesurer le succès d\'un lancement ?', a: 'Par le taux de couverture des prescripteurs ciblés, la réalisation des objectifs produits et les résultats des comptes rendus (accord, réserve, refus).' },
+      { q: 'Faut-il adapter le message selon la cible ?', a: 'Oui : un médecin hospitalier, un pharmacien et une sage-femme ont des besoins et des attentes différents — l\'argumentaire doit être segmenté.' },
+    ],
+  },
+  {
+    path: '/blog/manager-force-de-vie-delegues-medicaux',
+    title: 'Manager une force de vente de délégués médicaux',
+    desc: 'Manager une équipe de délégués médicaux : secteurs par district, rituels hebdo/mensuel/trimestriel, animation, validation des CRV et pilotage de la couverture.',
+    h1: 'Manager une force de vente de délégués médicaux',
+    intro: 'Manager des délégués médicaux, c\'est combiner la structuration (secteurs, objectifs), l\'animation (motivation, formation) et le contrôle (CRV, couverture). Un rôle de terrain qui se pilote avec des rituels.',
+    sections: [
+      { h: 'Structurer la force de vente', p: [
+        'Alignez les secteurs des délégués sur les districts sanitaires de la carte sanitaire — la maille officielle — pour éviter les doublons et les zones blanches. Chaque délégué connaît sa zone et ses objectifs. <a href="/carte-sanitaire">Consulter le référentiel</a>.',
+        'Un référentiel partagé (professionnels, structures, districts) dans un <a href="/blog/crm-laboratoire-pharmaceutique-delegues-medicaux">CRM de visite médicale</a> évite les tableurs et les conflits de répartition.',
+      ] },
+      { h: 'Les rituels de pilotage', p: [
+        'Le rituel hebdomadaire : activité de la semaine (visites réalisées, CRV validés, couverture en cours). Le rituel mensuel : réalisation des objectifs produits. Le rituel trimestriel : le retour sur investissement de la force de vente.',
+        'Chaque point s\'appuie sur les mêmes données du CRM — voir le <a href="/blog/reporting-kpi-laboratoire-force-de-vente">guide reporting et KPIs</a>.',
+      ] },
+      { h: 'Animer et motiver', p: [
+        'Des objectifs clairs, un feedback constructif après les CRV, la reconnaissance des zones et des délégués performants : l\'animation ne remplace pas la structure, elle la fait vivre.',
+        'La formation continue et le mentorat fidélisent : un délégué qui voit un chemin d\'évolution (manager de zone, chef de produit) s\'investit davantage.',
+      ] },
+      { h: 'Contrôler sans tuer l\'initiative', p: [
+        'Le contrôle passe par la validation des CRV et les taux de couverture, en temps réel, avec un retour constructif plutôt que des sanctions. Voir le <a href="/blog/crv-compte-rendu-de-visite-guide">cycle de validation du CRV</a>.',
+        'Face à une zone sous-couverte : réaffectez, coachez, redéfinissez le plan. Face à un délégué en retard de reporting : débloquez l\'obstacle avant de conclure.',
+      ] },
+    ],
+    faq: [
+      { q: 'Comment organiser une équipe de délégués ?', a: 'Par secteurs alignés sur les districts sanitaires, chacun avec des objectifs propres et une checklist de professionnels à visiter.' },
+      { q: 'Quels rituels pour manager ?', a: 'Hebdomadaire sur l\'activité et la couverture, mensuel sur les objectifs produits, trimestriel sur le retour sur investissement.' },
+      { q: 'Comment motiver les délégués ?', a: 'Objectifs clairs, reconnaissance des résultats, formation continue et participation aux décisions qui touchent leur zone.' },
+      { q: 'Comment contrôler sans freiner ?', a: 'Par les CRV validés et la couverture, en temps réel, avec un retour constructif : le contrôle est un outil de pilotage, pas de défiance.' },
+    ],
+  },
 ];
 
 /* ---------- Métadonnées par route ---------- */
@@ -862,7 +1047,7 @@ function sitemapUrls() {
 
 export function robotsTxt() { return ROBOTS; }
 export function sitemapXml() {
-  const urls = sitemapUrls().map((u) => `  <url><loc>${BASE}${u.loc}</loc><lastmod>2026-08-12</lastmod><changefreq>${u.freq}</changefreq><priority>${u.prio}</priority></url>`).join('\n');
+  const urls = sitemapUrls().map((u) => `  <url><loc>${BASE}${u.loc}</loc><lastmod>2026-08-17</lastmod><changefreq>${u.freq}</changefreq><priority>${u.prio}</priority></url>`).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 export { warmTarifs, warmLaboratoires, warmCarteSanitaire };

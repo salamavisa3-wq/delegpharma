@@ -945,6 +945,46 @@ const GUIDES = [
       { q: 'Quel est le contenu d\'une formation de délégué médical ?', a: 'Pharmacologie, visite médicale, communication et réglementation pharmaceutique, complétés par un stage pour les formations courtes.' },
     ],
   },
+  {
+    path: '/blog/devenir-delegue-medical-cote-ivoire',
+    title: 'Devenir délégué médical en Côte d\'Ivoire : formations',
+    desc: 'Devenir délégué médical en Côte d\'Ivoire : formations (Medicours, IIFPM, UFR SPB, Académie Tridem), salaire 250 000-600 000 FCFA, 1 217 officines.',
+    h1: 'Devenir délégué médical en Côte d\'Ivoire',
+    intro: 'La Côte d\'Ivoire compte plus de 1 200 officines et un marché pharmaceutique en forte croissance. Voici les formations reconnues pour devenir délégué médical, les salaires pratiqués et les débouchés.',
+    sections: [
+      { h: 'Les formations de délégué médical en Côte d\'Ivoire', p: [
+        'Quatre voies principales se distinguent. L\'Institut Medicours International propose une formation de délégué médical en 12 mois (dont 6 mois de stage), accessible à partir du BAC, avec un suivi en ligne possible.',
+        'L\'IIFPM (Abidjan, Cocody) forme au métier de Délégué Médical Spécialisé (gynécologie, cardiologie, ophtalmologie), avec stage assuré et premier emploi visé. L\'UFR Sciences Pharmaceutiques et Biologiques de l\'Université Félix Houphouët-Boigny délivre un certificat spécialisé de visiteurs médicaux en 12 mois (8 mois de cours, 3 mois de stage, 1 mois de mémoire).',
+        'L\'Académie Tridem, créée par Tridem Pharma avec l\'UFHB, forme des visiteurs médicaux et pharmaceutiques à un niveau universitaire sur un an.',
+      ] },
+      { h: 'Le coût des formations', p: [
+        'Les tarifs varient selon l\'établissement. À titre indicatif, le certificat de l\'UFR SPB (UFHB) revient à 1 000 000 FCFA (200 000 FCFA de scolarité UFHB + 800 000 FCFA de frais pédagogiques), plus 30 000 FCFA de frais de candidature.',
+        'Les instituts privés comme Medicours et l\'IIFPM communiquent leurs frais directement. Vérifiez toujours les conditions d\'admission et les tarifs auprès de chaque école avant de vous engager.',
+      ] },
+      { h: 'Le salaire d\'un délégué médical en Côte d\'Ivoire', p: [
+        'Le salaire d\'un délégué médical en Côte d\'Ivoire se situe généralement entre 250 000 et 600 000 FCFA par mois, selon l\'expérience, le laboratoire et la zone couverte.',
+        'Les profils spécialisés (Délégué Médical Spécialisé) et ceux issus de formations universitaires reconnues négocient les rémunérations les plus élevées.',
+      ] },
+      { h: 'Le marché : 1 217 officines et 4 grossistes', p: [
+        'Le secteur privé ivoirien compte 1 217 officines de pharmacie (Ministère de la Santé, fin août 2025) et 9 unités de production de médicaments. Quatre grossistes-répartiteurs approvisionnent le marché : UBIPHARM, COPHARMED, DPCI et TEDIS PHARMA CI.',
+        'Plus de 90 % des médicaments sont importés, ce qui maintient une forte présence des délégués médicaux sur le terrain pour la promotion auprès des officines et des professionnels de santé.',
+      ] },
+      { h: 'La régulation : AIRP et DAP', p: [
+        'La visite médicale en Côte d\'Ivoire s\'exerce dans un cadre réglementé. L\'AIRP (Autorité Ivoirienne de Régulation Pharmaceutique, loi n° 2017-541) encadre l\'activité pharmaceutique, et la DAP (Direction de l\'Activité Pharmaceutique) définit la politique pharmaceutique nationale.',
+        'L\'Ordre National des Pharmaciens (loi n° 2015-535) régit la profession. Un délégué médical qui maîtrise ce cadre réglementaire est un atout pour les laboratoires.',
+      ] },
+      { h: 'Choisir sa formation', p: [
+        'L\'arbitrage se joue entre la reconnaissance universitaire (UFR SPB, Académie Tridem) et la rapidité d\'entrée sur le marché (Medicours, IIFPM). Le budget, le niveau d\'admission et la spécialisation souhaitée orientent le choix.',
+        'Au Sénégal, le guide des <a href="/blog/formations-delegue-medical-senegal">formations de délégué médical</a> détaille les voies équivalentes. Les laboratoires recrutent aussi des profils commerciaux formés sur le tas, mais la formation reste la voie la plus reconnue.',
+      ] },
+    ],
+    faq: [
+      { q: 'Quelle est la meilleure formation de délégué médical en Côte d\'Ivoire ?', a: 'Le certificat de l\'UFR SPB (Université Félix Houphouët-Boigny) et l\'Académie Tridem offrent la reconnaissance universitaire. Medicours et l\'IIFPM proposent des formations plus courtes pour entrer plus vite sur le marché.' },
+      { q: 'Combien coûte une formation de délégué médical en Côte d\'Ivoire ?', a: 'À titre indicatif, le certificat de l\'UFR SPB revient à 1 000 000 FCFA (plus 30 000 FCFA de candidature). Les instituts privés communiquent leurs frais directement.' },
+      { q: 'Quel est le salaire d\'un délégué médical en Côte d\'Ivoire ?', a: 'Entre 250 000 et 600 000 FCFA par mois selon l\'expérience, le laboratoire et la zone couverte. Les profils spécialisés négocient les rémunérations les plus élevées.' },
+      { q: 'Peut-on devenir délégué médical en Côte d\'Ivoire sans formation ?', a: 'Certains laboratoires recrutent des profils commerciaux formés sur le tas, mais la formation reste la voie la plus reconnue et la plus valorisée.' },
+    ],
+  },
 ];
 
 /* ---------- Métadonnées par route ---------- */

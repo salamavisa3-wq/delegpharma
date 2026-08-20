@@ -59,9 +59,22 @@ app.use('/api', assistantRoutes);
 // SEO : robots.txt + sitemap.xml (avant le fallback SPA qui les capturerait sinon)
 app.get('/robots.txt', (req, res) => res.type('text/plain').send(robotsTxt()));
 app.get('/sitemap.xml', (req, res) => res.type('application/xml').send(sitemapXml()));
+app.get('/llms.txt', (req, res) => res.type('text/plain; charset=utf-8').sendFile(resolve(frontendDir, 'llms.txt')));
 
 // Frontend statique (app.js, app.css, og-image.png) sans index.html auto (fallback SSR ci-dessous)
-app.use(express.static(frontendDir, { index: false }));
+// Cache long sur les assets (hash dans le nom si un jour on en ajoute) ; le HTML SSR garde
+// un cache court pour pouvoir invalider rapidement le head SEO.
+app.use(express.static(frontendDir, {
+  index: false,
+  maxAge: '1y',
+  setHeaders: (res, chemin) => {
+    if (/\.(css|js|svg|jpg|jpeg|png|webp|ico|json|txt)$/i.test(chemin)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    } else {
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+    }
+  },
+}));
 app.use((req, res) => {
   if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Route API inconnue' });
   return res.type('html').send(seoShell(req)); // head SEO + SSR des pages publiques

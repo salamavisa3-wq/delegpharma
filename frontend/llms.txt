@@ -1,0 +1,35 @@
+# DelegPharma
+
+## Description
+
+DelegPharma est le CRM des délégués médicaux et des laboratoires pharmaceutiques au Sénégal. L'application s'appuie sur la carte sanitaire et sociale nationale (MSAS / ANSD) : 14 régions médicales, 79 districts sanitaires, 3 915 structures et plus de 34 000 professionnels de santé recensés.
+
+## Fonctionnalités principales
+
+- Référentiel national des professionnels de santé et des structures (régions, districts, spécialités)
+- Comptes rendus de visite (CRV) : brouillon → soumis → validé, avec pièces jointes et PDF signé
+- Planification des tournées terrain par district
+- Campagnes et objectifs produits par zone
+- Tableau de bord délégué, manager, laboratoire et plateforme
+- Abonnement 5 000 / 10 000 / 15 000 FCFA par mois, paiement Mobile Money (Wave, Orange Money), carte ou PayPal
+- Assistant IA intégré pour aider les délégués et laboratoires
+
+## Pages publiques
+
+- [Accueil](https://app.delegpharma.com/)
+- [Tarifs](https://app.delegpharma.com/tarifs)
+- [Carte sanitaire du Sénégal](https://app.delegpharma.com/carte-sanitaire)
+- [Laboratoires référencés](https://app.delegpharma.com/laboratoires)
+- [À propos](https://app.delegpharma.com/a-propos)
+- [Blog / guides métier](https://app.delegpharma.com/blog/comment-devenir-delegue-medical-senegal)
+- [Contact](https://app.delegpharma.com/contact)
+- [Mentions légales](https://app.delegpharma.com/mentions-legales)
+- [Politique de confidentialité](https://app.delegpharma.com/politique-de-confidentialite)
+
+## Compte gratuit
+
+Créer un compte sans formule donne accès au CRM en lecture seule. Pour saisir des CRV et planifier des tournées, choisir une formule Essentiel, Standard ou Premium.
+
+## Support
+
+WhatsApp et email de support disponibles via la page [Contact](https://app.delegpharma.com/contact).

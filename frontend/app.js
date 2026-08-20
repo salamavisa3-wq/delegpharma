@@ -129,6 +129,7 @@ async function showView() {
 /* ---------- Landing / Login ---------- */
 function landingView() {
   return `
+  <main>
   <div class="hero">
     <h1><span>DelegPharma</span> — le CRM des délégués médicaux et des laboratoires au Sénégal</h1>
     <p>Planifiez vos tournées, suivez chaque professionnel de santé, rédigez vos comptes rendus de visite et pilotez vos campagnes — de Dakar à Kédougou.</p>
@@ -167,7 +168,8 @@ function landingView() {
   </div>
   <footer style="max-width:860px;margin:34px auto 8px;text-align:center;font-size:13px;color:var(--mut)">
     <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a> · <a href="/tarifs">Tarifs</a> · <a href="/a-propos">À propos</a> · <a href="/login">Connexion</a> · <a href="/inscription">Compte gratuit</a>
-  </footer>`;
+  </footer>
+  </main>`;
 }
 function loginView() {
   return `

@@ -397,7 +397,7 @@ function articleBody({ h1, intro, sections, faq }) {
   </main>`;
 }
 
-function articlePage({ path, title, desc, h1, intro, sections, faq }) {
+function articlePage({ path, title, desc, h1, intro, sections, faq, published = '2026-08-17', modified = '2026-08-21', primaryImage = BASE + '/og-image-1200x630.png' }) {
   return {
     index: true,
     title,
@@ -410,6 +410,21 @@ function articlePage({ path, title, desc, h1, intro, sections, faq }) {
           { '@type': 'ListItem', position: 1, name: 'Accueil', item: BASE + '/' },
           { '@type': 'ListItem', position: 2, name: h1, item: BASE + path },
         ] },
+        {
+          '@type': 'WebPage',
+          '@id': BASE + path,
+          url: BASE + path,
+          name: title,
+          headline: h1,
+          description: desc,
+          isPartOf: { '@type': 'WebSite', '@id': BASE + '/#website', url: BASE + '/', name: 'DelegPharma' },
+          publisher: { '@type': 'Organization', '@id': BASE + '/#org', name: 'DelegPharma', url: BASE + '/', logo: { '@type': 'ImageObject', url: BASE + '/og-image-1200x630.png' } },
+          author: { '@type': 'Organization', name: 'DelegPharma', url: BASE + '/' },
+          datePublished: published,
+          dateModified: modified,
+          primaryImageOfPage: { '@type': 'ImageObject', url: primaryImage, width: 1200, height: 630 },
+          inLanguage: 'fr',
+        },
         { '@type': 'FAQPage', mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) },
       ],
     },
@@ -513,14 +528,18 @@ const GUIDES = [
   },
   {
     path: '/blog/carte-sanitaire-senegal-guide',
-    title: 'La carte sanitaire du Sénégal : 14 régions, 79 districts expliqués',
-    desc: 'La carte sanitaire et sociale du Sénégal expliquée : 14 régions médicales, 79 districts sanitaires, structures de santé. Pourquoi elle est essentielle aux délégués médicaux.',
+    title: 'Carte sanitaire du Sénégal — 14 régions, 79 districts (guide 2026)',
+    desc: 'Guide complet de la carte sanitaire et sociale du Sénégal : 14 régions médicales, 79 districts sanitaires, structures de santé. Idéal pour les délégués médicaux et les laboratoires.',
     h1: 'La carte sanitaire du Sénégal',
     intro: 'La carte sanitaire et sociale est le référentiel officiel du système de santé sénégalais. Pour le délégué médical, c\'est la base de toute planification de tournée.',
     sections: [
       { h: '14 régions médicales, 79 districts sanitaires', p: [
         'Le Sénégal est découpé en 14 régions médicales et 79 districts sanitaires, chacun doté de structures de santé : hôpitaux, centres de santé, postes de santé et cases de santé. Au total, près de 3 900 structures et plus de 34 000 professionnels de santé.',
         'Consultez le <a href="/carte-sanitaire">référentiel complet de la carte sanitaire</a> : chaque région et chaque district y est détaillé.',
+      ] },
+      { h: 'Carte de santé du Sénégal : le référentiel du terrain', p: [
+        'La carte de santé recense les professionnels de santé, les structures publiques et privées et le découpage territorial utilisé par le MSAS et l\'ANSD. Elle permet à un laboratoire ou à un délégué médical de cibler les districts et de mesurer la couverture réelle.',
+        'Explorez la carte de santé par région puis par district pour préparer vos tournées sans doublon ni zone blanche.',
       ] },
       { h: 'Pourquoi c\'est essentiel pour le délégué médical', p: [
         'La carte sanitaire permet de découper le territoire en zones de visite cohérentes, d\'identifier les professionnels à cibler par district et de mesurer la couverture réelle des campagnes.',
@@ -534,6 +553,7 @@ const GUIDES = [
       { q: 'Combien de régions médicales au Sénégal ?', a: 'Le Sénégal compte 14 régions médicales, de Dakar à Kédougou.' },
       { q: 'Combien de districts sanitaires ?', a: '79 districts sanitaires, répartis sur les 14 régions médicales.' },
       { q: 'Où trouver la carte sanitaire du Sénégal ?', a: 'Le référentiel officiel est publié par le MSAS. DelegPharma en propose une version interactive et détaillée, conçue pour les délégués médicaux.' },
+      { q: 'Qu\'est-ce que la carte de santé du Sénégal ?', a: 'C\'est le référentiel national des structures, professionnels et découpages territoriaux du système de santé sénégalais.' },
     ],
   },
   {
@@ -588,8 +608,8 @@ const GUIDES = [
   },
   {
     path: '/blog/crm-laboratoire-pharmaceutique-delegues-medicaux',
-    title: 'CRM pour laboratoire pharmaceutique au Sénégal : piloter ses délégués médicaux',
-    desc: 'Pourquoi un laboratoire pharmaceutique au Sénégal a besoin d\'un CRM dédié : piloter ses délégués médicaux, suivre les comptes rendus de visite, mesurer la couverture par district et les objectifs produits.',
+    title: 'CRM laboratoire pharmaceutique Sénégal — délégués médicaux',
+    desc: 'CRM pour laboratoire pharmaceutique au Sénégal : piloter les délégués médicaux, suivre les CRV, mesurer la couverture par district et les objectifs produits.',
     h1: 'CRM pour laboratoire pharmaceutique : piloter sa force de délégués médicaux',
     intro: 'Un laboratoire pharmaceutique sénégalais qui déploie des délégués médicaux doit savoir qui visite qui, où, avec quel produit et avec quel résultat. Le CRM dédié à la visite médicale apporte cette visibilité — du référentiel national au taux de couverture par district.',
     sections: [
@@ -605,6 +625,10 @@ const GUIDES = [
         'La <a href="/carte-sanitaire">carte sanitaire et sociale du Sénégal</a> (MSAS/ANSD) recense 14 régions médicales, 79 districts sanitaires, 3 915 structures et plus de 34 000 professionnels de santé. C\'est le découpage officiel sur lequel un laboratoire peut répartir sa force de vente sans doublon ni zone blanche.',
         'DelegPharma intègre ce référentiel : tournées par district, professionnels ciblables, couverture mesurée à la maille officielle. Consultez aussi <a href="/laboratoires">l\'annuaire des laboratoires pharmaceutiques présents au Sénégal</a>.',
       ] },
+      { h: 'Délégués médicaux : recrutement, salaire et pilotage', p: [
+        'Le délégué médical est le visage du laboratoire sur le terrain. Son salaire au Sénégal combine un fixe et des primes sur objectifs. Pour le recruter, structurer sa zone et le fidéliser, le laboratoire doit lui donner un outil fiable : tournées claires, CRV validés, objectifs transparents.',
+        'DelegPharma transforme le terrain en données exploitables : chaque délégué sait où aller, le manager voit la couverture en temps réel, et le laboratoire peut justifier son investissement. <a href="/blog/salaire-remuneration-delegue-medical-senegal">En savoir plus sur le salaire du délégué médical</a>.',
+      ] },
       { h: 'Mesurer la performance : couverture et objectifs produits', p: [
         'Les indicateurs qui comptent pour un laboratoire : taux de professionnels visités par district (couverture), réalisation des objectifs par produit phare et par zone, nombre de CRV validés par délégué, délai de remontée des comptes rendus.',
         'Ces indicateurs alimentent les campagnes suivantes : réallouer les délégués vers les districts sous-couverts, recentrer la promotion sur les produits en retard d\'objectif, et justifier le retour sur investissement de la force de vente. <a href="/tarifs">Découvrir les formules DelegPharma</a>.',
@@ -615,6 +639,7 @@ const GUIDES = [
       { q: 'Combien coûte un CRM de visite médicale au Sénégal ?', a: 'Chez DelegPharma, les formules vont de 5 000 FCFA (Essentiel) à 15 000 FCFA (Premium) par mois et par utilisateur, avec paiement Mobile Money (Wave, Orange Money, QR Wave/OM), carte Visa/Mastercard ou PayPal.' },
       { q: 'Le CRM couvre-t-il les 14 régions du Sénégal ?', a: 'Oui. DelegPharma intègre la carte sanitaire complète : 14 régions médicales et 79 districts sanitaires, soit la maille officielle de répartition de votre force de vente.' },
       { q: 'Peut-on suivre les objectifs par produit ?', a: 'Oui. L\'outil suit les objectifs par produit phare et par zone, avec un taux de réalisation visible et des exports CSV/PDF pour vos rapports.' },
+      { q: 'Quel est le salaire d\'un délégué médical au Sénégal ?', a: 'La rémunération combine un fixe et des primes sur objectifs (couverture, CRV validés, objectifs produits). Le montant total dépend du laboratoire, de la zone couverte et de l\'expérience.' },
     ],
   },
   {
@@ -676,8 +701,8 @@ const GUIDES = [
   },
   {
     path: '/blog/choisir-crm-force-de-vente-laboratoire-pharmaceutique',
-    title: 'Choisir son CRM de force de vente pharmaceutique : le guide pour laboratoires',
-    desc: 'Le guide pour choisir le CRM de votre force de vente pharmaceutique au Sénégal : référentiel carte sanitaire, tournées, CRV, objectifs produits, couverture, prix et critères de sélection.',
+    title: 'Choisir un CRM force de vente laboratoire pharmaceutique — guide',
+    desc: 'Guide pour choisir un CRM laboratoire pharmaceutique au Sénégal : référentiel carte sanitaire, tournées, CRV, objectifs produits, couverture et prix.',
     h1: 'Choisir le CRM de votre force de vente pharmaceutique',
     intro: 'Tournées, comptes rendus de visite, objectifs produits, couverture : le CRM de force de vente concentre toute l\'activité terrain d\'un laboratoire. Le bon choix se joue sur quelques critères précis, adaptés au contexte sénégalais.',
     sections: [
@@ -685,7 +710,7 @@ const GUIDES = [
         'Le référentiel territorial d\'abord : l\'outil doit couvrir les 14 régions médicales et 79 districts sanitaires du Sénégal pour répartir la force de vente sur la maille officielle. Viennent ensuite les tournées par district avec checklist, la saisie des CRV depuis le terrain et leur validation.',
         'Enfin, le pilotage : objectifs par produit phare, taux de couverture par zone et exports pour le reporting, comme le montre notre guide sur <a href="/blog/objectifs-campagnes-chiffre-affaires-laboratoire">le pilotage du chiffre d\'affaires</a>. Sans ces briques, le CRM reste une simple base de contacts. <a href="/carte-sanitaire">Découvrir le référentiel</a>.',
       ] },
-      { h: 'Les pièges à éviter', p: [
+      { h: 'CRM laboratoire pharmaceutique : les pièges à éviter', p: [
         'Un outil non adapté à la visite médicale (un simple CRM de contacts) ne gère ni les tournées, ni les CRV, ni les objectifs produits. Un outil sans référentiel local oblige à tout recréer, district par district.',
         'Méfiez-vous aussi des prix en devises et des abonnements sans paiement local : au Sénégal, le Mobile Money (Wave, Orange Money, QR Wave/OM) est le mode de paiement naturel des PME. <a href="/tarifs">Comparer les formules DelegPharma</a>.',
       ] },
@@ -1032,8 +1057,8 @@ const PAGES = {
   },
   '/laboratoires': {
     index: true,
-    title: 'Laboratoires pharmaceutiques au Sénégal — Référencés sur DelegPharma',
-    desc: 'Annuaire des laboratoires pharmaceutiques présents au Sénégal : industriels, distributeurs, génériques. DelegPharma les accompagne dans le suivi des délégués médicaux, des tournées et des comptes rendus de visite.',
+    title: 'Liste des laboratoires pharmaceutiques au Sénégal — 2026',
+    desc: 'Liste des laboratoires pharmaceutiques au Sénégal : industriels, distributeurs, génériques. Annuaire référencé sur DelegPharma pour les délégués médicaux.',
     canonical: '/laboratoires',
     jsonLd: () => ({
       '@context': 'https://schema.org',
@@ -1146,6 +1171,9 @@ function head(page) {
     `<meta property="og:description" content="${esc(page.desc)}">`,
     `<meta property="og:site_name" content="DelegPharma">`,
     `<meta property="og:image" content="${BASE}/og-image-1200x630.png">`,
+    `<meta property="og:image:width" content="1200">`,
+    `<meta property="og:image:height" content="630">`,
+    '<meta property="og:locale" content="fr_FR">',
     '<meta name="twitter:card" content="summary_large_image">',
     `<meta name="twitter:title" content="${esc(page.title)}">`,
     `<meta name="twitter:description" content="${esc(page.desc)}">`,

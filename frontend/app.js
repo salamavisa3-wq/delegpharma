@@ -51,8 +51,8 @@ async function init() {
     if (map[p]) { location.hash = map[p]; state.hash = map[p]; }
   }
   try {
-    const hasAuthCookie = document.cookie.split(';').some(c => c.trim().startsWith('dp_token='));
-    if (!hasAuthCookie) throw new Error('no token');
+    // Le cookie d'auth est HttpOnly : invisible pour document.cookie. On laisse
+    // /auth/me décider (le navigateur envoie le cookie automatiquement).
     const me = await api('/auth/me');
     state.user = me.user;
     state.labo = me.laboratoire;

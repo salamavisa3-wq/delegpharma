@@ -377,22 +377,28 @@ function crvActions(v) {
   }
   return out.join(' ');
 }
-// Téléchargement PDF sans nouvel onglet : fetch + blob (résiste aux bloqueurs de popups,
+// Téléchargement sans nouvel onglet : fetch + blob (résiste aux bloqueurs de popups,
 // fonctionne sur mobile, et affiche une erreur claire si la session a expiré).
-async function downloadPdf(id, date) {
+async function downloadFile(url, filename) {
   try {
-    const res = await fetch(`/api/visites/${id}/pdf`, { credentials: 'same-origin' });
+    const res = await fetch(url, { credentials: 'same-origin' });
     if (!res.ok) throw new Error(res.status === 401 ? 'Session expirée — reconnectez-vous' : `Erreur ${res.status}`);
     const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
+    const blobUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = date ? `CRV-${id}-${date}.pdf` : `CRV-${id}.pdf`;
+    a.href = blobUrl;
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
   } catch (err) { toast(err.message); }
+}
+async function downloadPdf(id, date) {
+  return downloadFile(`/api/visites/${id}/pdf`, date ? `CRV-${id}-${date}.pdf` : `CRV-${id}.pdf`);
+}
+async function downloadDoc(id, idx, nom) {
+  return downloadFile(`/api/visites/${id}/doc/${idx}`, nom || `document-${idx}`);
 }
 async function crvNewView(psId, psNom) {
   renderMain('<div class="muted">Chargement…</div>');
@@ -912,6 +918,7 @@ function bind() {
         return refreshCrvList();
       }
       if (act === 'crv-pdf') { e.preventDefault(); downloadPdf(el.dataset.id, el.dataset.date); return; }
+      if (act === 'crv-doc') { e.preventDefault(); downloadDoc(el.dataset.id, el.dataset.idx, el.dataset.nom); return; }
       if (act === 'crv-add-produit') {
         const id = Number($('#p-select').value); const qty = Number($('#p-qty').value) || 1;
         const pr = state.catalog.produits.find((x) => x.id === id);
@@ -1109,7 +1116,7 @@ async function openPsFiche(id) {
 async function openCrvFiche(id) {
   try {
     const v = await api(`/visites/${id}`);
-    const docs = v.docs.map((d, i) => `<a class="chip" href="/api/visites/${v.id}/doc/${i}" target="_blank">📎 ${esc(d.nom)}</a>`).join('') || '<span class="muted">Aucune pièce jointe</span>';
+    const docs = v.docs.map((d, i) => `<a class="chip" href="#" data-action="crv-doc" data-id="${v.id}" data-idx="${i}" data-nom="${esc(d.nom)}">📎 ${esc(d.nom)}</a>`).join('') || '<span class="muted">Aucune pièce jointe</span>';
     modal(`CRV n°${v.id} — ${fmtDate(v.date)}`, `
       <div style="display:grid;gap:8px">
         <div><b>${esc(v.professionnel)}</b> ${badgePot(v.potentiel)} <span class="muted">(${esc(v.specialite)})</span></div>

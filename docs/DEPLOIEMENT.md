@@ -149,8 +149,11 @@ curl -I https://app.delegpharma.com/            # 200, SPA
 ```bash
 #!/usr/bin/env bash
 set -e
+# Le dépôt appartient à l'utilisateur applicatif `delegpharma` (pas à ubuntu/root) :
+# git doit tourner en `delegpharma`, sinon "dubious ownership" + Permission denied sur .git/.
+sudo -u delegpharma git config --global --add safe.directory /opt/delegpharma
 cd /opt/delegpharma
-git pull --ff-only
+sudo -u delegpharma git pull --ff-only
 cd backend
 npm ci --omit=dev
 sudo systemctl restart delegpharma

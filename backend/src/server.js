@@ -5,7 +5,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { initSchema } from './schema.js';
-import { seed, seedExtras, seedDemoActivity } from './seed.js';
+import { seed, seedExtras, seedDemoActivity, seedCatalog } from './seed.js';
 import { requireAuth, requireRole } from './auth.js';
 import { seoShell, robotsTxt, sitemapXml, warmTarifs, warmLaboratoires, warmCarteSanitaire } from './seo.js';
 import authRoutes from './routes/auth.js';
@@ -89,6 +89,7 @@ initSchema()
   .then(() => seed())      // idempotent : ne fait rien si meta.seeded_v1 existe déjà
   .then(() => seedExtras()) // idempotent : formules + comptes plateforme/professionnel
   .then(() => seedDemoActivity()) // idempotent : activité démo (CRV/tournées/objectifs/abonnement)
+  .then(() => seedCatalog()) // idempotent : catalogue marché Sénégal (~220 produits, dédoublonné)
   .then(() => warmTarifs()) // SSR des tarifs (cache base réelle, fallback statique)
   .then(() => warmLaboratoires()) // SSR des laboratoires (cache base réelle)
   .then(() => warmCarteSanitaire()) // SSR carte sanitaire (régions/districts depuis la base)

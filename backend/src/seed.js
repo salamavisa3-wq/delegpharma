@@ -8,7 +8,7 @@ import { initSchema } from './schema.js';
 import {
   PAYS, REGIONS, TYPES_STRUCTURE, SPECIALITES, TENANT_DEMO,
   STRUCTURES, PROFESSIONNELS, PRODUITS, CAMPAGNE, USERS_DEMO,
-  FORMULES, USERS_EXT, LABORATOIRES, DEMO_ACTIVITY,
+  FORMULES, USERS_EXT, LABORATOIRES, DEMO_ACTIVITY, CATALOGUE_MARCHE,
 } from './seed-data.js';
 
 /** Placeholder adaptatif : $n pour Postgres, ? pour SQLite. */
@@ -304,12 +304,55 @@ export async function seedDemoActivity() {
   );
 }
 
+/** Catalogue marché (Sénégal) — rattache chaque produit à SON laboratoire, et donne au
+ *  tenant démo (MEDIS) le catalogue complet du marché en plus de son portfolio, pour servir
+ *  de vitrine. Idempotent par dédoublonnage (laboratoire_id, nom) : ré-exécutable au boot. */
+export async function seedCatalog() {
+  await initSchema();
+  const laboIdByNom = {};
+  const ensureLab = async (nom) => {
+    if (laboIdByNom[nom]) return laboIdByNom[nom];
+    const row = await get(`SELECT id FROM laboratoire WHERE nom = ${ph(1)}`, [nom]);
+    if (row) { laboIdByNom[nom] = row.id; return row.id; }
+    const r = await run(`INSERT INTO laboratoire (nom) VALUES (${ph(1)})`, [nom]);
+    laboIdByNom[nom] = lastInsertId(r);
+    return laboIdByNom[nom];
+  };
+  const demoId = await ensureLab(TENANT_DEMO);
+  let inserted = 0;
+  for (let i = 0; i < CATALOGUE_MARCHE.length; i++) {
+    const p = CATALOGUE_MARCHE[i];
+    const arp = 'ARP-MKT-' + String(i + 1).padStart(4, '0');
+    const laboId = await ensureLab(p.labo);
+    const owned = await get(`SELECT id FROM produit WHERE laboratoire_id = ${ph(1)} AND nom = ${ph(2)}`, [laboId, p.nom]);
+    if (!owned) {
+      await run(
+        `INSERT INTO produit (laboratoire_id, nom, dci, presentation, agrement_arp) VALUES (${ph(1)},${ph(2)},${ph(3)},${ph(4)},${ph(5)})`,
+        [laboId, p.nom, p.dci, p.presentation, arp],
+      );
+      inserted++;
+    }
+    if (laboId !== demoId) {
+      const ownedDemo = await get(`SELECT id FROM produit WHERE laboratoire_id = ${ph(1)} AND nom = ${ph(2)}`, [demoId, p.nom]);
+      if (!ownedDemo) {
+        await run(
+          `INSERT INTO produit (laboratoire_id, nom, dci, presentation, agrement_arp) VALUES (${ph(1)},${ph(2)},${ph(3)},${ph(4)},${ph(5)})`,
+          [demoId, p.nom, p.dci, p.presentation, arp],
+        );
+        inserted++;
+      }
+    }
+  }
+  console.log(`Catalogue marché OK — ${CATALOGUE_MARCHE.length} produits référencés, ${inserted} lignes insérées.`);
+}
+
 // Exécution directe : `npm run seed`
 const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   seed()
     .then(() => seedExtras())
     .then(() => seedDemoActivity())
+    .then(() => seedCatalog())
     .then(() => close())
     .then(() => process.exit(0))
     .catch((e) => {

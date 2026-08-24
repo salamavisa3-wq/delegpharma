@@ -1068,7 +1068,7 @@ const PAGES = {
     body: laboratoiresBody,
   },
   '/login': { index: false, title: 'Connexion — DelegPharma', desc: 'Accédez à votre espace délégué médical DelegPharma.', canonical: '/login', jsonLd: null, body: loginBody },
-  '/inscription': { index: false, title: 'Créer un compte gratuit — DelegPharma', desc: 'Créez votre compte gratuit DelegPharma : découvrez le CRM des délégués médicaux et des laboratoires pharmaceutiques au Sénégal, puis abonnez-vous en Mobile Money (Wave, Orange Money, QR), carte Visa/Mastercard ou PayPal.', canonical: '/inscription', jsonLd: null, body: inscriptionBody },
+  '/inscription': { index: true, title: 'Créer un compte gratuit — DelegPharma', desc: 'Créez votre compte gratuit DelegPharma : découvrez le CRM des délégués médicaux et des laboratoires pharmaceutiques au Sénégal, puis abonnez-vous en Mobile Money (Wave, Orange Money, QR), carte Visa/Mastercard ou PayPal.', canonical: '/inscription', jsonLd: null, body: inscriptionBody },
   '/a-propos': {
     index: true,
     title: 'À propos — DelegPharma, le CRM des laboratoires et délégués médicaux du Sénégal',

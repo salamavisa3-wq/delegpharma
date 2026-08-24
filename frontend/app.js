@@ -51,7 +51,7 @@ async function init() {
     if (map[p]) { location.hash = map[p]; state.hash = map[p]; }
   }
   try {
-    const hasAuthCookie = document.cookie.split(';').some(c => c.trim().startsWith('token='));
+    const hasAuthCookie = document.cookie.split(';').some(c => c.trim().startsWith('dp_token='));
     if (!hasAuthCookie) throw new Error('no token');
     const me = await api('/auth/me');
     state.user = me.user;

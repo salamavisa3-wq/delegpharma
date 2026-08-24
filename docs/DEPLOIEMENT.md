@@ -55,6 +55,17 @@ PAY_MODE=cinetpay
 CINETPAY_APIKEY=<clé marchand>
 CINETPAY_SITE_ID=<id site marchand>
 APP_BASE_URL=https://app.delegpharma.com
+
+# Identité légale / contact — obligatoire avant mise en prod réelle (site encaissant des
+# paiements). Sans ces valeurs, /contact et /mentions-legales restent en texte de repli
+# et /mentions-legales est légalement incomplète. Voir .env.example pour le détail.
+SUPPORT_EMAIL=<email support>
+SUPPORT_WHATSAPP=<numéro WhatsApp>
+LEGAL_ENTITY_NAME=<raison sociale + forme juridique>
+LEGAL_ADDRESS=<adresse enregistrée>
+LEGAL_RC=<registre de commerce>
+LEGAL_NINEA=<NINEA>
+LEGAL_DIRECTOR_NAME=<directeur de la publication>
 ```
 
 > Le schéma (14 tables) et les données de référence (14 régions / 79 districts, formules, comptes)

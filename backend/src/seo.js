@@ -12,6 +12,31 @@ const here = dirname(fileURLToPath(import.meta.url));
 const BASE = 'https://app.delegpharma.com';
 const SHELL = readFileSync(resolve(here, '../../frontend/index.html'), 'utf8');
 
+// Identité légale / contact — jamais codée en dur : lue depuis l'environnement (voir .env.example).
+// Tant que ces variables ne sont pas définies, /contact et /mentions-legales affichent un texte
+// de repli honnête (aucune coordonnée inventée) plutôt qu'un marqueur de template du type "[à compléter]".
+const SUPPORT_EMAIL = (process.env.SUPPORT_EMAIL || '').trim();
+const SUPPORT_WHATSAPP = (process.env.SUPPORT_WHATSAPP || '').trim();
+const LEGAL_ENTITY_NAME = (process.env.LEGAL_ENTITY_NAME || '').trim();
+const LEGAL_ADDRESS = (process.env.LEGAL_ADDRESS || '').trim();
+const LEGAL_RC = (process.env.LEGAL_RC || '').trim();
+const LEGAL_NINEA = (process.env.LEGAL_NINEA || '').trim();
+const LEGAL_DIRECTOR_NAME = (process.env.LEGAL_DIRECTOR_NAME || '').trim();
+const DPO_EMAIL = (process.env.DPO_EMAIL || SUPPORT_EMAIL || '').trim();
+const DATA_RETENTION_NOTE = (process.env.DATA_RETENTION_NOTE || '').trim();
+
+if (process.env.NODE_ENV === 'production') {
+  const missing = [
+    !SUPPORT_EMAIL && 'SUPPORT_EMAIL',
+    !LEGAL_ENTITY_NAME && 'LEGAL_ENTITY_NAME',
+    !LEGAL_ADDRESS && 'LEGAL_ADDRESS',
+    !LEGAL_DIRECTOR_NAME && 'LEGAL_DIRECTOR_NAME',
+  ].filter(Boolean);
+  if (missing.length) {
+    console.error(`[seo] ATTENTION : variables légales/contact manquantes en production (${missing.join(', ')}) — /contact et /mentions-legales affichent un texte de repli au lieu des vraies coordonnées. Voir .env.example.`);
+  }
+}
+
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const toFr = (n) => Number(n).toLocaleString('fr-FR');
 const jd = (o) => JSON.stringify(o).replace(/</g, '\\u003c'); // JSON-LD sûr dans <script>
@@ -1095,14 +1120,24 @@ const PAGES = {
       intro: 'Le site app.delegpharma.com est édité par DelegPharma, le CRM des délégués médicaux et des laboratoires pharmaceutiques au Sénégal.',
       sections: [
         { h: 'Éditeur', p: [
-          'DelegPharma — [Raison sociale et forme juridique à compléter] — [Adresse à compléter], Sénégal.',
-          'Directeur de la publication : [Nom à compléter].',
+          LEGAL_ENTITY_NAME && LEGAL_ADDRESS
+            ? `DelegPharma — ${esc(LEGAL_ENTITY_NAME)} — ${esc(LEGAL_ADDRESS)}, Sénégal.`
+            : 'DelegPharma — informations légales de l\'éditeur (raison sociale, adresse) en cours de publication.',
+          ...(LEGAL_RC || LEGAL_NINEA ? [[
+            LEGAL_RC && `RC ${esc(LEGAL_RC)}`,
+            LEGAL_NINEA && `NINEA ${esc(LEGAL_NINEA)}`,
+          ].filter(Boolean).join(' — ') + '.'] : []),
+          LEGAL_DIRECTOR_NAME
+            ? `Directeur de la publication : ${esc(LEGAL_DIRECTOR_NAME)}.`
+            : 'Directeur de la publication : information en cours de publication.',
         ] },
         { h: 'Hébergeur', p: [
           'Le site est hébergé par OVHcloud, 2 rue Kellermann, 59100 Roubaix, France (serveur dédié/VPS).',
         ] },
         { h: 'Contact', p: [
-          'Pour toute question : [adresse e-mail à compléter]. Pour les demandes professionnelles (laboratoires, délégués médicaux), voir la <a href="/contact">page contact</a>.',
+          SUPPORT_EMAIL
+            ? `Pour toute question : ${esc(SUPPORT_EMAIL)}. Pour les demandes professionnelles (laboratoires, délégués médicaux), voir la <a href="/contact">page contact</a>.`
+            : 'Pour toute question, voir la <a href="/contact">page contact</a>.',
         ] },
         { h: 'Propriété intellectuelle', p: [
           'Les contenus du site (textes, données, marque DelegPharma) sont la propriété de DelegPharma. Toute reproduction sans autorisation est interdite.',
@@ -1127,10 +1162,10 @@ const PAGES = {
           'Les données servent à fournir le service CRM (planification des tournées, CRV, suivi des objectifs), à la facturation et au support client. Elles ne sont jamais revendues à des tiers.',
         ] },
         { h: 'Base légale et conservation', p: [
-          'Le traitement repose sur l\'exécution du contrat de service et le consentement. Les données sont conservées pendant la durée de l\'abonnement, puis [durée à compléter].',
+          `Le traitement repose sur l'exécution du contrat de service et le consentement. Les données sont conservées pendant la durée de l'abonnement${DATA_RETENTION_NOTE ? `, puis ${esc(DATA_RETENTION_NOTE)}` : ', puis pour la durée nécessaire au respect de nos obligations légales et comptables.'}`,
         ] },
         { h: 'Vos droits', p: [
-          'Conformément à la loi sénégalaise n° 2008-12 sur la protection des données personnelles et au RGPD, vous disposez d\'un droit d\'accès, de rectification et de suppression de vos données. Pour l\'exercer : [adresse e-mail à compléter].',
+          `Conformément à la loi sénégalaise n° 2008-12 sur la protection des données personnelles et au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression de vos données.${DPO_EMAIL ? ` Pour l'exercer : ${esc(DPO_EMAIL)}.` : ' Pour l\'exercer, voir la <a href="/contact">page contact</a>.'}`,
         ] },
       ],
     }),
@@ -1146,8 +1181,9 @@ const PAGES = {
       intro: 'Une question sur DelegPharma, une démonstration pour votre laboratoire, un partenariat ? Voici comment nous joindre.',
       sections: [
         { h: 'Support et démonstration', p: [
-          'Pour les délégués médicaux et les laboratoires : [adresse e-mail à compléter].',
-          'WhatsApp : [numéro à compléter] — le canal le plus direct au Sénégal.',
+          ...(SUPPORT_EMAIL ? [`Pour les délégués médicaux et les laboratoires : ${esc(SUPPORT_EMAIL)}.`] : []),
+          ...(SUPPORT_WHATSAPP ? [`WhatsApp : ${esc(SUPPORT_WHATSAPP)} — le canal le plus direct au Sénégal.`] : []),
+          ...(!SUPPORT_EMAIL && !SUPPORT_WHATSAPP ? ['Créez un compte gratuit ci-dessous pour échanger avec notre équipe, ou consultez nos <a href="/tarifs">tarifs</a>.'] : []),
         ] },
         { h: 'Créer un compte', p: [
           'Vous pouvez aussi <a href="/inscription">créer un compte gratuit</a> pour découvrir le CRM, ou consulter les <a href="/tarifs">formules</a>.',

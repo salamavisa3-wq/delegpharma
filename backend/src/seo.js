@@ -1220,6 +1220,7 @@ Sitemap: ${BASE}/sitemap.xml
 function sitemapUrls() {
   const urls = [
     { loc: '/', freq: 'weekly', prio: '1.0' },
+    { loc: '/inscription', freq: 'monthly', prio: '0.7' },
     { loc: '/tarifs', freq: 'monthly', prio: '0.8' },
     { loc: '/laboratoires', freq: 'weekly', prio: '0.7' },
     { loc: '/carte-sanitaire', freq: 'weekly', prio: '0.9' },

@@ -199,7 +199,7 @@ async function dashboardView() {
 }
 function delegueDash(d) {
   const s = d.stats || {};
-  const rows = d.recentes.map((v) => `<tr><td>${fmtDate(v.date)}</td><td>${esc(v.professionnel)}</td><td>${badgeRes(v.resultat)}</td><td>${badgeStatut(v.statut)}</td><td><a class="small" href="/api/visites/${v.id}/pdf" target="_blank">PDF</a></td></tr>`).join('');
+  const rows = d.recentes.map((v) => `<tr><td>${fmtDate(v.date)}</td><td>${esc(v.professionnel)}</td><td>${badgeRes(v.resultat)}</td><td>${badgeStatut(v.statut)}</td><td><a class="small" href="/api/visites/${v.id}/pdf" data-action="crv-pdf" data-id="${v.id}" data-date="${v.date}">PDF</a></td></tr>`).join('');
   return `
   <div class="stats">
     <div class="stat"><div class="n">${s.brouillon || 0}</div><div class="l">Brouillons</div></div>
@@ -364,7 +364,7 @@ async function refreshCrvList() {
     <tbody>${rows.map((v) => `<tr>
       <td>${fmtDate(v.date)}</td><td><b>${esc(v.professionnel)}</b></td><td class="muted">${esc(v.district)}</td>
       <td>${badgeRes(v.resultat)}</td><td>${badgeStatut(v.statut)}</td>
-      <td><a class="small" href="/api/visites/${v.id}/pdf" target="_blank">PDF</a></td>
+      <td><a class="small" href="/api/visites/${v.id}/pdf" data-action="crv-pdf" data-id="${v.id}" data-date="${v.date}">PDF</a></td>
       <td>${crvActions(v)}</td>
     </tr>`).join('')}</tbody></table>`;
 }
@@ -376,6 +376,23 @@ function crvActions(v) {
     out.push(`<button class="small danger" data-action="crv-refuse" data-id="${v.id}">Refuser</button>`);
   }
   return out.join(' ');
+}
+// Téléchargement PDF sans nouvel onglet : fetch + blob (résiste aux bloqueurs de popups,
+// fonctionne sur mobile, et affiche une erreur claire si la session a expiré).
+async function downloadPdf(id, date) {
+  try {
+    const res = await fetch(`/api/visites/${id}/pdf`, { credentials: 'same-origin' });
+    if (!res.ok) throw new Error(res.status === 401 ? 'Session expirée — reconnectez-vous' : `Erreur ${res.status}`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = date ? `CRV-${id}-${date}.pdf` : `CRV-${id}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (err) { toast(err.message); }
 }
 async function crvNewView(psId, psNom) {
   renderMain('<div class="muted">Chargement…</div>');
@@ -894,6 +911,7 @@ function bind() {
         crvFilters.statut = $('#c-statut').value; crvFilters.region_id = $('#c-region').value; crvFilters.district_id = $('#c-district').value;
         return refreshCrvList();
       }
+      if (act === 'crv-pdf') { e.preventDefault(); downloadPdf(el.dataset.id, el.dataset.date); return; }
       if (act === 'crv-add-produit') {
         const id = Number($('#p-select').value); const qty = Number($('#p-qty').value) || 1;
         const pr = state.catalog.produits.find((x) => x.id === id);
@@ -1102,7 +1120,7 @@ async function openCrvFiche(id) {
         ${v.prochaine_visite ? `<div class="muted">Prochaine visite : ${fmtDate(v.prochaine_visite)}</div>` : ''}
         ${v.motif_refus ? `<div style="color:var(--red)">Motif de refus : ${esc(v.motif_refus)}</div>` : ''}
         <div class="docs">${docs}</div>
-        <div><a class="primary" style="color:var(--teal);font-weight:600" href="/api/visites/${v.id}/pdf" target="_blank">⬇ Télécharger le PDF</a></div>
+        <div><a class="primary" style="color:var(--teal);font-weight:600" href="/api/visites/${v.id}/pdf" data-action="crv-pdf" data-id="${v.id}" data-date="${v.date}">⬇ Télécharger le PDF</a></div>
       </div>`, 'fiche');
   } catch (err) { toast(err.message); }
 }

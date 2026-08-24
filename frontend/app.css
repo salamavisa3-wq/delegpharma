@@ -118,6 +118,14 @@ nav.main a.active { background: var(--teal); color: #fff; }
 .docs { display: flex; gap: 8px; flex-wrap: wrap; }
 .chip { background: #f1f5f9; border-radius: 999px; padding: 3px 10px; font-size: 12px; color: var(--ink); }
 .products-adder { display: flex; gap: 8px; align-items: center; }
+/* Sélecteur de produit avec recherche (gros portefeuilles) */
+.picker { position: relative; flex: 1 1 240px; min-width: 0; }
+.picker input[data-picker-input] { padding-right: 30px; }
+.picker-list { position: absolute; z-index: 60; left: 0; right: 0; top: calc(100% + 4px); background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 10px 30px rgba(15, 23, 42, .14); max-height: 280px; overflow: auto; padding: 4px; }
+.picker-item { display: block; width: 100%; text-align: left; background: none; border: 0; border-radius: 8px; padding: 8px 10px; cursor: pointer; font: inherit; }
+.picker-item b { display: block; }
+.picker-item:hover, .picker-item.sel { background: var(--teal-soft); }
+.picker-empty, .picker-more { padding: 8px 10px; font-size: 12px; color: var(--mut); }
 .check-list { display: grid; gap: 6px; }
 .check-list label { display: flex; gap: 8px; align-items: center; font-weight: 400; color: var(--ink); font-size: 14px; margin: 0; }
 .check-list input[type=checkbox] { width: auto; }
@@ -185,7 +193,7 @@ article details p { margin: 8px 0 0; color: var(--mut); font-size: 14px; }
   .form-row > div { width: 100%; }
   .cards { grid-template-columns: 1fr; }
   .products-adder { flex-wrap: wrap; }
-  .products-adder select { flex: 1 1 100%; }
+  .products-adder .picker { flex: 1 1 100%; }
   .products-adder input[type=number] { flex: 0 0 90px; }
   .products-adder button { flex: 1 1 auto; }
   table { display: block; width: auto; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }

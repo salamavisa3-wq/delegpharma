@@ -5,6 +5,49 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 const today = () => new Date().toISOString().slice(0, 10);
 const fmtDate = (d) => (d ? String(d).slice(0, 10) : '—');
 
+/* ---------- Sélecteur de produit (recherche/autocomplétion gros portefeuilles) ---------- */
+const pickerNorm = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+function pickerHTML(id, name = 'produit_id', placeholder = 'Rechercher un produit (nom ou molécule)…') {
+  return `<div class="picker" data-picker="${id}">
+    <input type="text" data-picker-input placeholder="${placeholder}" autocomplete="off" aria-expanded="false">
+    <input type="hidden" name="${name}" value="" data-picker-value>
+    <div class="picker-list" data-picker-list hidden></div>
+  </div>`;
+}
+function renderPickerList(picker) {
+  const input = picker.querySelector('[data-picker-input]');
+  const list = picker.querySelector('[data-picker-list]');
+  const produits = (state.catalog && state.catalog.produits) || [];
+  const tokens = pickerNorm(input.value).split(/\s+/).filter(Boolean);
+  const rows = tokens.length
+    ? produits.filter((p) => tokens.every((t) => pickerNorm(p.nom + ' ' + p.dci).includes(t)))
+    : produits;
+  const max = 12, more = rows.length - max;
+  list.innerHTML = !rows.length ? '<div class="picker-empty">Aucun produit ne correspond.</div>'
+    : rows.slice(0, max).map((p) => `<button type="button" class="picker-item" data-action="picker-pick" data-id="${p.id}">
+        <b>${esc(p.nom)}</b> <span class="muted">${esc(p.dci)} · ${esc(p.presentation)}</span></button>`).join('')
+      + (more > 0 ? `<div class="picker-more">… ${more} autre${more > 1 ? 's' : ''} — affinez la recherche</div>` : '');
+  list.hidden = !rows.length;
+  input.setAttribute('aria-expanded', String(!list.hidden));
+  picker.dataset.active = '-1';
+}
+function pickerPick(picker, id) {
+  const pr = ((state.catalog && state.catalog.produits) || []).find((p) => p.id === Number(id));
+  if (!pr) return;
+  picker.querySelector('[data-picker-value]').value = pr.id;
+  const input = picker.querySelector('[data-picker-input]');
+  input.value = pr.nom;
+  input.setAttribute('aria-expanded', 'false');
+  picker.querySelector('[data-picker-list]').hidden = true;
+}
+function pickerReset(picker) {
+  picker.querySelector('[data-picker-input]').value = '';
+  picker.querySelector('[data-picker-value]').value = '';
+  picker.querySelector('[data-picker-list]').hidden = true;
+  picker.dataset.active = '-1';
+}
+function pickerValue(picker) { return Number(picker.querySelector('[data-picker-value]').value) || 0; }
+
 const state = { user: null, labo: null, catalog: null, abonnement: null, tarifs: null, laboratoires: null, selFormule: null, hash: location.hash || '#/landing' };
 let draft = { produits: [], docs: [] };
 let chatHistory = []; // historique de l'Assistant IA (en mémoire, reset au logout)
@@ -418,7 +461,7 @@ async function crvNewView(psId, psNom) {
         </div>
         <div><label>Produits présentés</label>
           <div class="products-adder">
-            <select id="p-select">${cat.produits.map((pr) => `<option value="${pr.id}">${esc(pr.nom)} — ${esc(pr.dci)}</option>`).join('')}</select>
+            ${pickerHTML('crv', 'produits', 'Rechercher un produit (nom ou molécule)…')}
             <input id="p-qty" type="number" min="1" value="1" style="width:80px">
             <button type="button" data-action="crv-add-produit">Ajouter</button>
           </div>
@@ -725,7 +768,7 @@ async function objectifsView() {
 async function objectifNewModal() {
   const [cat, regions, delegues] = await Promise.all([catalog(), api('/regions'), api('/delegues')]);
   modal('Fixer un objectif', `
-    <div><label>Produit phare</label><select name="produit_id">${cat.produits.map((p) => `<option value="${p.id}">${esc(p.nom)} — ${esc(p.dci)}</option>`).join('')}</select></div>
+    <div><label>Produit phare</label>${pickerHTML('obj', 'produit_id', 'Rechercher un produit (nom ou molécule)…')}</div>
     <div><label>Délégué (vide = zone entière)</label><select name="user_id"><option value="">Toute l'équipe</option>${delegues.map((d) => `<option value="${d.id}">${esc(d.nom)}</option>`).join('')}</select></div>
     <div class="form-row">
       <div><label>Région</label><select name="region_id" data-slot="region"><option value="">Tout le pays</option>${regions.map((r) => `<option value="${r.id}">${esc(r.nom)}</option>`).join('')}</select></div>
@@ -872,7 +915,7 @@ async function campagneNewModal() {
   const regions = await api('/regions');
   modal('Nouvelle campagne', `
     <div><label>Nom</label><input name="nom" required></div>
-    <div><label>Produit</label><select name="produit_id" required>${cat.produits.map((p) => `<option value="${p.id}">${esc(p.nom)} — ${esc(p.dci)}</option>`).join('')}</select></div>
+    <div><label>Produit</label>${pickerHTML('camp', 'produit_id', 'Rechercher un produit (nom ou molécule)…')}</div>
     <div class="form-row">
       <div><label>N° agrément ARP</label><input name="agrement_arp" placeholder="ARP-XXXX"></div>
       <div><label>Objectif (visites validées)</label><input name="objectif" type="number" min="1" required></div>
@@ -888,6 +931,9 @@ async function campagneNewModal() {
 function bind() {
   // Délégation sur document (view + modaux, les 3 remplacés à chaque render).
   document.onclick = async (e) => {
+    if (!e.target.closest('[data-picker]')) {
+      document.querySelectorAll('.picker-list').forEach((l) => { l.hidden = true; l.closest('.picker').querySelector('[data-picker-input]').setAttribute('aria-expanded', 'false'); });
+    }
     const el = e.target.closest('[data-action]');
     if (!el) return;
     const act = el.dataset.action;
@@ -901,6 +947,7 @@ function bind() {
       }
       if (act === 'logout') { await api('/auth/logout', { method: 'POST' }); state.user = null; state.hash = '#/landing'; chatHistory = []; render(); return; }
       if (act === 'modal-close') { if (!e.target.closest('[data-stop]')) closeModal(); return; }
+      if (act === 'picker-pick') { pickerPick(el.closest('[data-picker]'), Number(el.dataset.id)); return; }
 
       if (act === 'ps-apply') {
         psFilters.region_id = $('#f-region').value; psFilters.district_id = $('#f-district').value;
@@ -920,10 +967,12 @@ function bind() {
       if (act === 'crv-pdf') { e.preventDefault(); downloadPdf(el.dataset.id, el.dataset.date); return; }
       if (act === 'crv-doc') { e.preventDefault(); downloadDoc(el.dataset.id, el.dataset.idx, el.dataset.nom); return; }
       if (act === 'crv-add-produit') {
-        const id = Number($('#p-select').value); const qty = Number($('#p-qty').value) || 1;
-        const pr = state.catalog.produits.find((x) => x.id === id);
+        const picker = $('[data-picker="crv"]'); const id = pickerValue(picker); const qty = Number($('#p-qty').value) || 1;
+        const pr = ((state.catalog && state.catalog.produits) || []).find((x) => x.id === id);
+        if (!pr) { toast('Recherchez et choisissez un produit'); return; }
         if (draft.produits.some((x) => x.produit_id === id)) { toast('Produit déjà ajouté'); return; }
         draft.produits.push({ produit_id: id, qty, nom: pr.nom });
+        pickerReset(picker);
         return renderDraftSlots();
       }
       if (act === 'crv-remove-produit') { draft.produits.splice(el.dataset.i, 1); return renderDraftSlots(); }
@@ -989,6 +1038,32 @@ function bind() {
       renderDraftSlots();
     }
   };
+  document.oninput = (e) => {
+    const input = e.target.closest('[data-picker-input]');
+    if (input) renderPickerList(input.closest('.picker'));
+  };
+  document.onfocusin = (e) => {
+    const input = e.target.closest('[data-picker-input]');
+    if (input) { renderPickerList(input.closest('.picker')); input.select(); }
+  };
+  document.onkeydown = (e) => {
+    const input = document.activeElement && document.activeElement.closest('[data-picker-input]');
+    if (!input) return;
+    const picker = input.closest('.picker');
+    const list = picker.querySelector('[data-picker-list]');
+    if (list.hidden) return;
+    const items = [...list.querySelectorAll('.picker-item')];
+    if (!items.length) return;
+    let i = Number(picker.dataset.active || '-1');
+    if (e.key === 'ArrowDown') { i = Math.min(i + 1, items.length - 1); e.preventDefault(); }
+    else if (e.key === 'ArrowUp') { i = Math.max(i - 1, 0); e.preventDefault(); }
+    else if (e.key === 'Enter') { i = i < 0 ? 0 : i; e.preventDefault(); pickerPick(picker, Number(items[i].dataset.id)); return; }
+    else if (e.key === 'Escape') { list.hidden = true; input.setAttribute('aria-expanded', 'false'); return; }
+    else return;
+    picker.dataset.active = String(i);
+    items.forEach((it, j) => it.classList.toggle('sel', j === i));
+    items[i].scrollIntoView({ block: 'nearest' });
+  };
   document.onsubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
@@ -1024,7 +1099,9 @@ function bind() {
         closeModal(); toast('Tournée planifiée'); return location.reload();
       }
       if (name === 'campagne-new') {
-        await api('/campagnes', { method: 'POST', body: JSON.stringify(read(form)) });
+        const body = read(form);
+        if (!Number(body.produit_id)) throw new Error('Choisissez un produit');
+        await api('/campagnes', { method: 'POST', body: JSON.stringify(body) });
         closeModal(); toast('Campagne créée'); return location.reload();
       }
       if (name === 'inscription') {
@@ -1042,6 +1119,7 @@ function bind() {
         body.user_id = body.user_id ? Number(body.user_id) : null;
         body.region_id = body.region_id ? Number(body.region_id) : null;
         body.district_id = body.district_id ? Number(body.district_id) : null;
+        if (!Number(body.produit_id)) throw new Error('Choisissez un produit phare');
         body.produit_id = Number(body.produit_id);
         await api('/objectifs', { method: 'POST', body: JSON.stringify(body) });
         closeModal(); toast('Objectif fixé'); return showView();

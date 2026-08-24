@@ -454,7 +454,12 @@ async function crvNewView(psId, psNom) {
     <div class="card" style="max-width:760px">
       <h3 class="section-title">Nouveau compte rendu de visite</h3>
       <form data-form="crv-new">
-        <div><label>Professionnel de santé</label><select name="ps" required>${psOpts || '<option value="">Aucun PS — créez-en un dans le Référentiel</option>'}</select></div>
+        <div><label>Professionnel de santé</label>
+          <div style="display:flex;gap:8px;align-items:end">
+            <div style="flex:1;min-width:0"><select name="ps" required>${psOpts || '<option value="">Aucun PS — ajoutez-en un ci-contre</option>'}</select></div>
+            <button type="button" data-action="ps-new-crv" style="flex:0 0 auto;white-space:nowrap">+ Ajouter</button>
+          </div>
+        </div>
         <div class="form-row">
           <div><label>Date</label><input name="date" type="date" value="${today()}" required></div>
           <div><label>Résultat</label><select name="resultat"><option value="">—</option><option>accord</option><option>reserve</option><option>refus</option><option>absent</option></select></div>
@@ -902,6 +907,15 @@ async function psNewModal() {
     </div>
     <div><label>Téléphone</label><input name="telephone" placeholder="77 000 00 00"></div>`, 'ps-new');
 }
+// Rafraîchit le <select name="ps"> du CRV en place (sans recharger) et présélectionne le nouveau PS.
+async function refreshPsSelect(newId) {
+  const ps = await api('/professionnels');
+  const sel = $('#view [name="ps"]');
+  if (!sel) { location.reload(); return; }
+  sel.innerHTML = ps.map((p) => `<option value="${p.id}">${esc(p.nom)} — ${esc(p.district)}</option>`).join('') || '<option value="">Aucun PS</option>';
+  sel.value = String(newId);
+  draft.professionnel_id = Number(newId);
+}
 async function tourneeNewModal() {
   const regions = await api('/regions');
   modal('Planifier une tournée', `
@@ -957,6 +971,7 @@ function bind() {
       if (act === 'ps-reset') { psFilters = { region_id: '', district_id: '', specialite_id: '', potentiel: '', q: '' }; location.reload(); return; }
       if (act === 'ps-detail') { openPsFiche(el.dataset.id); return; }
       if (act === 'ps-new-open') { psNewModal(); return; }
+      if (act === 'ps-new-crv') { state.psFromCrv = true; psNewModal(); return; }
       if (act === 'crv-new-ps') { showCrvNew(el.dataset.id, el.dataset.nom); return; }
 
       if (act === 'crv-new') { showCrvNew(); return; }
@@ -1079,8 +1094,9 @@ function bind() {
         return;
       }
       if (name === 'ps-new') {
-        await api('/professionnels', { method: 'POST', body: JSON.stringify(read(form)) });
+        const r = await api('/professionnels', { method: 'POST', body: JSON.stringify(read(form)) });
         closeModal(); toast('Professionnel ajouté');
+        if (state.psFromCrv) { state.psFromCrv = false; return refreshPsSelect(r.id); }
         return location.reload();
       }
       if (name === 'crv-new') {

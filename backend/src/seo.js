@@ -472,6 +472,24 @@ function legalBody({ h1, intro, sections }) {
   </main>`;
 }
 
+function blogBody() {
+  const items = GUIDES.map((g) => `
+    <article style="margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid #eee">
+      <h2 style="font-size:19px;margin-bottom:6px"><a href="${g.path}">${esc(g.h1)}</a></h2>
+      <p style="line-height:1.7;margin:0 0 8px;color:var(--mut)">${g.desc}</p>
+      <a href="${g.path}" style="font-size:13px">Lire l'article →</a>
+    </article>`).join('');
+  return `
+  <main style="max-width:920px;margin:0 auto;padding:28px 16px">
+    ${publicHeader()}
+    <nav class="breadcrumb"><a href="/">Accueil</a> › Blog</nav>
+    <h1 style="font-size:26px;margin-bottom:12px">Le blog DelegPharma</h1>
+    <p class="hint" style="margin-bottom:20px">Guides et conseils pour les délégués médicaux et les laboratoires pharmaceutiques au Sénégal : métier, formation, salaire, tournées, CRV, carte sanitaire, CRM de visite médicale.</p>
+    ${items}
+    <p class="hint" style="margin-top:24px">DelegPharma, le CRM des délégués médicaux au Sénégal. <a href="/tarifs">Découvrir les tarifs</a> · <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a></p>
+  </main>`;
+}
+
 const GUIDES = [
   {
     path: '/blog/comment-devenir-delegue-medical-senegal',
@@ -1109,6 +1127,23 @@ const PAGES = {
     },
     body: aProposBody,
   },
+  '/blog': {
+    index: true,
+    title: 'Blog — guides du délégué médical et du laboratoire',
+    desc: 'Les guides de DelegPharma pour les délégués médicaux et les laboratoires pharmaceutiques au Sénégal : formation, salaire, tournées, CRV, carte sanitaire, CRM de visite médicale.',
+    canonical: '/blog',
+    jsonLd: () => ({
+      '@context': 'https://schema.org',
+      '@graph': [
+        { '@type': 'BreadcrumbList', itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Accueil', item: BASE + '/' },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: BASE + '/blog' },
+        ] },
+        { '@type': 'ItemList', itemListElement: GUIDES.map((g, i) => ({ '@type': 'ListItem', position: i + 1, name: g.h1, url: BASE + g.path })) },
+      ],
+    }),
+    body: blogBody,
+  },
   '/mentions-legales': {
     index: true,
     title: 'Mentions légales — DelegPharma',
@@ -1259,6 +1294,7 @@ function sitemapUrls() {
     { loc: '/inscription', freq: 'monthly', prio: '0.7' },
     { loc: '/tarifs', freq: 'monthly', prio: '0.8' },
     { loc: '/laboratoires', freq: 'weekly', prio: '0.7' },
+    { loc: '/blog', freq: 'weekly', prio: '0.8' },
     { loc: '/carte-sanitaire', freq: 'weekly', prio: '0.9' },
     { loc: '/a-propos', freq: 'monthly', prio: '0.5' },
     { loc: '/mentions-legales', freq: 'yearly', prio: '0.2' },

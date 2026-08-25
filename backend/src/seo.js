@@ -177,7 +177,7 @@ function tarifsBody() {
   <main style="max-width:920px;margin:0 auto;padding:28px 16px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
       <div class="brand">DelegPharma</div>
-      <div><a href="/">Accueil</a> · <a href="/tarifs">Tarifs</a> · <a href="/login">Connexion</a></div>
+      <div><a href="/">Accueil</a> · <a href="/delegue-medical">Délégué médical</a> · <a href="/tarifs">Tarifs</a> · <a href="/login">Connexion</a></div>
     </div>
     <h1 style="font-size:26px;margin-bottom:20px">Nos tarifs</h1>
     <div id="public">
@@ -209,7 +209,7 @@ function inscriptionBody() {
   <main style="max-width:920px;margin:0 auto;padding:28px 16px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
       <div class="brand">DelegPharma</div>
-      <div><a href="/">Accueil</a> · <a href="/tarifs">Tarifs</a> · <a href="/login">Connexion</a></div>
+      <div><a href="/">Accueil</a> · <a href="/delegue-medical">Délégué médical</a> · <a href="/tarifs">Tarifs</a> · <a href="/login">Connexion</a></div>
     </div>
     <h1 style="font-size:26px;margin-bottom:12px">Créer un compte gratuit</h1>
     <p class="hint" style="margin-bottom:20px">Le CRM des délégués médicaux et des laboratoires pharmaceutiques au Sénégal : tournées, comptes rendus de visite, objectifs et couverture par district. Sans formule : découverte en lecture seule. Avec formule : abonnement réglé par Mobile Money (Wave, Orange Money, QR), carte Visa/Mastercard ou PayPal.</p>
@@ -245,7 +245,7 @@ function laboratoiresBody() {
   <main style="max-width:920px;margin:0 auto;padding:28px 16px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
       <div class="brand">DelegPharma</div>
-      <div><a href="/">Accueil</a> · <a href="/tarifs">Tarifs</a> · <a href="/login">Connexion</a></div>
+      <div><a href="/">Accueil</a> · <a href="/delegue-medical">Délégué médical</a> · <a href="/tarifs">Tarifs</a> · <a href="/login">Connexion</a></div>
     </div>
     <h1 style="font-size:26px;margin-bottom:12px">Laboratoires pharmaceutiques au Sénégal</h1>
     <p class="hint" style="margin-bottom:20px">Annuaire des laboratoires référencés sur DelegPharma. La liste est enrichie régulièrement.</p>
@@ -259,7 +259,7 @@ function publicHeader() {
   return `
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
     <div class="brand">DelegPharma</div>
-    <div><a href="/">Accueil</a> · <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a> · <a href="/tarifs">Tarifs</a> · <a href="/a-propos">À propos</a> · <a href="/login">Connexion</a></div>
+    <div><a href="/">Accueil</a> · <a href="/delegue-medical">Délégué médical</a> · <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a> · <a href="/tarifs">Tarifs</a> · <a href="/a-propos">À propos</a> · <a href="/login">Connexion</a></div>
   </div>`;
 }
 
@@ -486,6 +486,72 @@ function blogBody() {
     <h1 style="font-size:26px;margin-bottom:12px">Le blog DelegPharma</h1>
     <p class="hint" style="margin-bottom:20px">Guides et conseils pour les délégués médicaux et les laboratoires pharmaceutiques au Sénégal : métier, formation, salaire, tournées, CRV, carte sanitaire, CRM de visite médicale.</p>
     ${items}
+    <p class="hint" style="margin-top:24px">DelegPharma, le CRM des délégués médicaux au Sénégal. <a href="/tarifs">Découvrir les tarifs</a> · <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a></p>
+  </main>`;
+}
+
+/* ---------- Page pilier : Délégué médical (SSR public) ---------- */
+
+const DELEGUE_FAQ = [
+  { q: 'C\'est quoi un délégué médical ?', a: 'Un délégué médical représente un laboratoire pharmaceutique auprès des professionnels de santé (médecins, infirmiers, sages-femmes) : il informe sur les produits, promeut la prescription et rend compte de chaque visite.' },
+  { q: 'Quels sont les débouchés du métier ?', a: 'Superviseur ou délégué médical auprès des laboratoires pharmaceutiques, commercial chez les grossistes pharmaceutiques, commercial dans les industries pharmaceutiques, ou délégué pharmaceutique / vendeur en pharmacie.' },
+  { q: 'Combien gagne un délégué médical au Sénégal ?', a: 'La rémunération combine un fixe et des primes sur objectifs. Le total varie selon le laboratoire, la zone et l\'expérience : aucune grille publique unique ne fait foi. Voir notre <a href="/blog/salaire-remuneration-delegue-medical-senegal">guide du salaire</a>.' },
+  { q: 'Quelles formations pour devenir délégué médical ?', a: 'La licence professionnelle (ISMED UCAD, IUP-Santé) et les instituts privés (IPAM, IFAA, ICOA Santé) préparent au métier. Les conditions et frais relèvent de chaque établissement. Voir notre <a href="/blog/formations-delegue-medical-senegal">guide des formations</a>.' },
+  { q: 'C\'est quoi un CRV ?', a: 'Un compte rendu de visite : la trace structurée de chaque visite d\'un professionnel de santé. Il permet au laboratoire de suivre la couverture réelle de sa force de vente. Voir le <a href="/blog/crv-compte-rendu-de-visite-guide">guide du CRV</a>.' },
+  { q: 'Comment DelegPharma aide le délégué médical ?', a: 'DelegPharma s\'appuie sur la carte sanitaire officielle (14 régions, 79 districts), référence les professionnels de santé, planifie les tournées, enregistre les CRV et suit les objectifs — pour piloter sa zone de bout en bout.' },
+];
+
+function delegueMedicalBody() {
+  const faqHtml = DELEGUE_FAQ.map((f) => `<details style="margin:8px 0"><summary style="cursor:pointer;font-weight:600">${esc(f.q)}</summary><p style="line-height:1.7;margin-top:6px">${f.a}</p></details>`).join('');
+  return `
+  <main style="max-width:920px;margin:0 auto;padding:28px 16px">
+    ${publicHeader()}
+    <nav class="breadcrumb"><a href="/">Accueil</a> › Délégué médical</nav>
+    <article>
+      <h1 style="font-size:26px;margin-bottom:12px">Délégué médical</h1>
+      <p class="hint" style="margin-bottom:20px">Le délégué médical est le lien entre les laboratoires pharmaceutiques et les professionnels de santé : il informe, promeut la prescription et anime sa zone au Sénégal — district par district.</p>
+      <p class="hint" style="font-size:13px;color:#667;margin-bottom:20px">Par DelegPharma — docteur en pharmacie, délégué médical au Sénégal · Mis à jour le 24 août 2026</p>
+      <section>
+        <h2 style="font-size:19px;margin:18px 0 10px">Objectif du métier</h2>
+        <p style="line-height:1.7;margin-bottom:10px">L\'objectif du délégué médical est de faire connaître les produits pharmaceutiques de son laboratoire aux prescripteurs : médecins, infirmières, sages-femmes, pharmaciens. Cela suppose une formation médicale solide — connaissance du médicament, information médicale — et la promotion quotidienne des produits.</p>
+        <ul style="line-height:1.8;margin-bottom:10px">
+          <li>Informer les professionnels de santé sur les produits et leur bon usage</li>
+          <li>Promouvoir les produits pharmaceutiques du laboratoire représenté</li>
+          <li>Suivre l\'évolution de la prescription dans sa zone</li>
+          <li>Rendre un compte rendu de visite (CRV) pour chaque rencontre</li>
+        </ul>
+      </section>
+      <section>
+        <h2 style="font-size:19px;margin:18px 0 10px">Les débouchés</h2>
+        <p style="line-height:1.7;margin-bottom:10px">Le métier et la formation de délégué médical ouvrent plusieurs voies dans le secteur pharmaceutique :</p>
+        <ul style="line-height:1.8;margin-bottom:10px">
+          <li>Superviseur ou délégué médical auprès des laboratoires pharmaceutiques</li>
+          <li>Commercial au niveau des grossistes pharmaceutiques</li>
+          <li>Commercial au niveau des industries pharmaceutiques</li>
+          <li>Délégué pharmaceutique ou vendeur en pharmacie</li>
+        </ul>
+        <p style="line-height:1.7;margin-bottom:10px">Voir le <a href="/blog/le-metier-de-delegue-medical">métier de délégué médical</a> en détail et le <a href="/blog/comment-devenir-delegue-medical-senegal">guide pour devenir délégué médical</a>.</p>
+      </section>
+      <section>
+        <h2 style="font-size:19px;margin:18px 0 10px">Le métier au quotidien</h2>
+        <p style="line-height:1.7;margin-bottom:10px">Une semaine de délégué médical s\'organise autour de tournées sur le terrain : chaque visite est préparée (argumentaire produit, objectif de rencontre), réalisée chez le prescripteur, puis tracée dans un compte rendu de visite.</p>
+        <p style="line-height:1.7;margin-bottom:10px"><a href="/blog/preparer-visite-medicale-argumentaire-produit">Préparer une visite médicale</a> · <a href="/blog/tournees-terrain-delegue-medical">Optimiser ses tournées</a> · <a href="/blog/crv-compte-rendu-de-visite-guide">Le CRV</a> · <a href="/blog/professionnels-de-sante-senegal-referentiel-delegue">Le référentiel des professionnels de santé</a></p>
+      </section>
+      <section>
+        <h2 style="font-size:19px;margin:18px 0 10px">Le métier avec DelegPharma</h2>
+        <p style="line-height:1.7;margin-bottom:10px">DelegPharma est le CRM construit pour le délégué médical sénégalais : il s\'appuie sur la carte sanitaire officielle (<b>14 régions, 79 districts</b>), référence les professionnels de santé, planifie les tournées, enregistre les CRV et suit les objectifs produits.</p>
+        <p style="line-height:1.7;margin-bottom:10px"><a href="/carte-sanitaire">La carte sanitaire</a> · <a href="/tarifs">Les tarifs</a> · <a href="/inscription">Créer un compte gratuit</a></p>
+      </section>
+      <section>
+        <h2 style="font-size:19px;margin:18px 0 10px">Se former au métier</h2>
+        <p style="line-height:1.7;margin-bottom:10px">Au Sénégal, la licence professionnelle (ISMED UCAD, IUP-Santé) et les instituts privés (IPAM, IFAA, ICOA Santé) préparent au métier. Les frais, la durée et les conditions d\'admission relèvent de chaque établissement : renseignez-vous directement auprès d\'eux.</p>
+        <p style="line-height:1.7;margin-bottom:10px"><a href="/blog/formations-delegue-medical-senegal">Les formations de délégué médical</a> · <a href="/blog/salaire-remuneration-delegue-medical-senegal">Le salaire du délégué médical</a></p>
+      </section>
+      <section>
+        <h2 style="font-size:19px;margin:18px 0 10px">Questions fréquentes</h2>
+        ${faqHtml}
+      </section>
+    </article>
     <p class="hint" style="margin-top:24px">DelegPharma, le CRM des délégués médicaux au Sénégal. <a href="/tarifs">Découvrir les tarifs</a> · <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a></p>
   </main>`;
 }
@@ -1144,6 +1210,38 @@ const PAGES = {
     }),
     body: blogBody,
   },
+  '/delegue-medical': {
+    index: true,
+    title: 'Délégué médical — métier, formation, salaire, outils | DelegPharma',
+    desc: 'Délégué médical au Sénégal : objectifs, débouchés (laboratoires, grossistes, industries, vendeur en pharmacie), formations et outils de visite médicale.',
+    canonical: '/delegue-medical',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@graph': [
+        { '@type': 'BreadcrumbList', itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Accueil', item: BASE + '/' },
+          { '@type': 'ListItem', position: 2, name: 'Délégué médical', item: BASE + '/delegue-medical' },
+        ] },
+        {
+          '@type': 'WebPage',
+          '@id': BASE + '/delegue-medical',
+          url: BASE + '/delegue-medical',
+          name: 'Délégué médical — métier, formation, salaire, outils | DelegPharma',
+          headline: 'Délégué médical',
+          description: 'Délégué médical au Sénégal : objectifs, débouchés (laboratoires, grossistes, industries, vendeur en pharmacie), formations et outils de visite médicale.',
+          isPartOf: { '@type': 'WebSite', '@id': BASE + '/#website', url: BASE + '/', name: 'DelegPharma' },
+          publisher: { '@type': 'Organization', '@id': BASE + '/#org', name: 'DelegPharma', url: BASE + '/', logo: { '@type': 'ImageObject', url: BASE + '/og-image-1200x630.png' } },
+          author: { '@type': 'Organization', name: 'DelegPharma', url: BASE + '/' },
+          datePublished: '2026-08-24',
+          dateModified: '2026-08-24',
+          primaryImageOfPage: { '@type': 'ImageObject', url: BASE + '/og-image-1200x630.png', width: 1200, height: 630 },
+          inLanguage: 'fr',
+        },
+        { '@type': 'FAQPage', mainEntity: DELEGUE_FAQ.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a.replace(/<[^>]+>/g, '') } })) },
+      ],
+    },
+    body: delegueMedicalBody,
+  },
   '/mentions-legales': {
     index: true,
     title: 'Mentions légales — DelegPharma',
@@ -1296,6 +1394,7 @@ function sitemapUrls() {
     { loc: '/laboratoires', freq: 'weekly', prio: '0.7' },
     { loc: '/blog', freq: 'weekly', prio: '0.8' },
     { loc: '/carte-sanitaire', freq: 'weekly', prio: '0.9' },
+    { loc: '/delegue-medical', freq: 'monthly', prio: '0.9' },
     { loc: '/a-propos', freq: 'monthly', prio: '0.5' },
     { loc: '/mentions-legales', freq: 'yearly', prio: '0.2' },
     { loc: '/politique-de-confidentialite', freq: 'yearly', prio: '0.2' },

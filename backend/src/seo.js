@@ -905,7 +905,7 @@ const GUIDES = [
     intro: 'Qui le délégué médical visite-t-il ? Médecins, pharmaciens, sages-femmes, infirmiers, dentistes… Chaque catégorie a ses besoins, ses horaires et son rôle dans la prescription. Le référentiel les structure pour une couverture complète.',
     sections: [
       { h: 'Les catégories et leur rôle dans la prescription', p: [
-        'Les médecins sont les prescripteurs principaux — généralistes et spécialistes. Les <a href="/blog/pharmacien-officine-senegal-visite-medicale">pharmaciens dispensent et conseillent</a>, parfois en proposant une alternative. Les sages-femmes jouent un rôle clé en santé maternelle et néonatale. Les infirmiers sont en première ligne dans les postes de santé. Les dentistes forment un réseau distinct.',
+        'Les <a href="/blog/medecin-prescripteur-senegal-visite-medicale">médecins sont les prescripteurs principaux</a> — généralistes et spécialistes. Les <a href="/blog/pharmacien-officine-senegal-visite-medicale">pharmaciens dispensent et conseillent</a>, parfois en proposant une alternative. Les sages-femmes jouent un rôle clé en santé maternelle et néonatale. Les infirmiers sont en première ligne dans les postes de santé. Les dentistes forment un réseau distinct.',
         'Chaque catégorie se visite avec un argumentaire adapté : le médecin attend des données, le pharmacien des conditions, la sage-femme des produits de santé maternelle, l\'infirmier une approche de soins.',
       ] },
       { h: 'Les structures où les rencontrer', p: [
@@ -1221,6 +1221,38 @@ const GUIDES = [
       { q: 'Qui régule l\'ouverture d\'une officine au Sénégal ?', a: 'L\'Agence sénégalaise de Réglementation pharmaceutique (ARP), dans le cadre de la loi n° 2023-06 du 13 juin 2023 et de son décret d\'application n° 2023-2421 du 27 décembre 2023, qui organise notamment l\'attribution des sites de création d\'officine.' },
       { q: 'Quel est le rôle de l\'Ordre des Pharmaciens du Sénégal ?', a: 'Il veille au respect des devoirs professionnels et de l\'éthique de la profession, et représente la pharmacie auprès des pouvoirs publics.' },
       { q: 'Que doit apporter un délégué médical en visite chez un pharmacien ?', a: 'Une information produit claire, la disponibilité chez le grossiste répartiteur habituel de l\'officine, et des conditions commerciales — plutôt qu\'un argumentaire clinique destiné au prescripteur.' },
+    ],
+    published: '2026-09-03',
+    modified: '2026-09-03',
+  },
+  {
+    path: '/blog/medecin-prescripteur-senegal-visite-medicale',
+    title: 'Le médecin prescripteur au Sénégal : déontologie et visite du délégué médical',
+    desc: 'Le médecin, premier prescripteur au Sénégal : rôle, cadre déontologique de l\'Ordre National des Médecins (ONMS) et bonnes pratiques de la visite médicale.',
+    h1: 'Le médecin face au délégué médical',
+    intro: 'Premier prescripteur, le médecin attend d\'une visite médicale des données cliniques solides — dans un cadre déontologique strict qui encadre la relation entre professionnels de santé et industrie pharmaceutique.',
+    sections: [
+      { h: 'Le rôle du médecin dans la prescription', p: [
+        'Généraliste ou spécialiste, le médecin est le prescripteur principal ciblé par le délégué médical. Sa décision de prescription s\'appuie sur des données cliniques, l\'expérience et, pour partie, l\'information apportée par les laboratoires lors des visites.',
+        'Le référentiel MSAS/ANSD de la carte sanitaire recense les médecins par structure et par district. Voir le <a href="/blog/professionnels-de-sante-senegal-referentiel-delegue">référentiel des professionnels de santé</a>.',
+      ] },
+      { h: 'Le cadre déontologique de la visite médicale', p: [
+        'L\'Ordre National des Médecins du Sénégal (ONMS) veille au respect du code de déontologie médicale (décret n° 67-147 du 10 février 1967, pris en application de la loi n° 66-069 du 4 juillet 1966). Ce code interdit toute collusion entre médecins et pharmaciens, auxiliaires médicaux ou toute autre personne.',
+        'Pour le délégué médical, cela signifie une visite fondée sur l\'information produit et les données scientifiques — jamais sur un avantage indu. Un compte rendu de visite tracé et daté est la meilleure preuve du respect de ce cadre. Voir aussi notre guide sur <a href="/blog/agrement-arp-laboratoires">l\'agrément ARP</a> des produits présentés.',
+      ] },
+      { h: 'Ce qu\'attend un médecin d\'une visite de délégué médical', p: [
+        'Le temps de consultation étant compté, un médecin attend une visite brève, centrée sur des données cliniques précises : indications, posologie, effets indésirables, études de référence — adaptées à sa spécialité.',
+        'Un bon compte rendu de visite consigne la spécialité du médecin, les produits présentés et le résultat (accord, réserve, refus), pour affiner l\'argumentaire lors de la prochaine visite. Voir le <a href="/blog/preparer-visite-medicale-argumentaire-produit">guide pour préparer une visite médicale</a>.',
+      ] },
+      { h: 'Les médecins dans DelegPharma', p: [
+        'DelegPharma référence les médecins de la carte sanitaire par spécialité, structure et district, avec l\'historique complet des visites et des CRV — la traçabilité qu\'attendent à la fois le laboratoire et le cadre déontologique. <a href="/inscription">Créer un compte gratuit</a>.',
+      ] },
+    ],
+    faq: [
+      { q: 'Quel est le rôle de l\'Ordre National des Médecins du Sénégal (ONMS) ?', a: 'L\'ONMS veille au respect des principes de moralité, de compétence et de dévouement de la médecine, et fait appliquer le code de déontologie médicale auprès de ses membres.' },
+      { q: 'La visite médicale auprès des médecins est-elle réglementée au Sénégal ?', a: 'Le code de déontologie médicale (décret n° 67-147 du 10 février 1967) interdit toute collusion entre médecins et pharmaciens ou toute autre personne. La visite médicale doit rester une démarche d\'information, jamais un avantage indu.' },
+      { q: 'Que doit apporter un délégué médical en visite chez un médecin ?', a: 'Des données cliniques précises et adaptées à sa spécialité (indications, posologie, effets indésirables), dans un temps de visite généralement court.' },
+      { q: 'Pourquoi tracer chaque visite médecin dans un CRM ?', a: 'Un compte rendu de visite daté et structuré documente une démarche d\'information conforme, utile au laboratoire comme preuve de bonne pratique.' },
     ],
     published: '2026-09-03',
     modified: '2026-09-03',

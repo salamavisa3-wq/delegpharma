@@ -1413,4 +1413,4 @@ export function sitemapXml() {
   const urls = sitemapUrls().map((u) => `  <url><loc>${BASE}${u.loc}</loc><lastmod>2026-08-17</lastmod><changefreq>${u.freq}</changefreq><priority>${u.prio}</priority></url>`).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
-export { warmTarifs, warmLaboratoires, warmCarteSanitaire };
+export { warmTarifs, warmLaboratoires, warmCarteSanitaire, matchPage };

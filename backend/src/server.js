@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { initSchema } from './schema.js';
 import { seed, seedExtras, seedDemoActivity, seedCatalog } from './seed.js';
 import { requireAuth, requireRole } from './auth.js';
-import { seoShell, robotsTxt, sitemapXml, warmTarifs, warmLaboratoires, warmCarteSanitaire } from './seo.js';
+import { seoShell, robotsTxt, sitemapXml, warmTarifs, warmLaboratoires, warmCarteSanitaire, matchPage } from './seo.js';
 import authRoutes from './routes/auth.js';
 import referentielRoutes from './routes/referentiel.js';
 import crvRoutes from './routes/crv.js';
@@ -36,6 +36,10 @@ app.use(express.urlencoded({ extended: true })); // webhook CinetPay (form)
 
 // Santé
 app.get('/api/health', (req, res) =>
+  res.json({ ok: true, service: 'delegpharma', time: new Date().toISOString() }));
+
+// Liveness probe publique (uptime monitors) : un vrai endpoint, distinct des pages SSR.
+app.get('/healthz', (req, res) =>
   res.json({ ok: true, service: 'delegpharma', time: new Date().toISOString() }));
 
 // API — ordre important : les routes publiques (tarifs, webhook) doivent être
@@ -77,7 +81,11 @@ app.use(express.static(frontendDir, {
 }));
 app.use((req, res) => {
   if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Route API inconnue' });
-  return res.type('html').send(seoShell(req)); // head SEO + SSR des pages publiques
+  // P1 (skill saas-propulsion) : toute route inconnue renvoyait 200 → soft-404.
+  // matchPage est la source de vérité des routes publiques (PAGES + /carte-sanitaire/*).
+  // seoShell applique le FALLBACK noindex → page d'atterrissage utile, jamais indexée.
+  const status = matchPage(req.path) ? 200 : 404;
+  return res.status(status).type('html').send(seoShell(req));
 });
 
 // Filet de survie : une promesse rejetée ou une exception ne doit pas crash-loop le service.

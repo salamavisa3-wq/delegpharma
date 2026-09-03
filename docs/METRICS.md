@@ -24,7 +24,7 @@ mettre à jour les mesures, comparer à la baseline, tester UNE hypothèse.
 - [x] **Phase 1** — robots, sitemap dynamique, canoniques, JSON-LD, SSR, llms.txt
 - [x] **Phase 1 — résidu** : soft-404 corrigé 03/09 (voir Findings)
 - [x] **Phase 2** — GSC SA attachée, IndexNow (clé 6d9b…2d25), auto-ping + batch historiques
-- [~] **Phase 3** — 19 guides + hub carte sanitaire (14 régions) + tarifs ; **maillage home manquant**
+- [x] **Phase 3** — 19 guides + hub carte sanitaire (14 régions) + tarifs ; **maillage home corrigé 03/09** (P2)
 - [x] **Phase 4** — llms.txt riche, schéma citable, dates/sources dans les articles
 - [ ] **Phase 5** — ce fichier ; prochaine re-mesure : 2026-09-10
 
@@ -45,16 +45,19 @@ au durcissement.
 Observation (hors périmètre) : `/api/bogus` → 401 (router `requireAuth` monté avant le
 catch-all, comportement pré-existant ; `/api/` est disallow dans robots.txt, aucun impact SEO).
 
-### P2 — Maillage : la home ne lie ni `/blog` ni `/delegue-medical`
-La home SSR ne contient (ni nav ni header) **aucun lien** vers :
-- `/blog` (listing 19 guides) — aucun lien interne détecté depuis les pages vérifiées (orphelin hors sitemap)
-- `/delegue-medical` (page pilier FAQPage) — **0 lien depuis la home** (mais bien maillé depuis les sous-pages : 19 liens depuis /blog, + /tarifs /carte-sanitaire /inscription /laboratoires)
+### P2 — Maillage : la home ne lie ni `/blog` ni `/delegue-medical` — ✅ CORRIGÉ 03/09
+La home SSR ne contenait (ni nav ni header) **aucun lien** vers :
+- `/blog` (listing 19 guides) — aucun lien interne détecté (orphelin hors sitemap)
+- `/delegue-medical` (page pilier FAQPage) — **0 lien depuis la home**
 
-Conséquence : la page la plus forte du site ne transmet pas sa puissance vers ses deux hubs
-de contenu ; `/blog` découvert uniquement via sitemap.
-**Fix** : ajouter `/blog` et `/delegue-medical` dans la nav/footer SSR de la home.
-Hypothèse à tester : *« un lien nav home → /delegue-medical + /blog accélère leur crawlabilité
-et remonte le blog dans les SERPs métier. »*
+**Fix livré** (commit `a2441b4`) : dans `seo.js` —
+- `landingBody` (home) : hint contextuel dans le hero + liens footer → `/blog` et `/delegue-medical` (**×2 chacun**, vérifié live)
+- `publicHeader` : lien `/blog` ajouté → maillé depuis toutes les pages qui portent la nav SSR (a-propos, carte-sanitaire hub/régions/districts, articles, légales, blog, delegue-medical)
+
+Hypothèse à tester sur 2 semaines : *« un lien nav home → /delegue-medical + /blog accélère
+leur crawlabilité et remonte le blog dans les SERPs métier. »*
+Rappel : `/laboratoires` et `/tarifs` ont leur propre layout sans `publicHeader` (pas de lien
+`/blog` — comportement hérité, sans régression).
 
 ### P3 — Hubs minces (observation, pas un fix immédiat)
 `/laboratoires` ≈ 88 mots, `/carte-sanitaire` ≈ 171 mots. Ce sont des hubs de listes avec
@@ -65,6 +68,7 @@ liens vers sous-pages (données réelles) → acceptable, à étoffer si le temp
 
 ## Prochaine itération (2026-09-10)
 1. ~~Corriger P1 (soft-404)~~ ✅ fait 03/09 — `/definitely-not-a-page` → 404 vérifié.
-2. **Corriger P2** (maillage home → `/blog` + `/delegue-medical`) — toujours ouvert.
-3. E-E-A-T : signer les articles par une personne physique (renforcement nommé).
-4. Re-mesurer : sitemap, liens internes home, indexation GSC.
+2. ~~Corriger P2 (maillage home → `/blog` + `/delegue-medical`)~~ ✅ fait 03/09 — vérifié live.
+3. **E-E-A-T** : signer les articles par une personne physique (renforcement nommé).
+4. Re-mesurer : sitemap, liens internes home, indexation GSC + crawl budget (impact P1).
+5. Vérifier la prise d'indexation `/blog` dans les SERPs métier (hypothèse P2).

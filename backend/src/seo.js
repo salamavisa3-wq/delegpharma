@@ -495,7 +495,7 @@ function blogBody() {
 
 const DELEGUE_FAQ = [
   { q: 'C\'est quoi un délégué médical ?', a: 'Un délégué médical représente un laboratoire pharmaceutique auprès des professionnels de santé (médecins, infirmiers, sages-femmes) : il informe sur les produits, promeut la prescription et rend compte de chaque visite.' },
-  { q: 'Quels sont les débouchés du métier ?', a: 'Superviseur ou délégué médical auprès des laboratoires pharmaceutiques, commercial chez les grossistes pharmaceutiques, commercial dans les industries pharmaceutiques, ou délégué pharmaceutique / vendeur en pharmacie.' },
+  { q: 'Quels sont les débouchés du métier ?', a: 'Superviseur ou délégué médical auprès des laboratoires pharmaceutiques, commercial chez les <a href="/blog/grossiste-repartiteur-pharmaceutique-senegal">grossistes pharmaceutiques</a>, commercial dans les industries pharmaceutiques, ou délégué pharmaceutique / vendeur en pharmacie.' },
   { q: 'Combien gagne un délégué médical au Sénégal ?', a: 'La rémunération combine un fixe et des primes sur objectifs. Le total varie selon le laboratoire, la zone et l\'expérience : aucune grille publique unique ne fait foi. Voir notre <a href="/blog/salaire-remuneration-delegue-medical-senegal">guide du salaire</a>.' },
   { q: 'Quelles formations pour devenir délégué médical ?', a: 'La licence professionnelle (ISMED UCAD, IUP-Santé) et les instituts privés (IPAM, IFAA, ICOA Santé) préparent au métier. Les conditions et frais relèvent de chaque établissement. Voir notre <a href="/blog/formations-delegue-medical-senegal">guide des formations</a>.' },
   { q: 'C\'est quoi un CRV ?', a: 'Un compte rendu de visite : la trace structurée de chaque visite d\'un professionnel de santé. Il permet au laboratoire de suivre la couverture réelle de sa force de vente. Voir le <a href="/blog/crv-compte-rendu-de-visite-guide">guide du CRV</a>.' },
@@ -1156,6 +1156,39 @@ const GUIDES = [
       { q: 'Combien coûte un logiciel de gestion pour délégué médical au Sénégal ?', a: 'Les tarifs varient selon l\'éditeur. DelegPharma propose trois formules à 5 000, 10 000 et 15 000 FCFA par mois, payables en Mobile Money, carte bancaire ou PayPal.' },
       { q: 'Le CRV papier ou WhatsApp suffit-il encore ?', a: 'Ces méthodes fonctionnent pour un délégué isolé, mais elles ne remontent aucune donnée agrégée exploitable par le laboratoire pour piloter une force de vente ou une campagne produit.' },
       { q: 'Délégué médical et visiteur médical, est-ce le même métier ?', a: 'Oui, ce sont deux appellations du même métier : représentant terrain d\'un laboratoire pharmaceutique auprès des professionnels de santé. « Visiteur médical » est le terme le plus courant en France, « délégué médical » au Sénégal et en Afrique francophone.' },
+    ],
+    published: '2026-09-03',
+    modified: '2026-09-03',
+  },
+  {
+    path: '/blog/grossiste-repartiteur-pharmaceutique-senegal',
+    title: 'Grossiste répartiteur pharmaceutique au Sénégal : rôle, acteurs, force de vente',
+    desc: 'Le grossiste répartiteur pharmaceutique au Sénégal : rôle dans la chaîne du médicament, cadre réglementaire ARP, acteurs présents (SOGEN, UbiPharm Sénégal) et pilotage de la force commerciale.',
+    h1: 'Le grossiste répartiteur pharmaceutique au Sénégal',
+    intro: 'Entre le laboratoire qui fabrique ou importe le médicament et l\'officine qui le délivre, le grossiste répartiteur assure la distribution en gros. Un maillon réglementé, avec ses propres commerciaux terrain.',
+    sections: [
+      { h: 'Le rôle du grossiste répartiteur dans la chaîne du médicament', p: [
+        'Le grossiste répartiteur achète les médicaments aux laboratoires (fabricants ou importateurs) et les revend en gros aux officines, en assurant le stockage, la logistique et la disponibilité sur l\'ensemble du territoire — y compris dans les zones les moins accessibles.',
+        'Au Sénégal, plusieurs grossistes répartiteurs opèrent sur ce marché, parmi lesquels SOGEN et UbiPharm Sénégal (répartiteur du groupe UbiPharm, présent dans plusieurs pays d\'Afrique de l\'Ouest).',
+      ] },
+      { h: 'Le cadre réglementaire', p: [
+        'L\'activité de distribution en gros de produits pharmaceutiques est encadrée par l\'Agence sénégalaise de Réglementation pharmaceutique (ARP), dans le cadre de la loi n° 2023-06 du 13 juin 2023 relative au médicament et aux autres produits de santé et de son décret d\'application n° 2023-2421 du 27 décembre 2023, qui fixent les conditions d\'ouverture et d\'exploitation des établissements pharmaceutiques.',
+        'Un établissement pharmaceutique de fabrication et de distribution en gros doit disposer d\'un agrément ARP pour exercer, au même titre qu\'un laboratoire. Voir aussi notre guide sur <a href="/blog/agrement-arp-laboratoires">l\'agrément ARP</a>.',
+      ] },
+      { h: 'Les commerciaux du grossiste : un métier proche du délégué médical', p: [
+        'Le grossiste répartiteur emploie ses propres commerciaux, chargés de développer et fidéliser un portefeuille d\'officines : prise de commande, suivi des règlements, présentation des nouveautés et des opérations promotionnelles du répartiteur.',
+        'La logique terrain rejoint celle du délégué médical : une zone à couvrir, une tournée à planifier, un compte rendu de visite à consigner et des objectifs par produit ou par gamme à atteindre — mais avec un portefeuille d\'officines plutôt que de professionnels de santé prescripteurs.',
+      ] },
+      { h: 'Digitaliser le suivi d\'un réseau d\'officines', p: [
+        'Comme pour un laboratoire, un grossiste qui pilote sa force commerciale sans outil dédié perd en visibilité : doublons de visite, comptes rendus dispersés sur WhatsApp ou papier, couverture du réseau d\'officines difficile à mesurer.',
+        'Le référentiel de la carte sanitaire du Sénégal (14 régions, 79 districts) et la logique de tournées, CRV et objectifs de DelegPharma — pensée pour le délégué médical — répondent à la même structure de besoin pour un commercial de grossiste répartiteur. <a href="/tarifs">Voir les formules</a>.',
+      ] },
+    ],
+    faq: [
+      { q: 'Qu\'est-ce qu\'un grossiste répartiteur pharmaceutique ?', a: 'Un établissement pharmaceutique qui achète les médicaments aux laboratoires et les distribue en gros aux officines, en assurant le stockage et la logistique sur le territoire.' },
+      { q: 'Quels sont les grossistes répartiteurs présents au Sénégal ?', a: 'Plusieurs acteurs opèrent sur ce marché, parmi lesquels SOGEN et UbiPharm Sénégal. Pour la liste exhaustive et à jour, se référer à l\'Agence sénégalaise de Réglementation pharmaceutique (ARP).' },
+      { q: 'Un grossiste répartiteur a-t-il besoin d\'un agrément ARP ?', a: 'Oui, un établissement pharmaceutique de fabrication et de distribution en gros doit être agréé par l\'ARP pour exercer, dans le cadre de la loi n° 2023-06 et de son décret d\'application n° 2023-2421.' },
+      { q: 'Le métier de commercial chez un grossiste ressemble-t-il à celui de délégué médical ?', a: 'La structure du travail est proche — tournée, compte rendu de visite, objectifs — mais le portefeuille visité est un réseau d\'officines plutôt que des professionnels de santé prescripteurs.' },
     ],
     published: '2026-09-03',
     modified: '2026-09-03',

@@ -510,7 +510,7 @@ function delegueMedicalBody() {
     <nav class="breadcrumb"><a href="/">Accueil</a> › Délégué médical</nav>
     <article>
       <h1 style="font-size:26px;margin-bottom:12px">Délégué médical</h1>
-      <p class="hint" style="margin-bottom:20px">Le délégué médical est le lien entre les laboratoires pharmaceutiques et les professionnels de santé : il informe, promeut la prescription et anime sa zone au Sénégal — district par district.</p>
+      <p class="hint" style="margin-bottom:20px">Le délégué médical — aussi appelé visiteur médical — est le lien entre les laboratoires pharmaceutiques et les professionnels de santé : il informe, promeut la prescription et anime sa zone au Sénégal — district par district.</p>
       <p class="hint" style="font-size:13px;color:#667;margin-bottom:20px">Par DelegPharma — docteur en pharmacie, délégué médical au Sénégal · Mis à jour le 24 août 2026</p>
       <section>
         <h2 style="font-size:19px;margin:18px 0 10px">Objectif du métier</h2>
@@ -541,7 +541,7 @@ function delegueMedicalBody() {
       <section>
         <h2 style="font-size:19px;margin:18px 0 10px">Le métier avec DelegPharma</h2>
         <p style="line-height:1.7;margin-bottom:10px">DelegPharma est le CRM construit pour le délégué médical sénégalais : il s\'appuie sur la carte sanitaire officielle (<b>14 régions, 79 districts</b>), référence les professionnels de santé, planifie les tournées, enregistre les CRV et suit les objectifs produits.</p>
-        <p style="line-height:1.7;margin-bottom:10px"><a href="/carte-sanitaire">La carte sanitaire</a> · <a href="/tarifs">Les tarifs</a> · <a href="/inscription">Créer un compte gratuit</a></p>
+        <p style="line-height:1.7;margin-bottom:10px"><a href="/carte-sanitaire">La carte sanitaire</a> · <a href="/tarifs">Les tarifs</a> · <a href="/inscription">Créer un compte gratuit</a> · <a href="/blog/meilleur-logiciel-gestion-delegues-medicaux-senegal">Excel, WhatsApp ou CRM : le comparatif</a></p>
       </section>
       <section>
         <h2 style="font-size:19px;margin:18px 0 10px">Se former au métier</h2>
@@ -822,7 +822,7 @@ const GUIDES = [
       ] },
       { h: 'CRM laboratoire pharmaceutique : les pièges à éviter', p: [
         'Un outil non adapté à la visite médicale (un simple CRM de contacts) ne gère ni les tournées, ni les CRV, ni les objectifs produits. Un outil sans référentiel local oblige à tout recréer, district par district.',
-        'Méfiez-vous aussi des prix en devises et des abonnements sans paiement local : au Sénégal, le Mobile Money (Wave, Orange Money, QR Wave/OM) est le mode de paiement naturel des PME. <a href="/tarifs">Comparer les formules DelegPharma</a>.',
+        'Méfiez-vous aussi des prix en devises et des abonnements sans paiement local : au Sénégal, le Mobile Money (Wave, Orange Money, QR Wave/OM) est le mode de paiement naturel des PME. <a href="/tarifs">Comparer les formules DelegPharma</a>. Voir aussi notre <a href="/blog/meilleur-logiciel-gestion-delegues-medicaux-senegal">comparatif Excel, WhatsApp et CRM métier</a>.',
       ] },
       { h: 'Le déploiement pas à pas', p: [
         'Commencez par référencer les professionnels de votre zone, créez vos produits avec leur agrément ARP, définissez les objectifs par produit, puis lancez les premières tournées.',
@@ -1122,6 +1122,44 @@ const GUIDES = [
       { q: 'Peut-on devenir délégué médical en Côte d\'Ivoire sans formation ?', a: 'Certains laboratoires recrutent des profils commerciaux formés sur le tas, mais la formation reste la voie la plus reconnue et la plus valorisée.' },
     ],
   },
+  {
+    path: '/blog/meilleur-logiciel-gestion-delegues-medicaux-senegal',
+    title: 'Meilleur logiciel de gestion des délégués médicaux au Sénégal : comparatif 2026',
+    desc: 'Excel, WhatsApp, papier ou CRM métier : comparatif des méthodes de gestion des tournées et CRV pour délégué médical ou visiteur médical au Sénégal, avec grille de critères et tarifs réels.',
+    h1: 'Meilleur logiciel de gestion des délégués médicaux au Sénégal',
+    intro: 'La majorité des délégués médicaux (aussi appelés visiteurs médicaux) et de leurs laboratoires gèrent encore tournées et comptes rendus de visite avec Excel, WhatsApp ou du papier. Voici ce que ces méthodes permettent, leurs limites, et ce qu\'apporte un logiciel métier.',
+    sections: [
+      { h: 'Excel, WhatsApp, papier : ce que font ces outils aujourd\'hui', p: [
+        'Un tableur Excel permet de lister des professionnels de santé et de suivre des objectifs chiffrés, mais il ne connaît pas la carte sanitaire du Sénégal : rien n\'empêche un doublon de visite entre deux délégués, ou un district oublié faute de vue structurée par région.',
+        'WhatsApp reste le canal le plus rapide pour envoyer un compte rendu à son responsable, mais un message n\'est ni structuré, ni archivé par professionnel de santé, ni exploitable en reporting : le manager doit relire des dizaines de messages pour reconstituer la couverture réelle de sa zone.',
+        'Le carnet papier a l\'avantage de fonctionner sans réseau sur le terrain, mais il se perd, n\'est consultable que par son propriétaire, et ne remonte aucune donnée agrégée au laboratoire pour piloter une campagne produit.',
+      ] },
+      { h: 'Ce que change un CRM métier de visite médicale', p: [
+        'Un logiciel construit pour le délégué médical sénégalais s\'appuie sur la carte sanitaire officielle (14 régions, 79 districts) : les tournées se planifient par district, sans doublon ni zone oubliée, et le référentiel des professionnels de santé est partagé par toute l\'équipe.',
+        'Le compte rendu de visite se rédige en moins d\'une minute depuis le terrain, se génère en PDF signé, et alimente automatiquement le suivi des objectifs produits du laboratoire — sans ressaisie ni relecture de messages.',
+        'Le responsable de zone ou le laboratoire retrouve en temps réel la couverture de sa force de vente (visites réalisées, professionnels rencontrés, résultats par produit) au lieu de la reconstituer a posteriori.',
+      ] },
+      { h: 'Grille de comparaison', p: [
+        '<b>Carte sanitaire structurée (régions/districts)</b> — Excel/papier : non, à construire manuellement · WhatsApp : non · CRM métier : oui, intégrée.',
+        '<b>CRV en moins d\'une minute, PDF signé</b> — Excel/papier : ressaisie manuelle · WhatsApp : message non structuré · CRM métier : oui.',
+        '<b>Suivi des objectifs en temps réel pour le laboratoire</b> — Excel/papier : reporting manuel différé · WhatsApp : quasi impossible à agréger · CRM métier : oui, automatique.',
+        '<b>Fonctionne sans connexion sur le terrain</b> — Excel/papier : oui (papier) · WhatsApp : non · CRM métier : dépend de l\'outil, à vérifier avant de s\'engager.',
+        '<b>Coût mensuel</b> — Excel/papier : gratuit ou coût de licence bureautique · WhatsApp : gratuit · CRM métier : payant, généralement par abonnement.',
+      ] },
+      { h: 'Combien coûte un logiciel de gestion pour délégué médical au Sénégal', p: [
+        'Les tarifs varient selon l\'éditeur et le niveau de fonctionnalités. DelegPharma propose trois formules en FCFA payables en Mobile Money (Wave, Orange Money), carte Visa/Mastercard ou PayPal : Essentiel à 5 000 FCFA/mois, Standard à 10 000 FCFA/mois et Premium à 15 000 FCFA/mois. <a href="/tarifs">Voir le détail des formules</a>.',
+        'Avant de s\'engager, il est utile de comparer plusieurs éditeurs sur les mêmes critères : couverture de la carte sanitaire locale, rapidité du CRV, mode hors-ligne, et export des données en cas de changement d\'outil.',
+      ] },
+    ],
+    faq: [
+      { q: 'Un CRM de délégué médical remplace-t-il complètement Excel ?', a: 'Pour la gestion quotidienne des tournées et des CRV, oui : un CRM métier structure ce qu\'Excel ne fait que lister. Excel peut rester utile pour des analyses ponctuelles hors périmètre du logiciel.' },
+      { q: 'Combien coûte un logiciel de gestion pour délégué médical au Sénégal ?', a: 'Les tarifs varient selon l\'éditeur. DelegPharma propose trois formules à 5 000, 10 000 et 15 000 FCFA par mois, payables en Mobile Money, carte bancaire ou PayPal.' },
+      { q: 'Le CRV papier ou WhatsApp suffit-il encore ?', a: 'Ces méthodes fonctionnent pour un délégué isolé, mais elles ne remontent aucune donnée agrégée exploitable par le laboratoire pour piloter une force de vente ou une campagne produit.' },
+      { q: 'Délégué médical et visiteur médical, est-ce le même métier ?', a: 'Oui, ce sont deux appellations du même métier : représentant terrain d\'un laboratoire pharmaceutique auprès des professionnels de santé. « Visiteur médical » est le terme le plus courant en France, « délégué médical » au Sénégal et en Afrique francophone.' },
+    ],
+    published: '2026-09-03',
+    modified: '2026-09-03',
+  },
 ];
 
 /* ---------- Métadonnées par route ---------- */
@@ -1214,7 +1252,7 @@ const PAGES = {
   '/delegue-medical': {
     index: true,
     title: 'Délégué médical — métier, formation, salaire, outils | DelegPharma',
-    desc: 'Délégué médical au Sénégal : objectifs, débouchés (laboratoires, grossistes, industries, vendeur en pharmacie), formations et outils de visite médicale.',
+    desc: 'Délégué médical (ou visiteur médical) au Sénégal : objectifs, débouchés (laboratoires, grossistes, industries, vendeur en pharmacie), formations et outils de visite médicale.',
     canonical: '/delegue-medical',
     jsonLd: {
       '@context': 'https://schema.org',

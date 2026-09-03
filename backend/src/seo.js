@@ -92,6 +92,7 @@ function landingBody() {
       <a class="primary" href="/login" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Se connecter</a>
       <a class="primary" href="/tarifs" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Voir les tarifs</a>
     </p>
+    <p class="hint" style="margin-top:14px">Le métier de <a href="/delegue-medical">délégué médical</a> expliqué · Nos <a href="/blog">guides pratiques</a> pour laboratoires et visiteurs médicaux</p>
   </div>
   <div class="features">
     <div class="feature"><div class="ico">🗺️</div><h2>Référentiel national</h2><p>14 régions médicales, 79 districts sanitaires, structures et professionnels de santé ciblés. <a href="/carte-sanitaire">Explorer la carte sanitaire →</a></p></div>
@@ -124,7 +125,7 @@ function landingBody() {
     <a class="primary" href="/carte-sanitaire" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Explorer la carte sanitaire du Sénégal</a>
   </div>
   <footer style="max-width:860px;margin:34px auto 8px;text-align:center;font-size:13px;color:var(--mut)">
-    <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a> · <a href="/tarifs">Tarifs</a> · <a href="/a-propos">À propos</a> · <a href="/login">Connexion</a> · <a href="/inscription">Compte gratuit</a>
+    <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a> · <a href="/tarifs">Tarifs</a> · <a href="/delegue-medical">Délégué médical</a> · <a href="/blog">Blog</a> · <a href="/a-propos">À propos</a> · <a href="/login">Connexion</a> · <a href="/inscription">Compte gratuit</a>
   </footer>
   </main>`;
 }
@@ -259,7 +260,7 @@ function publicHeader() {
   return `
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
     <div class="brand">DelegPharma</div>
-    <div><a href="/">Accueil</a> · <a href="/delegue-medical">Délégué médical</a> · <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a> · <a href="/tarifs">Tarifs</a> · <a href="/a-propos">À propos</a> · <a href="/login">Connexion</a></div>
+    <div><a href="/">Accueil</a> · <a href="/delegue-medical">Délégué médical</a> · <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a> · <a href="/tarifs">Tarifs</a> · <a href="/blog">Blog</a> · <a href="/a-propos">À propos</a> · <a href="/login">Connexion</a></div>
   </div>`;
 }
 

@@ -114,7 +114,7 @@ function landingBody() {
     <div class="features" style="margin-top:16px">
       <div class="feature"><div class="ico">🎯</div><h2>Objectifs produits</h2><p>Objectifs par produit phare et par zone, taux de réalisation, campagnes mesurées sur le chiffre d'affaires.</p></div>
       <div class="feature"><div class="ico">🗺️</div><h2>Couverture sans doublon</h2><p>Force de vente répartie sur le référentiel officiel : chaque district a sa checklist, chaque zone est mesurée.</p></div>
-      <div class="feature"><div class="ico">📊</div><h2>Terrain en temps réel</h2><p>CRV validés depuis le terrain, couverture par district, exports CSV/PDF — fini les CRV papier et les tableurs.</p></div>
+      <div class="feature"><div class="ico">📊</div><h2>Terrain en temps réel</h2><p>CRV validés depuis le terrain, couverture par district, exports CSV/PDF — fini les CRV papier et les tableurs. <a href="/blog/meilleur-logiciel-gestion-delegues-medicaux-senegal">Voir le comparatif →</a></p></div>
     </div>
     <p style="text-align:center;margin-top:18px">
       <a class="primary" href="/inscription" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Équiper mon laboratoire</a>

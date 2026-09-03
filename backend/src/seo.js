@@ -905,7 +905,7 @@ const GUIDES = [
     intro: 'Qui le délégué médical visite-t-il ? Médecins, pharmaciens, sages-femmes, infirmiers, dentistes… Chaque catégorie a ses besoins, ses horaires et son rôle dans la prescription. Le référentiel les structure pour une couverture complète.',
     sections: [
       { h: 'Les catégories et leur rôle dans la prescription', p: [
-        'Les médecins sont les prescripteurs principaux — généralistes et spécialistes. Les pharmaciens dispensent et conseillent, parfois en proposant une alternative. Les sages-femmes jouent un rôle clé en santé maternelle et néonatale. Les infirmiers sont en première ligne dans les postes de santé. Les dentistes forment un réseau distinct.',
+        'Les médecins sont les prescripteurs principaux — généralistes et spécialistes. Les <a href="/blog/pharmacien-officine-senegal-visite-medicale">pharmaciens dispensent et conseillent</a>, parfois en proposant une alternative. Les sages-femmes jouent un rôle clé en santé maternelle et néonatale. Les infirmiers sont en première ligne dans les postes de santé. Les dentistes forment un réseau distinct.',
         'Chaque catégorie se visite avec un argumentaire adapté : le médecin attend des données, le pharmacien des conditions, la sage-femme des produits de santé maternelle, l\'infirmier une approche de soins.',
       ] },
       { h: 'Les structures où les rencontrer', p: [
@@ -1189,6 +1189,38 @@ const GUIDES = [
       { q: 'Quels sont les grossistes répartiteurs présents au Sénégal ?', a: 'Plusieurs acteurs opèrent sur ce marché, parmi lesquels SOGEN et UbiPharm Sénégal. Pour la liste exhaustive et à jour, se référer à l\'Agence sénégalaise de Réglementation pharmaceutique (ARP).' },
       { q: 'Un grossiste répartiteur a-t-il besoin d\'un agrément ARP ?', a: 'Oui, un établissement pharmaceutique de fabrication et de distribution en gros doit être agréé par l\'ARP pour exercer, dans le cadre de la loi n° 2023-06 et de son décret d\'application n° 2023-2421.' },
       { q: 'Le métier de commercial chez un grossiste ressemble-t-il à celui de délégué médical ?', a: 'La structure du travail est proche — tournée, compte rendu de visite, objectifs — mais le portefeuille visité est un réseau d\'officines plutôt que des professionnels de santé prescripteurs.' },
+    ],
+    published: '2026-09-03',
+    modified: '2026-09-03',
+  },
+  {
+    path: '/blog/pharmacien-officine-senegal-visite-medicale',
+    title: 'Le pharmacien d\'officine au Sénégal : rôle, régulation, visite du délégué médical',
+    desc: 'Le pharmacien d\'officine au Sénégal : rôle de dispensation, régulation ARP et Ordre des Pharmaciens, et ce qu\'attend un pharmacien d\'une visite de délégué médical.',
+    h1: 'Le pharmacien d\'officine face au délégué médical',
+    intro: 'Dernier maillon avant le patient, le pharmacien d\'officine dispense, conseille et peut proposer une alternative. Une visite de délégué médical réussie ne s\'y prépare pas comme chez un médecin.',
+    sections: [
+      { h: 'Le rôle du pharmacien d\'officine', p: [
+        'Le pharmacien d\'officine dispense les médicaments prescrits, conseille le patient et peut orienter vers une alternative disponible en stock. Contrairement au médecin, il n\'est pas prescripteur mais reste un acteur clé de l\'accès au médicament — le référentiel MSAS/ANSD recense près de 1 230 officines au Sénégal selon esante.sn.',
+        'L\'Ordre des Pharmaciens du Sénégal veille au respect des devoirs professionnels et de l\'éthique de la profession, et représente la pharmacie auprès des pouvoirs publics.',
+      ] },
+      { h: 'La régulation de l\'officine', p: [
+        'L\'ouverture et l\'exploitation d\'une officine sont encadrées par l\'Agence sénégalaise de Réglementation pharmaceutique (ARP), dans le cadre de la loi n° 2023-06 du 13 juin 2023 relative au médicament et de son décret d\'application n° 2023-2421 du 27 décembre 2023, qui organisent notamment l\'attribution annuelle des sites de création d\'officine.',
+        'Un pharmacien titulaire d\'officine s\'approvisionne auprès des <a href="/blog/grossiste-repartiteur-pharmaceutique-senegal">grossistes répartiteurs</a> et dispense des produits couverts par un agrément ARP délivré au laboratoire. Voir aussi notre guide sur <a href="/blog/agrement-arp-laboratoires">l\'agrément ARP</a>.',
+      ] },
+      { h: 'Ce qu\'attend un pharmacien d\'une visite de délégué médical', p: [
+        'À la différence du médecin, qui attend des données cliniques pour prescrire, le pharmacien s\'intéresse aux conditions commerciales (marge, conditionnement, disponibilité), à la rotation du produit et aux arguments de conseil au comptoir.',
+        'Une visite réussie apporte une information produit claire, une disponibilité vérifiée chez le grossiste répartiteur habituel de l\'officine, et un compte rendu de visite qui note les réserves ou objections propres au canal officinal.',
+      ] },
+      { h: 'Les officines dans le référentiel DelegPharma', p: [
+        'DelegPharma référence les officines au même titre que les autres professionnels de santé de la carte sanitaire, avec leur district et leur historique de visite. Voir le <a href="/blog/professionnels-de-sante-senegal-referentiel-delegue">référentiel complet des professionnels de santé</a>.',
+      ] },
+    ],
+    faq: [
+      { q: 'Combien y a-t-il d\'officines de pharmacie au Sénégal ?', a: 'Le référentiel MSAS/ANSD recense près de 1 230 officines au Sénégal, selon esante.sn.' },
+      { q: 'Qui régule l\'ouverture d\'une officine au Sénégal ?', a: 'L\'Agence sénégalaise de Réglementation pharmaceutique (ARP), dans le cadre de la loi n° 2023-06 du 13 juin 2023 et de son décret d\'application n° 2023-2421 du 27 décembre 2023, qui organise notamment l\'attribution des sites de création d\'officine.' },
+      { q: 'Quel est le rôle de l\'Ordre des Pharmaciens du Sénégal ?', a: 'Il veille au respect des devoirs professionnels et de l\'éthique de la profession, et représente la pharmacie auprès des pouvoirs publics.' },
+      { q: 'Que doit apporter un délégué médical en visite chez un pharmacien ?', a: 'Une information produit claire, la disponibilité chez le grossiste répartiteur habituel de l\'officine, et des conditions commerciales — plutôt qu\'un argumentaire clinique destiné au prescripteur.' },
     ],
     published: '2026-09-03',
     modified: '2026-09-03',

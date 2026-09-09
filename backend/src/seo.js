@@ -372,7 +372,12 @@ function regionPage(region) {
 function districtPage(region, district) {
   const info = DISTRICT_INFO[district.nom] || {};
   return {
-    index: true,
+    // noindex tant qu'aucune structure/professionnel réel n'est listé sur la page :
+    // 79 pages quasi-identiques (seuls nom/population changent) diluaient la qualité
+    // perçue du domaine neuf et retardaient l'indexation de tout le site (0 page
+    // indexée après 3+ semaines). Repasser à true dès que districtBody() affiche
+    // de vraies structures issues de la base.
+    index: false,
     title: `District sanitaire de ${district.nom} — ${region.nom}`,
     desc: `Le district sanitaire de ${district.nom} dans la région de ${region.nom}${info.chefLieu ? `, chef-lieu ${info.chefLieu}` : ''}. Structures et professionnels de santé référencés sur DelegPharma.`,
     canonical: `/carte-sanitaire/${slugify(region.nom)}/${slugify(district.nom)}`,
@@ -1539,7 +1544,8 @@ function sitemapUrls() {
   for (const g of GUIDES) urls.push({ loc: g.path, freq: 'monthly', prio: '0.7' });
   for (const r of carteRegions()) {
     urls.push({ loc: `/carte-sanitaire/${slugify(r.nom)}`, freq: 'monthly', prio: '0.8' });
-    for (const d of r.districts) urls.push({ loc: `/carte-sanitaire/${slugify(r.nom)}/${slugify(d.nom)}`, freq: 'monthly', prio: '0.6' });
+    // Pages district : noindex (voir districtPage() dans seo.js) → exclues du sitemap
+    // pour éviter les avertissements GSC "URL envoyée marquée noindex".
   }
   return urls;
 }

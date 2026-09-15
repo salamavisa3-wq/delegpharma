@@ -1,0 +1,16 @@
+name: Healthcheck
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping /healthz
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 https://app.delegpharma.com/healthz)
+          echo "HTTP $code"
+          [ "$code" = "200" ]

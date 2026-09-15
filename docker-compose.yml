@@ -1,0 +1,45 @@
+# Stack vps-deploy : app (Express+Postgres) + db. Le Caddy partagé de l'hôte
+# route vers "app" via le réseau externe "caddy_net" — pas de "ports:" ici.
+# .env doit exister à côté de ce fichier sur le VPS (jamais commité).
+
+services:
+  app:
+    build: .
+    container_name: delegpharma-app
+    restart: unless-stopped
+    env_file: .env
+    expose:
+      - "10000"
+    networks:
+      - caddy_net
+      - default
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:10000/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  db:
+    image: postgres:16-alpine
+    container_name: delegpharma-db
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  caddy_net:
+    external: true
+  default:
+
+volumes:
+  pgdata:

@@ -1,0 +1,29 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # TARGET = /opt/apps/delegpharma — doit correspondre au nom donné à
+      # onboard-app.sh (sudo bash /opt/scripts/onboard-app.sh delegpharma app.delegpharma.com node 10000).
+      - name: Deploy app files to VPS (health-gated, rollback auto si échec)
+        uses: easingthemes/ssh-deploy@v6.0.3
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.VPS_HOST }}
+          REMOTE_USER: ${{ secrets.VPS_USER }}
+          REMOTE_PORT: ${{ secrets.VPS_PORT }}
+          SOURCE: "./"
+          TARGET: /opt/apps/delegpharma
+          EXCLUDE: "/.env, /.git, /node_modules, /.data, /docker-compose.override.yml"
+          SCRIPT_BEFORE: |
+            mkdir -p /opt/apps/delegpharma
+          SCRIPT_AFTER: |
+            /opt/scripts/deploy-rollback.sh /opt/apps/delegpharma

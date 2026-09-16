@@ -1,13 +1,12 @@
 // Exécuteur de la file PDF — .github/workflows/pdf.yml (cron */5 + workflow_dispatch).
 // Tourne sur le runner GitHub (CPU illimité, contourne les 10 ms du Worker) : lit
-// pdf_jobs 'en_attente', génère le PDF avec pdfkit, l'envoie sur R2 (jamais public) et
+// pdf_jobs 'en_attente', génère le PDF avec pdfkit, l'envoie sur KV (jamais public) et
 // marque 'pret' avec l'URL servie par le Worker (route /pdfs/*). Échec → 'echoue'
 // (relancable via l'enqueue idempotente côté API).
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setDriver, all, get, run, ph, isPg } from './db.js';
 import { crvPdf } from './pdf.js';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 // Driver : base = Neon (Postgres) en production, sqlite local pour un test manuel.
 setDriver(
@@ -47,7 +46,25 @@ async function hydrateProduits(visite) {
   return arr.map((p) => ({ ...p, nom: prods.find((x) => x.id === p.produit_id)?.nom || '' }));
 }
 
-export async function processPendingPdfJobs(s3) {
+/** Put d'un PDF sur KV via l'API REST Cloudflare (repli sans carte : R2 bloqué). */
+async function putKvPdf(key, buffer) {
+  const url =
+    `https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT_ID}` +
+    `/storage/kv/namespaces/${process.env.KV_NAMESPACE_ID}/values/${encodeURIComponent(key)}`;
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+      'Content-Type': 'application/pdf',
+    },
+    body: buffer,
+  });
+  if (!res.ok) {
+    throw new Error(`KV put ${key} → HTTP ${res.status} ${await res.text()}`);
+  }
+}
+
+export async function processPendingPdfJobs() {
   const jobs = await all(
     `SELECT id, visite_id FROM pdf_jobs WHERE statut = 'en_attente' ORDER BY id ASC LIMIT ${BATCH}`);
   let done = 0, failed = 0;
@@ -63,12 +80,7 @@ export async function processPendingPdfJobs(s3) {
         labo: labo || { nom: '', agrement_arp: '' },
       });
       const key = `pdfs/${filename}`;
-      await s3.send(new PutObjectCommand({
-        Bucket: process.env.R2_BUCKET,
-        Key: key,
-        Body: buffer,
-        ContentType: 'application/pdf',
-      }));
+      await putKvPdf(key, buffer);
       await run(
         'UPDATE pdf_jobs SET statut = $1, url = $2, erreur = \'\' WHERE id = $3',
         ['pret', `/${key}`, job.id]); // '/' + key = URL servie par le Worker
@@ -85,15 +97,7 @@ export async function processPendingPdfJobs(s3) {
 // Exécution directe : `node src/pdf-job-runner.js`
 const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
-  const s3 = new S3Client({
-    region: 'auto',
-    endpoint: process.env.R2_ENDPOINT, // https://<CF_ACCOUNT_ID>.r2.cloudflarestorage.com
-    credentials: {
-      accessKeyId: process.env.R2_ACCESS_KEY_ID,
-      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-    },
-  });
-  processPendingPdfJobs(s3)
+  processPendingPdfJobs()
     .then(() => console.log('File PDF traitée.'))
     .catch((e) => {
       console.error('pdf-job-runner a échoué :', e);

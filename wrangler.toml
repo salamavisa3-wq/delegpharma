@@ -1,4 +1,4 @@
-# DelegPharma — Cloudflare Workers (Express 5 via nodejs_compat) + Static Assets + R2.
+# DelegPharma — Cloudflare Workers (Express 5 via nodejs_compat) + Static Assets + KV.
 # zéro carte : Workers Free 10 ms CPU/invocation, jamais d'upgrade payant.
 name = "delegpharma"
 main = "backend/src/worker.js"
@@ -9,16 +9,17 @@ compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 
 # Frontend SPA servi par Static Assets (edge). run_worker_first = le Worker traite TOUT
-# (API, /pdfs/* R2, robots/sitemap, SSR SEO, soft-404) et proxie les fichiers vers ASSETS.
+# (API, /pdfs/* KV, robots/sitemap, SSR SEO, soft-404) et proxie les fichiers vers ASSETS.
 [assets]
 directory = "./frontend"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
 run_worker_first = true
 
-[[r2_buckets]]
-binding = "BUCKET"
-bucket_name = "delegpharma-assets"
+# PDFs CRV générés par pdf.yml → KV `delegpharma-pdfs` (repli sans carte : R2 bloqué sur ce compte).
+[[kv_namespaces]]
+binding = "PDFS"
+id = "bf15b5b72aec4c1d80d4a3dd8d4a7c09"
 
 # Variables non sensibles. Secrets → `wrangler secret put` :
 #   NEON_DATABASE_URL, JWT_SECRET, CINETPAY_APIKEY, CINETPAY_SITE_ID,

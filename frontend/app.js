@@ -441,8 +441,8 @@ async function downloadFile(url, filename) {
     setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
   } catch (err) { toast(err.message); }
 }
-// PDF du CRV — génération asynchrone (job GitHub Actions → R2) : on met en file, on
-// interroge le statut (~5 s, max 2 min), puis on télécharge l'URL R2 servie par le Worker.
+// PDF du CRV — génération asynchrone (job GitHub Actions → KV) : on met en file, on
+// interroge le statut (~5 s, max 2 min), puis on télécharge l'URL KV servie par le Worker.
 async function downloadPdf(id, date) {
   const filename = date ? `CRV-${id}-${date}.pdf` : `CRV-${id}.pdf`;
   try {

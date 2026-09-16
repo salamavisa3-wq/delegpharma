@@ -1,7 +1,7 @@
-name: PDF CRV (génération asynchrone → R2)
+name: "PDF CRV (génération asynchrone → KV)"
 
 # pdfkit dépasse le budget CPU de 10 ms du Workers Free → génération ici (CPU illimité),
-# upload R2 (jamais public), l'URL est servie par le Worker (route /pdfs/*).
+# upload KV (namespace delegpharma-pdfs, jamais public), l'URL est servie par le Worker (route /pdfs/*).
 on:
   schedule:
     - cron: "*/5 * * * *"
@@ -19,16 +19,15 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
-      - name: Install backend deps (pdfkit, aws-sdk, neon)
+      - name: Install backend deps (pdfkit, neon)
         working-directory: backend
         run: npm ci --omit=dev
 
-      - name: Generate pending PDFs → R2
+      - name: Generate pending PDFs → KV
         working-directory: backend
         env:
           NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
-          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          R2_BUCKET: ${{ secrets.R2_BUCKET }}
-          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          KV_NAMESPACE_ID: ${{ vars.KV_NAMESPACE_ID }}
         run: node src/pdf-job-runner.js

@@ -127,7 +127,7 @@ router.post('/visites/:id/refuse', requireRole('manager', 'admin', 'laboratoire'
 });
 
 // PDF du CRV — génération ASYNCHRONE (Workers : pdfkit > 10 ms CPU → queue pdf_jobs,
-// générée par le job GitHub Actions sur R2). GET + POST = même enqueue idempotente :
+// générée par le job GitHub Actions → KV). GET + POST = même enqueue idempotente :
 // une ligne pdf_jobs par visite ; echoue → relancée.
 async function enqueuePdf(req, res) {
   const v = await get('SELECT id FROM visite WHERE id = $1 AND laboratoire_id = $2',

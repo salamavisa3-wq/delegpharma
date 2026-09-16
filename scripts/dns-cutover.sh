@@ -67,9 +67,21 @@ ZONE_INFO="$(cfj '
   const fs=require("fs"); const r=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
   const z=(r.result||[])[0]; if (z) console.log(z.id+"|"+z.status+"|"+z.plan.name);
 ')"
+ZONE_NS="$(cfj '
+  const fs=require("fs"); const r=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
+  const z=(r.result||[])[0]; if (z && z.name_servers) console.log(z.name_servers.join(" "));
+')"
 if [ -n "$ZONE_INFO" ]; then
   ZONE_ID="${ZONE_INFO%%|*}"; REST="${ZONE_INFO#*|}"; ZONE_STATUS="${REST%%|*}"; ZONE_PLAN="${REST#*|}"
   echo "zone CF : $DOMAIN PRÉSENTE   id=${ZONE_ID:0:8}…   status=$ZONE_STATUS   plan=$ZONE_PLAN"
+  [ -n "$ZONE_NS" ] && echo "  NS CF assignés (à copier chez OVH -> serveurs DNS) : $ZONE_NS"
+  # Probe : le token actuel peut-il poser des records dans cette zone ?
+  api GET "/zones/$ZONE_ID/dns_records?per_page=1"
+  case "$CF_CODE" in
+    200) echo "  token CF : Zone:DNS:Edit OK -> --apply pourra poser records + redirect 301." ;;
+    403) echo "  token CF : SANS Zone:DNS:Edit (403) -> pour --apply, élargir le token (Zone:DNS:Edit, scoped $DOMAIN)." ;;
+    *)   echo "  token CF : probe dns_records HTTP $CF_CODE" ;;
+  esac
 else
   ZONE_ID=""; ZONE_STATUS="absent"
   echo "zone CF : $DOMAIN ABSENTE du compte -> ÉTAPE UTILISATEUR (dashboard CF -> Add a site, plan Free, zéro carte)."
@@ -97,22 +109,51 @@ echo "App : $APP_HOST/healthz -> $codeapp (200 une fois le custom domain branch�
 
 if [ "${1:-}" = "--apply" ]; then
   echo; echo "== APPLY =="
-  [ -n "$ZONE_ID" ] || { echo "X Zone absente (étape dashboard) — rien à appliquer."; exit 1; }
-  [ "$ZONE_STATUS" = "active" ] || { echo "X Zone présente mais status=$ZONE_STATUS (en attente de bascule NS) — attendre 'active'."; exit 1; }
+  [ -n "$ZONE_ID" ] || { echo "X Zone absente (étape dashboard : Add a site delegpharma.com, plan Free) — rien à appliquer."; exit 1; }
 
-  add_rec() { # $1=type $2=name $3=content $4=priority(opt)
-    local body="{\"type\":\"$1\",\"name\":\"$2\",\"content\":\"$3\"${4:+,\"priority\":$4}}"
-    api POST "/zones/$ZONE_ID/dns_records" "$body"
-    if [ "$CF_CODE" = "200" ]; then echo "  [OK] DNS $1 $2 -> $3"
-    else echo "  [X]  DNS $1 $2 -> HTTP $CF_CODE ($(cfmsgs))"; fi
+  rec_count() { # $1=type $2=name -> imprime combien de records (type,name) existent déjà (lit TMP)
+    local TYPE_R="$1" NAME_R="$2"
+    TYPE_R="$TYPE_R" NAME_R="$NAME_R" cfj '
+      const fs=require("fs");const r=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
+      const T=process.env.TYPE_R,N=process.env.NAME_R;
+      const hit=(x)=>x.type===T && (x.name===N || x.name===N+".");
+      console.log((r.result||[]).filter(hit).length);
+    '
   }
-  echo "Records essentiels (idempotents à volonté) :"
+  add_rec() { # $1=type $2=name $3=content $4=priority(opt) — idempotent : ne POST que si absent
+    local body="{\"type\":\"$1\",\"name\":\"$2\",\"content\":\"$3\"${4:+,\"priority\":$4}}"
+    api GET "/zones/$ZONE_ID/dns_records?type=$1&name=$2"
+    if [ "$CF_CODE" = "200" ] && [ "$(rec_count "$1" "$2")" -ge 1 ]; then
+      echo "  [ok] DNS $1 $2 -> déjà présent"
+    else
+      api POST "/zones/$ZONE_ID/dns_records" "$body"
+      if [ "$CF_CODE" = "200" ]; then echo "  [OK] DNS $1 $2 -> $3"
+      elif [ "$CF_CODE" = "403" ]; then echo "  [X]  DNS $1 $2 -> HTTP 403 (token CF sans Zone:DNS:Edit — relancer après élargissement du token)"
+      else echo "  [X]  DNS $1 $2 -> HTTP $CF_CODE ($(cfmsgs))"; fi
+    fi
+  }
+
+  # Records : posables dès que la zone existe (même pending) — la copie du manifeste
+  # OVH AVANT la bascule NS. Le mail (MX) ne doit jamais casser : on pose d'abord les MX.
+  echo "Records essentiels (idempotents, zone status=$ZONE_STATUS) :"
   add_rec MX "@" "mx1.mail.ovh.net" 1
   add_rec MX "@" "mx2.mail.ovh.net" 5
   add_rec MX "@" "mx3.mail.ovh.net" 100
   add_rec TXT "@" "v=spf1 include:mx.ovh.com -all"
+  add_rec TXT "@" "google-site-verification=1mblS75EDqOJvtI5mmg4BsepwuXoOPmu_TzpQ9G-H1c"
   add_rec A "@" "146.59.209.152"
   add_rec A "www" "146.59.209.152"
+
+  if [ "$ZONE_STATUS" != "active" ]; then
+    echo; echo "Zone status=$ZONE_STATUS -> en attente de bascule NS (étape dashboard OVH)."
+    if [ -n "$ZONE_NS" ]; then
+      echo "  Étape 2 (dashboard OVH -> domaines -> serveurs DNS) : remplacer ns106/dns106.ovh.net par :"
+      echo "    ${ZONE_NS// /, }"
+    fi
+    echo "  Puis relancer 'bash scripts/dns-cutover.sh --apply' — le custom domain et la redirect"
+    echo "  ne se poseront qu'une fois la zone 'active'."
+    exit 0
+  fi
 
   echo "Custom domain Worker :"
   api PUT "/accounts/$CF_ACCOUNT/workers/domains" \

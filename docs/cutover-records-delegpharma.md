@@ -1,4 +1,4 @@
-# Records à reproduire dans la zone Cloudflare delegpharma.com (générés 2026-09-16T23:30Z, source zone OVH autoritative)
+# Records à reproduire dans la zone Cloudflare delegpharma.com (générés 2026-09-16T23:43Z, source zone OVH autoritative)
 
 | Type | Nom | Contenu | Priorité | Note |
 |---|---|---|---|---|

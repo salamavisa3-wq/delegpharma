@@ -63,7 +63,11 @@ async function api(path, opts = {}) {
   });
   const ct = res.headers.get('content-type') || '';
   const body = ct.includes('application/json') ? await res.json() : await res.text();
-  if (!res.ok) throw new Error(body?.error || `Erreur ${res.status}`);
+  if (!res.ok) {
+    const err = new Error(body?.error || `Erreur ${res.status}`);
+    err.code = body?.code;
+    throw err;
+  }
   return body;
 }
 function toast(msg) {
@@ -437,8 +441,21 @@ async function downloadFile(url, filename) {
     setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
   } catch (err) { toast(err.message); }
 }
+// PDF du CRV — génération asynchrone (job GitHub Actions → R2) : on met en file, on
+// interroge le statut (~5 s, max 2 min), puis on télécharge l'URL R2 servie par le Worker.
 async function downloadPdf(id, date) {
-  return downloadFile(`/api/visites/${id}/pdf`, date ? `CRV-${id}-${date}.pdf` : `CRV-${id}.pdf`);
+  const filename = date ? `CRV-${id}-${date}.pdf` : `CRV-${id}.pdf`;
+  try {
+    toast('Préparation du PDF…');
+    let st = await api(`/visites/${id}/pdf`, { method: 'POST' });
+    for (let i = 0; i < 24 && (st.statut === 'en_attente' || st.statut === 'en_cours'); i++) {
+      await new Promise((r) => setTimeout(r, 5000));
+      st = await api(`/visites/${id}/pdf/status`);
+    }
+    if (st.statut === 'pret' && st.url) return downloadFile(st.url, filename);
+    if (st.statut === 'echoue') return toast('Génération du PDF en échec — réessayez dans quelques minutes.');
+    return toast('PDF toujours en préparation… essayez à nouveau dans un instant.');
+  } catch (err) { toast(err.message); }
 }
 async function downloadDoc(id, idx, nom) {
   return downloadFile(`/api/visites/${id}/doc/${idx}`, nom || `document-${idx}`);
@@ -1167,7 +1184,13 @@ function bind() {
         box.scrollTop = box.scrollHeight;
         return;
       }
-    } catch (err) { if (errSlot) errSlot.textContent = err.message; else toast(err.message); }
+    } catch (err) {
+      // Comptes importés ($2b$ bcrypt de l'ancienne prod) : réinitialisation forcée par la plateforme.
+      const msg = err?.code === 'PASSWORD_RESET'
+        ? 'Mot de passe à réinitialiser après la migration — demandez à un administrateur plateforme de vous en fixer un nouveau.'
+        : (err?.message || 'Erreur');
+      if (errSlot) errSlot.textContent = msg; else toast(msg);
+    }
   };
 }
 function read(form) {

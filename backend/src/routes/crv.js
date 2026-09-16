@@ -1,8 +1,7 @@
-// Module CRV : cycle brouillon → soumis → valide/refusé + pièces jointes + PDF pdfkit.
+// Module CRV : cycle brouillon → soumis → valide/refusé + pièces jointes + PDF asynchrone.
 import { Router } from 'express';
 import { all, get, run, lastInsertId, ph } from '../db.js';
 import { requireAuth, requireRole, requireAboWrite } from '../auth.js';
-import { crvPdf } from '../pdf.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -127,26 +126,36 @@ router.post('/visites/:id/refuse', requireRole('manager', 'admin', 'laboratoire'
   return res.json({ ok: true });
 });
 
-// PDF du CRV
-router.get('/visites/:id/pdf', async (req, res) => {
-  const v = await scopeVisite(req, req.params.id);
+// PDF du CRV — génération ASYNCHRONE (Workers : pdfkit > 10 ms CPU → queue pdf_jobs,
+// générée par le job GitHub Actions sur R2). GET + POST = même enqueue idempotente :
+// une ligne pdf_jobs par visite ; echoue → relancée.
+async function enqueuePdf(req, res) {
+  const v = await get('SELECT id FROM visite WHERE id = $1 AND laboratoire_id = $2',
+    [req.params.id, req.user.laboratoire_id]);
   if (!v) return res.status(404).json({ error: 'Visite introuvable' });
 
-  const produits = JSON.parse(v.produits || '[]');
-  const prods = produits.length
-    ? await all(`SELECT id, nom, dci FROM produit WHERE id IN (${produits.map((_, i) => ph(i + 1)).join(',')})`,
-        produits.map((p) => p.produit_id))
-    : [];
-  const labo = await get('SELECT nom, agrement_arp FROM laboratoire WHERE id = $1', [req.user.laboratoire_id]);
+  let job = await get('SELECT statut, url, erreur FROM pdf_jobs WHERE visite_id = $1', [req.params.id]);
+  if (!job) {
+    await run('INSERT INTO pdf_jobs (visite_id, user_id, statut) VALUES ($1,$2,$3)',
+      [req.params.id, req.user.id, 'en_attente']);
+    job = { statut: 'en_attente', url: '', erreur: '' };
+  } else if (job.statut === 'echoue') {
+    await run('UPDATE pdf_jobs SET statut = $1, erreur = \'\' WHERE visite_id = $2', ['en_attente', req.params.id]);
+    job = { statut: 'en_attente', url: '', erreur: '' };
+  }
+  return res.json(job);
+}
 
-  const { buffer, filename } = await crvPdf({
-    visite: v,
-    produits: produits.map((p) => ({ ...p, nom: prods.find((x) => x.id === p.produit_id)?.nom || '' })),
-    labo,
-  });
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-  return res.send(buffer);
+router.route('/visites/:id/pdf')
+  .get(enqueuePdf)
+  .post(enqueuePdf);
+
+router.get('/visites/:id/pdf/status', async (req, res) => {
+  const v = await get('SELECT id FROM visite WHERE id = $1 AND laboratoire_id = $2',
+    [req.params.id, req.user.laboratoire_id]);
+  if (!v) return res.status(404).json({ error: 'Visite introuvable' });
+  const job = await get('SELECT statut, url, erreur FROM pdf_jobs WHERE visite_id = $1', [req.params.id]);
+  return res.json(job || { statut: 'aucun', url: '', erreur: '' });
 });
 
 // Pièce jointe (base64 stockée en base) — téléchargement inline

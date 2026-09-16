@@ -1,0 +1,33 @@
+# DelegPharma — Cloudflare Workers (Express 5 via nodejs_compat) + Static Assets + R2.
+# zéro carte : Workers Free 10 ms CPU/invocation, jamais d'upgrade payant.
+name = "delegpharma"
+main = "backend/src/worker.js"
+compatibility_date = "2026-08-04"
+compatibility_flags = ["nodejs_compat"]
+
+# URL de preview *.workers.dev pendant le cutover (avant le domaine personnalisé).
+workers_dev = true
+
+# Frontend SPA servi par Static Assets (edge). run_worker_first = le Worker traite TOUT
+# (API, /pdfs/* R2, robots/sitemap, SSR SEO, soft-404) et proxie les fichiers vers ASSETS.
+[assets]
+directory = "./frontend"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = true
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "delegpharma-assets"
+
+# Variables non sensibles. Secrets → `wrangler secret put` :
+#   NEON_DATABASE_URL, JWT_SECRET, CINETPAY_APIKEY, CINETPAY_SITE_ID,
+#   PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, OLLAMA_API_KEY
+[vars]
+APP_BASE_URL = "https://app.delegpharma.com"
+COOKIE_SECURE = "true"
+# Bootstrap sûr ; les vraies valeurs (CinetPay/PayPal réels) sont posées au cutover,
+# quand le `.env` de prod est récupéré (une carte n'est jamais requise ici).
+PAY_MODE = "demo"
+PAYPAL_SANDBOX = "true"
+OLLAMA_MODEL = "nemotron-3-nano:30b"

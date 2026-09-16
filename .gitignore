@@ -3,6 +3,7 @@ node_modules/
 *.db-journal
 *.db-wal
 data/
+backups/
 .env
 .env.local
 .DS_Store

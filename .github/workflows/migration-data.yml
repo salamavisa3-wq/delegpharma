@@ -1,0 +1,57 @@
+name: Migration données prod (one-shot)
+
+# Restaure le dump prod (pg_dump du VPS OVH) dans Neon — le « moment de vérité ».
+# Le dump est déposé sur une release GitHub privée (jamais dans git) : choisir le tag,
+# puis lancer ce workflow. purge_existing=false par défaut : sécurité (ne rien écraser).
+# À exécuter AVANT que les utilisateurs se connectent (les hash $2b$ → reset obligatoire).
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Tag de la release privée contenant delegpharma-*.sql.gz"
+        required: true
+      purge_existing:
+        description: "Vider le schéma public existant avant le restore (⚠️ destructif — uniquement pour le 1er restore sur base vierge ou écarté)"
+        type: boolean
+        default: false
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install psql
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Download dump (release privée)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release download "${{ github.event.inputs.release_tag }}" --pattern "*.sql.gz" --clobber
+
+      - name: Purging schema (option explicite)
+        if: github.event.inputs.purge_existing == 'true'
+        env:
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: psql "$NEON_DATABASE_URL" -q -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+
+      - name: Restore pg_dump plain → Neon
+        env:
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: |
+          gzip -dc *.sql.gz | psql "$NEON_DATABASE_URL" --set ON_ERROR_STOP=1 -q
+
+      - name: Vérifications compteurs + hashs legacy
+        env:
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: |
+          {
+            echo "## Compteurs après restauration (dump prod)"
+            psql "$NEON_DATABASE_URL" -t -A -c "SELECT 'users='||count(*) FROM users"
+            psql "$NEON_DATABASE_URL" -t -A -c "SELECT 'visites='||count(*) FROM visite"
+            psql "$NEON_DATABASE_URL" -t -A -c "SELECT 'produits='||count(*) FROM produit"
+            psql "$NEON_DATABASE_URL" -t -A -c "SELECT 'laboratoires='||count(*) FROM laboratoire"
+            psql "$NEON_DATABASE_URL" -t -A -c "SELECT 'transactions='||count(*) FROM transaction_paiement"
+            psql "$NEON_DATABASE_URL" -t -A -c "SELECT 'legacy_hashes(\$2b\$ à reset)='||count(*) FROM users WHERE password_hash LIKE '\$2%'"
+          } > "$GITHUB_STEP_SUMMARY"
+          cat "$GITHUB_STEP_SUMMARY"

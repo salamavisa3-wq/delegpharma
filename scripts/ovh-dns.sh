@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+# ATTENTION — signature HMAC maison probablement bugguée (même défaut que
+# ovh-dns-vitrine.sh, jamais entièrement isolé ; voir ovh_dns_vitrine.py pour l'équivalent
+# fiable basé sur la librairie officielle `ovh`, testé et fonctionnel). Si ce script
+# renvoie "Invalid signature" malgré des clés valides et une Consumer Key activée avec la
+# bonne portée, ce n'est probablement pas un problème de clés — préférer un équivalent
+# Python plutôt que de redéboguer la signature ici.
+#
 # ovh-dns.sh — ajoute le record A `app.delegpharma.com → <IP>` via l'API OVHcloud.
 #
 # Prérequis : clés API créées sur https://api.ovh.com/createToken/ avec la portée :
@@ -31,7 +38,7 @@ TS="$(date +%s)"
 sig() {
   local meth="$1" url="$2" body="${3:-}"
   local s="$OVH_APP_SECRET+$OVH_CONSUMER_KEY+$TS+$meth+$url+$body"
-  printf '1$1$%s' "$(printf '%s' "$s" | sha1sum | cut -d' ' -f1)"
+  printf '$1$%s' "$(printf '%s' "$s" | sha1sum | cut -d' ' -f1)"
 }
 
 API() {

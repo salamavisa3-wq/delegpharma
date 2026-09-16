@@ -18,6 +18,18 @@ mettre à jour les mesures, comparer à la baseline, tester UNE hypothèse.
 | Canonicaux | self-canonical sur routes réelles | OK |
 | E-E-A-T articles | dates ✅ (17-08/21-08/17 août 2026), auteur « Par DelegPharma » | nommer une personne = renforcement possible |
 
+## Re-mesure — 2026-09-03 (post-déploiement P1/P2, itération hebdo)
+
+| Métrique | Re-mesure 03/09 | vs baseline |
+|---|---|---|
+| URLs au sitemap | **123** | = stable |
+| Routes publiques (échantillon 8) | **200** | = OK |
+| Soft-404 (P1) | `/definitely-not-a-page`, `/dashboard`, `/foo/bar/baz` → **404** | ✅ tient |
+| Healthcheck `/healthz` | **200** JSON `{ok:true}` | = OK |
+| Maillage home (P2) | home → `/blog` **×2**, home → `/delegue-medical` **×2**, nav `/a-propos` → `/blog` ×1 | ✅ tient |
+| SERP métier (hypothèse P2) | « délégué médical métier Sénégal » / « carte sanitaire Sénégal » → **DelegPharma invisible** (IUP-Santé, IPAM, esante.sn dominent) | ⏳ trop tôt — maillage déployé 03/09, re-mesure à 2 semaines |
+| Indexation GSC | **non re-mesurée** | ⚠️ bloqué : clé SA + outil GSC DelegPharma introuvables localement (seul `sakeurimmo-gsc-key.json` existe dans `Desktop/gsc-api-tool/`) |
+
 ## Checklist phases (skill saas-propulsion) — 03/09
 
 - [x] **Phase 0** — repo propre, auto-deploy (render.yaml), 301, healthz, baseline capturée
@@ -65,10 +77,21 @@ liens vers sous-pages (données réelles) → acceptable, à étoffer si le temp
 
 ## Renforcement possible (non prioritaire)
 - E-E-A-T : signer les articles par une personne physique (nom + bio) plutôt que « Par DelegPharma ».
+  **Personne dispo identifiée 03/09** : **Malick Sall** — « Directeur de la publication » sur
+  `/mentions-legales` (vérifié live). ⚠️ **Action user** : confirmer que Malick Sall est bien la
+  personne à signer (et son accréditation) — la byline actuelle porte « docteur en pharmacie,
+  délégué médical au Sénégal » qui est une accréditation de marque, non vérifiable pour Malick Sall.
+  Ne pas attribuer la paternité d'articles à une personne sans confirmation (affirmation factuelle).
 
 ## Prochaine itération (2026-09-10)
 1. ~~Corriger P1 (soft-404)~~ ✅ fait 03/09 — `/definitely-not-a-page` → 404 vérifié.
 2. ~~Corriger P2 (maillage home → `/blog` + `/delegue-medical`)~~ ✅ fait 03/09 — vérifié live.
-3. **E-E-A-T** : signer les articles par une personne physique (renforcement nommé).
-4. Re-mesurer : sitemap, liens internes home, indexation GSC + crawl budget (impact P1).
-5. Vérifier la prise d'indexation `/blog` dans les SERPs métier (hypothèse P2).
+3. ~~Re-mesure 03/09~~ ✅ P1/P2 tiennent, sitemap 123 stable, `/healthz` 200.
+4. **E-E-A-T (action user)** : confirmer la personne à signer (Malick Sall, directeur de la
+   publication — vérifiable `/mentions-legales`) + son accréditation, puis déployer la signature
+   (byline + JSON-LD author Person).
+5. **Indexation GSC (action user)** : retrouver la clé SA + outil GSC DelegPharma (introuvables
+   localement — seul `sakeurimmo-gsc-key.json` existe) pour re-mesurer l'indexation + crawl budget
+   (impact P1).
+6. Vérifier la prise d'indexation `/blog` dans les SERPs métier (hypothèse P2) — attendre 2 semaines
+   de maillage avant de conclure.

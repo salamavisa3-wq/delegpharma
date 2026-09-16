@@ -10,7 +10,24 @@ import { REGIONS as REGIONS_SEED } from './seed-data.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const BASE = 'https://app.delegpharma.com';
-const SHELL = readFileSync(resolve(here, '../../frontend/index.html'), 'utf8');
+const SHELL_PATH = resolve(here, '../../frontend/index.html');
+
+// Shell index.html résolu en lazy : sous Workers, node:fs est inopérant → on le lit via
+// la binding Static Assets (env.ASSETS). Fallback : disque (node dev) puis HTML minimal.
+let _shell = null;
+async function getShell() {
+  if (_shell) return _shell;
+  try {
+    const { env } = await import('cloudflare:workers');
+    if (env?.ASSETS) {
+      const resp = await env.ASSETS.fetch(new Request('https://assets/index.html'));
+      if (resp.ok) { _shell = await resp.text(); return _shell; }
+    }
+  } catch { /* node local — on lit le fichier */ }
+  try { _shell = readFileSync(SHELL_PATH, 'utf8'); return _shell; } catch { /* shell minimal */ }
+  _shell = '<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DelegPharma</title></head><body><div id="app"></div></body></html>';
+  return _shell;
+}
 
 // Identité légale / contact — jamais codée en dur : lue depuis l'environnement (voir .env.example).
 // Tant que ces variables ne sont pas définies, /contact et /mentions-legales affichent un texte
@@ -64,6 +81,13 @@ async function warmCarteSanitaire() {
     for (const d of districts) byRegion.get(d.region_id)?.districts.push(d);
     carteCache = { regions: [...byRegion.values()] };
   } catch (e) { console.error('[seo] warmCarteSanitaire échoué (fallback seed) :', e.message); }
+}
+// Warm SSR memoïsé : déclenché au premier SSR, pas au boot (Workers — l'attente réseau ne
+// compte pas dans le budget CPU, mais une seule passe par isolate économise les requêtes).
+let _warmPromise = null;
+function ensureWarm() {
+  _warmPromise ||= Promise.all([warmTarifs(), warmLaboratoires(), warmCarteSanitaire()]).catch(() => {});
+  return _warmPromise;
 }
 // Fallback statique (seed) si la base n'a pas pu être warmée.
 function carteRegions() {
@@ -1509,11 +1533,13 @@ function matchPage(path) {
   return null;
 }
 
-export function seoShell(req) {
+export async function seoShell(req) {
   const page = matchPage(req.path) || FALLBACK;
+  await ensureWarm();
   const body = page.body();
+  const shell = await getShell();
   // Remplace la ligne <title> d'origine par le head SEO complet (title, desc, canonical, OG, JSON-LD).
-  return SHELL
+  return shell
     .replace(/<title>.*?<\/title>/, `  ${head(page)}`)
     .replace('<div id="app"></div>', `<div id="app">${body}</div>`);
 }
@@ -1555,4 +1581,4 @@ export function sitemapXml() {
   const urls = sitemapUrls().map((u) => `  <url><loc>${BASE}${u.loc}</loc><lastmod>2026-08-17</lastmod><changefreq>${u.freq}</changefreq><priority>${u.prio}</priority></url>`).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
-export { warmTarifs, warmLaboratoires, warmCarteSanitaire, matchPage };
+export { warmTarifs, warmLaboratoires, warmCarteSanitaire, matchPage, getShell };

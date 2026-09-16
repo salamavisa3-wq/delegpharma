@@ -1,0 +1,32 @@
+name: Backup Neon → R2
+
+# Backup quotidien du Postgres Neon (remplace le cron VPS 3h30). Rétention 14 jours
+# via lifecycle rules sur le bucket R2 (dashboard Cloudflare → R2 → delegpharma-assets).
+on:
+  schedule:
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pg_dump
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Dump gzip
+        env:
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: |
+          F="delegpharma-$(date +%F).sql.gz"
+          pg_dump --no-owner --no-privileges -Fp "$NEON_DATABASE_URL" | gzip -9 > "$F"
+          echo "BACKUP_FILE=$F" >> "$GITHUB_ENV"
+
+      - name: Upload to R2
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: r2 object put "s3://delegpharma-assets/backups/${{ env.BACKUP_FILE }}" --file "${{ env.BACKUP_FILE }}"

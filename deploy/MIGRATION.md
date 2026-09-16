@@ -1,83 +1,50 @@
-# Migration DelegPharma : VPS OVHcloud → vps-deploy (Oracle Cloud Free Tier)
+# Migration DelegPharma : VPS OVH → Cloudflare Workers (zéro carte)
 
-Contexte : le VPS OVH actuel (`164.132.109.175`, `app.delegpharma.com`) est
-injoignable (timeout total sur 80/443 le 15/09/2026 — pas un souci de
-certificat SSL, celui-ci reste valide jusqu'au 2026-11-08). Fichiers de
-déploiement préparés côté repo (`Dockerfile`, `docker-compose.yml`, workflows
-GitHub) ; le provisionnement cloud reste une action utilisateur.
+Migration réelle réalisée : **VPS OVH → stack 100 % sans carte** (skill
+`vps-zero-carte`) — Cloudflare Workers (Express 5 via `nodejs_compat` +
+`httpServerHandler`) + Static Assets (edge) + **Neon Postgres** + R2 + GitHub
+Actions. Zéro Google Cloud / Oracle / Render ; jamais de carte, jamais
+d'upgrade payant (limite dure : 10 ms CPU/invocation Workers Free ; quota
+dépassé → optimisation, jamais upscale).
 
-## ⚠️ Avant de commencer : statut Oracle Cloud
+Cette page annule la préparation antérieure en **Oracle Cloud / GCP / Docker**
+(ce chemin, qui concluait que « DelegPharma ne se porte pas vers Workers »,
+est obsolète : l'adaptateur DB et le pattern HTTP l'ont porté sans réécriture
+des 15 routeurs).
 
-Sur un autre projet de cet environnement (SakeurImmo, 05/09/2026), **Oracle
-Cloud a refusé la création de compte pour le Sénégal** (blocage de
-vérification côté Oracle, pas une sanction). Si ce blocage tient toujours :
-- Option de repli : Google Cloud Always Free (`gcp-provision.sh`, voir le
-  skill `vps-deploy` Phase 0 Option B) — mais capacité plus faible
-  (`e2-micro`, 1 Go RAM) et carte bancaire également requise à la
-  vérification.
-- DelegPharma (Express + Postgres en conteneur, sessions cookie, webhooks
-  CinetPay/PayPal) ne se porte pas vers Cloudflare Workers sans réécriture
-  significative (contrairement à SakeurImmo qui a fini sur Workers) — ce
-  n'est pas une option équivalente ici.
+## Stack cible (en place dans le repo)
 
-**Vérifier en premier** (avant d'aller plus loin) : tenter la création d'un
-compte/tenancy Oracle Cloud pour ce projet. Si refusé de nouveau, revenir
-sur ce fichier pour arbitrer GCP vs. réparation du VPS OVH existant plutôt
-qu'une migration complète.
+| Brique | Choix |
+|---|---|
+| Application | `backend/src/worker.js` → `httpServerHandler({port:3000})`, Express 5 inchangé |
+| API | Les 15 routeurs (`backend/src/routes/`) — seuls `auth.js` (scrypt) et `crv.js` (PDF async) ont bougé |
+| DB | Neon Postgres via `setDriver('neon')` dans `backend/src/db.js` (adaptateur partagé pg/neon ; schema `PgDDL` déjà utilisé en prod = zéro changement de schéma) |
+| Auth | `node:crypto.scryptSync` N=4096 (≈11 ms, tient sous les 10 ms… à 1 ms près, paramètre mesuré) ; hash `$2b$` legacy → **403 PASSWORD_RESET** → reset gated `plateforme` |
+| PDF CRV | Asynchrone : `pdf_jobs` (queue) en base → génération GitHub Actions (`pdf.yml`, pdfkit CPU illimité) → R2 → servi par le Worker (`/pdfs/*`, jamais de bucket public) |
+| Frontend | Static Assets edge (`wrangler.toml [assets]`, `run_worker_first`) ; SSR SEO conservé (lazy warm + fallback noindex soft-404) |
+| Déploiement | `deploy.yml` (wrangler-action@v3 + `scripts/schema-init.mjs` schéma seul) |
+| Backup | `backup.yml` (`pg_dump` Neon → gzip → R2, rétention 14 j lifecycle R2) |
 
-## Fichiers déjà prêts dans ce repo
+## Secrets (jamais dans le code)
 
-- `Dockerfile` — image Node 22 Alpine, `npm ci --omit=dev` dans `backend/`,
-  sert `frontend/` en statique (pas de build, cohérent avec la prod OVH
-  actuelle).
-- `docker-compose.yml` — service `app` (port interne 10000, healthcheck
-  `/healthz`) + `db` (Postgres 16, volume `pgdata`), réseau `caddy_net`
-  externe (pas de `ports:` publiés).
-- `.env.example` — ajout des variables `POSTGRES_USER/PASSWORD/DB` requises
-  par le conteneur `db` (à côté des variables applicatives déjà existantes :
-  CinetPay, PayPal, JWT_SECRET, légal).
-- `.github/workflows/deploy.yml` — déploiement health-gated + rollback auto
-  vers `/opt/apps/delegpharma`.
-- `.github/workflows/healthcheck.yml` — ping externe `/healthz` toutes les
-  15 min (filet de sécurité si le VPS lui-même est injoignable).
+- `wrangler secret put` : `NEON_DATABASE_URL`, `JWT_SECRET`, `CINETPAY_APIKEY`,
+  `CINETPAY_SITE_ID`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `OLLAMA_API_KEY`.
+- GitHub Secrets : `NEON_DATABASE_URL`, `CF_API_TOKEN`, `CF_ACCOUNT_ID`,
+  `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_ENDPOINT`.
+- Les valeurs ne circulent jamais dans le chat ni dans git (comparaison par NOMS
+  via `scripts/migrate-env.sh` du skill) ; si le `.env` prod est introuvable →
+  régénérer `JWT_SECRET` (logout général, acceptable sur un SaaS down).
 
-## Étapes restantes (action utilisateur)
+## À faire au cutover (action utilisateur)
 
-1. **Compte cloud** — Oracle (voir avertissement ci-dessus) ou GCP.
-   Instance Ubuntu 24.04, clé SSH ajoutée, ports 22/80/443 ouverts.
-2. **Bootstrap hôte** (une fois) :
-   ```bash
-   ssh ubuntu@<IP> "mkdir -p /tmp/vps-deploy"
-   scp -r "$HOME/.claude/skills/vps-deploy/scripts" "$HOME/.claude/skills/vps-deploy/templates" ubuntu@<IP>:/tmp/vps-deploy/
-   ssh ubuntu@<IP> "sudo bash /tmp/vps-deploy/scripts/provision.sh deploy '<CLÉ_PUBLIQUE_DEPLOY>'"
-   ```
-3. **Onboarder l'app** :
-   ```bash
-   ssh deploy@<IP> "sudo bash /opt/scripts/onboard-app.sh delegpharma app.delegpharma.com node 10000"
-   ```
-4. **Compléter `/opt/apps/delegpharma/.env`** sur le serveur (jamais dans le
-   repo) — copier depuis `/opt/delegpharma/backend/.env` sur l'ancien VPS OVH
-   (CinetPay, PayPal, JWT_SECRET, légal) + ajouter `POSTGRES_*` et changer
-   `DATABASE_URL` pour `host=db`.
-5. Premier démarrage : `cd /opt/apps/delegpharma && docker compose up -d --build`.
-6. **Secrets GitHub** (repo `salamavisa3-wq/delegpharma`) : `VPS_HOST`,
-   `VPS_USER=deploy`, `VPS_PORT=22`, `VPS_SSH_KEY` (paire dédiée, générer avec
-   `ssh-keygen -t ed25519 -f deploy_key -N ""`, clé publique ajoutée à
-   `/home/deploy/.ssh/authorized_keys` sur le nouveau VPS).
-7. **Bascule DNS** : `app.delegpharma.com` A record → nouvelle IP (garder
-   l'ancien enregistrement en secours jusqu'à vérification complète).
-8. **Vérifier** : `https://app.delegpharma.com/healthz` → 200, cert
-   Let's Encrypt valide, `/api/tarifs` → 3 formules (test fonctionnel déjà
-   utilisé lors du déploiement OVH initial).
-9. **Sauvegarde + restauration testée** : `/opt/scripts/backup.sh` (cron auto
-   3h30 posé par `onboard-app.sh`) puis `sudo -u deploy bash
-   /opt/scripts/restore.sh delegpharma` au moins une fois.
-10. Une fois validé en prod : décommissionner l'ancien VPS OVH (ou le garder
-    en attente si le contrat court encore).
+1. **Récupérer le dump prod** (SSH OVH `~/backups/delegpharma-*.sql.gz` →
+   `backups/`, gitignoré) + noter sa taille (décide Neon direct vs docs→R2 vs repli D1).
+2. Poser les secrets (ci-dessus), tester en local `wrangler dev`, déployer.
+3. `migration-data.yml` (one-shot) : restore dump → compteurs → reset des hash `$2b$`.
+4. Bascule DNS : zone Cloudflare `delegpharma.com`, `app.delegpharma.com` →
+   custom domain Worker, 301 `delegpharma.com`/`www` en Redirect Rule (remplace
+   le 301 serveur), NS Cloudflare.
+5. Vérifier santé / SSR / login / PDF, garder le dump pour rollback.
+6. Offboarding OVH : résilier le VPS, retirer `OVH_*` de `scripts/.env`.
 
-## Non touché par cette préparation
-
-- `render.yaml` à la racine du repo — semble être un résidu d'un chemin de
-  déploiement Render non utilisé (la prod réelle tourne sur OVH via
-  systemd, pas Render). Laissé en place, à confirmer/supprimer séparément
-  si l'utilisateur confirme qu'il est mort.
+Voir le plan complet (Cloudflare migration) dans le dossier plans de la session.

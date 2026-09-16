@@ -1,8 +1,46 @@
 // Authentification multi-tenant : JWT dans cookie httpOnly + middleware de rôles.
 // Le JWT embarque laboratoire_id — chaque requête est scopée au tenant du token.
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { get, run } from './db.js';
+
+// Budget CPU Workers Free : 10 ms/invocation — le KDF est LA charge CPU du login.
+// Mesuré (2026) : scrypt N=8192 ≈ 21 ms, N=4096 ≈ 11 ms, N=2048 ≈ 5,5 ms (poste local).
+// N=4096 r=8 p=1 (~4 Mo) est le plus fort KDF qui tient sous la limite sur le matériel
+// Cloudflare. Les paramètres SONT stockés dans le hash → on peut monter N plus tard
+// (rehash au login) sans invalider les hashes existants.
+const SCRYPT = { N: 4096, r: 8, p: 1, keylen: 64, maxmem: 32 * 1024 * 1024 };
+
+/** Hash bcrypt legacy ($2a/$2b/$2y$) : importé depuis l'ancienne prod, non vérifiable →
+ *  reset forcé au login (403 PASSWORD_RESET). */
+export function isLegacyHash(hash) {
+  return /^\$2[aby]\$/.test(String(hash || ''));
+}
+
+/** Vrai si le hash ne suit pas les paramètres courants → rehash au prochain login. */
+export function needsRehash(hash) {
+  if (isLegacyHash(hash)) return true;
+  const [algo, N, r, p] = String(hash || '').split('$');
+  return algo !== 'scrypt' || Number(N) !== SCRYPT.N || Number(r) !== SCRYPT.r || Number(p) !== SCRYPT.p;
+}
+
+// Hash auto-descriptif : scrypt$N$r$p$<salt-b64>$<hash-b64> (forward-compat params).
+export function hashPassword(password) {
+  const salt = randomBytes(16);
+  const { N, r, p, keylen } = SCRYPT;
+  const dk = scryptSync(password, salt, keylen, { N, r, p, maxmem: SCRYPT.maxmem });
+  return `scrypt$${N}$${r}$${p}$${salt.toString('base64')}$${dk.toString('base64')}`;
+}
+
+export function verifyPassword(hash, password) {
+  if (isLegacyHash(hash)) return Promise.resolve(false); // jamais vérifié — reset forcé
+  const [algo, N, r, p, saltB64, hashB64] = String(hash || '').split('$');
+  if (algo !== 'scrypt' || !saltB64 || !hashB64) return Promise.resolve(false);
+  const salt = Buffer.from(saltB64, 'base64');
+  const expected = Buffer.from(hashB64, 'base64');
+  const dk = scryptSync(password, salt, expected.length, { N: Number(N), r: Number(r), p: Number(p), maxmem: SCRYPT.maxmem });
+  return Promise.resolve(timingSafeEqual(dk, expected));
+}
 
 const SECRET = process.env.JWT_SECRET
   || (process.env.NODE_ENV === 'production' ? null : 'dev-insecure-secret-change-me');
@@ -51,14 +89,6 @@ export function requireRole(...roles) {
     }
     return next();
   };
-}
-
-export function verifyPassword(hash, password) {
-  return bcrypt.compare(password, hash);
-}
-
-export function hashPassword(password) {
-  return bcrypt.hash(password, 10);
 }
 
 export function publicUser(u) {

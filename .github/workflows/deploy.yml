@@ -1,4 +1,4 @@
-name: Deploy to VPS
+name: Deploy (Cloudflare Workers + Static Assets)
 
 on:
   push:
@@ -11,19 +11,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # TARGET = /opt/apps/delegpharma — doit correspondre au nom donné à
-      # onboard-app.sh (sudo bash /opt/scripts/onboard-app.sh delegpharma app.delegpharma.com node 10000).
-      - name: Deploy app files to VPS (health-gated, rollback auto si échec)
-        uses: easingthemes/ssh-deploy@v6.0.3
+      - uses: actions/setup-node@v4
         with:
-          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.VPS_HOST }}
-          REMOTE_USER: ${{ secrets.VPS_USER }}
-          REMOTE_PORT: ${{ secrets.VPS_PORT }}
-          SOURCE: "./"
-          TARGET: /opt/apps/delegpharma
-          EXCLUDE: "/.env, /.git, /node_modules, /.data, /docker-compose.override.yml"
-          SCRIPT_BEFORE: |
-            mkdir -p /opt/apps/delegpharma
-          SCRIPT_AFTER: |
-            /opt/scripts/deploy-rollback.sh /opt/apps/delegpharma
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci --omit=dev
+
+      # Init schéma idempotent SUR LE RUNNER (CPU illimité), jamais dans le Worker
+      # (DDL multi-statement > 10 ms). Schéma SEUL par défaut : la base reste vierge
+      # tant que migration-data.yml n'a pas restauré le dump prod.
+      - name: Init schema (idempotent, Neon)
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: node scripts/schema-init.mjs
+
+      - name: Deploy Worker + assets + R2
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: deploy

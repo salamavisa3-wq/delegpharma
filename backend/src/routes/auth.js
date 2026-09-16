@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { get, run, lastInsertId } from '../db.js';
 import {
-  signToken, setAuthCookie, clearAuthCookie, requireAuth, verifyPassword,
-  hashPassword, publicUser, getSubscriptionState,
+  signToken, setAuthCookie, clearAuthCookie, requireAuth, requireRole, verifyPassword,
+  hashPassword, publicUser, getSubscriptionState, isLegacyHash, needsRehash,
 } from '../auth.js';
 import { payment, makeReference, payMode } from '../payments/adapter.js';
 
@@ -15,8 +15,20 @@ router.post('/login', async (req, res) => {
   const user = await get('SELECT * FROM users WHERE email = $1', [String(email).toLowerCase().trim()]);
   if (!user) return res.status(401).json({ error: 'Identifiants invalides' });
 
+  // Hash bcrypt $2b$ importé depuis l'ancienne prod : non vérifiable (bcrypt retiré) →
+  // réinitialisation forcée par un admin plateforme (POST /auth/admin/reset-password).
+  if (isLegacyHash(user.password_hash)) {
+    return res.status(403).json({ error: 'Mot de passe à réinitialiser', code: 'PASSWORD_RESET' });
+  }
+
   const ok = await verifyPassword(user.password_hash, password);
   if (!ok) return res.status(401).json({ error: 'Identifiants invalides' });
+
+  // Ratchet : si les params stockés sont plus faibles que les params courants (N relevé),
+  // on re-hash au vol — le login reste fluide, la sécurité monte sans intervention.
+  if (needsRehash(user.password_hash)) {
+    await run('UPDATE users SET password_hash = $1 WHERE id = $2', [hashPassword(password), user.id]).catch(() => {});
+  }
 
   const labo = user.laboratoire_id
     ? await get('SELECT id, nom, agrement_arp FROM laboratoire WHERE id = $1', [user.laboratoire_id])
@@ -24,6 +36,18 @@ router.post('/login', async (req, res) => {
   const token = signToken(user);
   setAuthCookie(res, token);
   return res.json({ user: publicUser(user), laboratoire: labo });
+});
+
+// Reset de mot de passe d'un utilisateur importé (hash $2b$ legacy, code PASSWORD_RESET).
+// Réservé à la plateforme — c'est l'acte qui déverrouille les comptes de la migration.
+router.post('/admin/reset-password', requireAuth, requireRole('plateforme'), async (req, res) => {
+  const { user_id, password } = req.body || {};
+  if (!user_id || !password) return res.status(400).json({ error: 'user_id et password requis' });
+  if (String(password).length < 8) return res.status(400).json({ error: 'Mot de passe trop court (min 8 caractères)' });
+  const target = await get('SELECT id FROM users WHERE id = $1', [user_id]);
+  if (!target) return res.status(404).json({ error: 'Utilisateur introuvable' });
+  await run('UPDATE users SET password_hash = $1 WHERE id = $2', [hashPassword(password), user_id]);
+  return res.json({ ok: true });
 });
 
 // Inscription publique délégué (spec §3.1) : choix laboratoire + formule →

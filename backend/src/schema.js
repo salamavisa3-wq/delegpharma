@@ -222,6 +222,20 @@ CREATE TABLE IF NOT EXISTS notification (
   created_at     TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_notif_to ON notification(to_user_id);
+
+-- File PDF des CRV : génération ASYNCHRONE (GitHub Actions, CPU illimité) car
+-- pdfkit dépasse le budget CPU de 10 ms/invocation du Worker. Table = queue + statut.
+CREATE TABLE IF NOT EXISTS pdf_jobs (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  visite_id  INTEGER NOT NULL REFERENCES visite(id),
+  user_id    INTEGER NOT NULL REFERENCES users(id),
+  statut     TEXT NOT NULL DEFAULT 'en_attente' CHECK (statut IN ('en_attente','en_cours','pret','echoue')),
+  url        TEXT NOT NULL DEFAULT '',
+  erreur     TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_pdf_jobs_visite ON pdf_jobs(visite_id);
+CREATE INDEX IF NOT EXISTS idx_pdf_jobs_statut ON pdf_jobs(statut);
 `;
 
 const PgDDL = SQLiteDDL
@@ -247,11 +261,10 @@ const PgDDL = SQLiteDDL
   ;
 
 export async function initSchema() {
-  const { exec, run } = await import('./db.js');
-  const url = process.env.DATABASE_URL || '';
-  const isPg = url.startsWith('postgres://') || url.startsWith('postgresql://');
-  await exec(isPg ? PgDDL : SQLiteDDL);
-  if (isPg) {
+  const { exec, run, isPg } = await import('./db.js');
+  const pg = isPg(); // dialecte pg OU neon (driver, pas l'env) — même schéma Postgres
+  await exec(pg ? PgDDL : SQLiteDDL);
+  if (pg) {
     const { all } = await import('./db.js');
     const indexes = [
       'CREATE INDEX IF NOT EXISTS idx_region_pays ON region(pays_id)',
@@ -278,7 +291,7 @@ export async function initSchema() {
   // Rôles étendus (professionnel, plateforme) + admin plateforme sans tenant + lien PS.
   // Sur une base neuve le CREATE TABLE ci-dessus porte déjà ces changements ; sur une base
   // existante (Render Postgres / dev), on ajuste la définition en place.
-  if (isPg) {
+  if (pg) {
     await run('ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check');
     await run('ALTER TABLE users ALTER COLUMN laboratoire_id DROP NOT NULL');
     await run('ALTER TABLE users ADD COLUMN IF NOT EXISTS professionnel_id INTEGER');

@@ -2,8 +2,8 @@
 // Usage : npm run seed
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import bcrypt from 'bcryptjs';
 import { run, get, close, lastInsertId, isPg } from './db.js';
+import { hashPassword } from './auth.js';
 import { initSchema } from './schema.js';
 import {
   PAYS, REGIONS, TYPES_STRUCTURE, SPECIALITES, TENANT_DEMO,
@@ -98,7 +98,7 @@ export async function seed() {
     { nom: 'Admin DelegPharma', email: 'admin.deleg', role: 'admin', password: 'Admin@2026Deleg' },
   ];
   for (const u of demoUsers) {
-    const hash = bcrypt.hashSync(u.password, 10);
+    const hash = hashPassword(u.password);
     await run(`INSERT INTO users (laboratoire_id, role, nom, email, password_hash) VALUES (${ph(1)},${ph(2)},${ph(3)},${ph(4)},${ph(5)})`,
       [laboId, u.role, u.nom, u.email, hash]);
   }
@@ -152,7 +152,7 @@ export async function seedExtras() {
   if (!alreadyE) {
     const hasP = await get(`SELECT id FROM users WHERE email = ${ph(1)}`, ['admin.plateforme']);
     if (!hasP) {
-      const hash = bcrypt.hashSync('Admin@2026Plateforme', 10);
+      const hash = hashPassword('Admin@2026Plateforme');
       await run('INSERT INTO users (laboratoire_id, role, nom, email, password_hash) VALUES (NULL, $1, $2, $3, $4)',
         ['plateforme', 'Admin Plateforme', 'admin.plateforme', hash]);
     }
@@ -161,7 +161,7 @@ export async function seedExtras() {
       const ps = await get(`SELECT id, laboratoire_id FROM professionnel WHERE nom = ${ph(1)} ORDER BY id LIMIT 1`,
         ['Dr Awa Ndiaye']);
       if (ps) {
-        const hash = bcrypt.hashSync('Ps@2026Deleg', 10);
+        const hash = hashPassword('Ps@2026Deleg');
         await run('INSERT INTO users (laboratoire_id, role, nom, email, password_hash, professionnel_id) VALUES ($1,$2,$3,$4,$5,$6)',
           [ps.laboratoire_id, 'professionnel', 'Dr Awa Ndiaye', 'ps.demo', hash, ps.id]);
       }

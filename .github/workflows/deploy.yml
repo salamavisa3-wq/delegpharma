@@ -35,4 +35,8 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          # Pin = version qui externalise node:sqlite (builtin Node, import dynamique
+          # db.js jamais exécuté sous Neon mais résolu au build). Le défaut (3.90.0)
+          # casse le bundle → épingle la 4.133.0 déjà validée en deploy manuel.
+          wranglerVersion: 4.133.0
           command: deploy

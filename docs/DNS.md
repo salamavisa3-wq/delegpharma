@@ -42,6 +42,19 @@ automatisé par scripts :
 Aucune bascule de NS n'est déclenchée par un script — c'est une décision volontaire et
 réversible (re-pointer NS OVH pour rollback).
 
+## ⚠️ PRÉREQUIS : token CF avec `Zone:DNS:Edit`
+
+Pour que `--apply` puisse **poser les records** (MX/SPF/A — le cœur du P1), le token CF doit
+avoir le scope **`Zone:DNS:Edit` sur `delegpharma.com`** en plus de `Workers Scripts:Edit`.
+Sans lui (token actuel, vérifié `403` sur `GET /dns_records`), le custom domain Worker et la
+redirect restent possibles (scopes Workers + Zone), mais **aucun record DNS ne sera créé** —
+et la bascule NS partirait sans MX dans CF → mail à risque.
+
+Création (dashboard CF, gratuit, sans carte) : My Profile → **API Tokens** → **Create Token** →
+Template « Edit zone DNS » → Zone Resources = **Specific zone: delegpharma.com** → + perm
+`Workers Scripts:Edit` (Account, pour le custom domain) → créer → coller la valeur dans
+`~/secrets-delegpharma.env` ligne `CF_API_TOKEN=…` (jamais affichée), puis relancer le watcher.
+
 ## Procédure automatisée (le mail ne doit JAMAIS tomber)
 
 Tu peux relancer ceci en continu pendant que tu fais les 2 étapes dashboard ; il reprend seul

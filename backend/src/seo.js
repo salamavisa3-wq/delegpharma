@@ -8,7 +8,9 @@ import { all } from './db.js';
 import { NATIONAL, REGION_INFO, DISTRICT_INFO } from './carte-sanitaire.js';
 import { REGIONS as REGIONS_SEED } from './seed-data.js';
 
-const here = dirname(fileURLToPath(import.meta.url));
+// Workers : import.meta.url undefined dans le bundle → garde (SHELL_PATH disque
+// n'est lu qu'en Node dev ; sous Workers on passe par env.ASSETS).
+const here = import.meta.url ? dirname(fileURLToPath(import.meta.url)) : '.';
 const BASE = 'https://app.delegpharma.com';
 const SHELL_PATH = resolve(here, '../../frontend/index.html');
 

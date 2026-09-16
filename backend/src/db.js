@@ -9,7 +9,9 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mkdirSync } from 'node:fs';
 
-const here = dirname(fileURLToPath(import.meta.url));
+// Workers : import.meta.url est undefined dans le module bundle (esbuild) → garde
+// (le chemin disque n'est utilisé qu'en Node : sqlite/pg dev, jamais sous Workers).
+const here = import.meta.url ? dirname(fileURLToPath(import.meta.url)) : '.';
 const defaultFile = resolve(here, '../../data/delegpharma.db');
 
 export const url = process.env.DATABASE_URL || `file:${defaultFile}`;

@@ -1,61 +1,81 @@
-# DNS — delegpharma.com (OVHcloud)
+# DNS — delegpharma.com (bascule vers Cloudflare Workers, cible zéro-carte)
 
-Migration DNS pour la spec §7 : la **vitrine** est servie par **systeme.io** via CloudFront,
-le **backend** sur `app.delegpharma.com` (VPS OVHcloud). Le domaine est géré chez **OVHcloud**
-(zone DNS). **Conserver MX intacts** — le mail (`mx1-3.mail.ovh.net`) ne change pas.
+ÉTAT AU 16/09/2026 — remplace l'ancien `DNS.md` (v1, périmé : pointait `app` vers le VPS
+OVH `164.132.109.175` et `www` vers la vitrine systeme.io/CloudFront).
 
-## Architecture DNS finale
+## Objectif
 
-| Type | Nom | Cible | Note |
-|---|---|---|---|
-| A | `delegpharma.com` (apex) | IP mutualisée OVHcloud | WordPress backup jusqu'à bascule finale |
-| CNAME | `www` | `dejc22hvp6w80.cloudfront.net.` | vitrine systeme.io |
-| CNAME | `_12505783a60f38d6d95de9e9ec48c863` | `_f9e220a0fda19605cd8dcacae8832d82.jkddzztszm.acm-validations.aws.` | validation SSL ACM |
-| CNAME | `app` | VPS OVHcloud | backend Node — A vers IP du VPS de préférence |
-| MX | `@` | `mx0.mail.ovh.net` / `mx1.mail.ovh.net` / `mx2.mail.ovh.net` / `mx3.mail.ovh.net` | **préserver, ne pas toucher** |
+| Hôte | Cible actuelle (AVANT) | Cible (APRÈS bascule) |
+|---|---|---|
+| `app.delegpharma.com` | A → `164.132.109.175` (VPS **RÉSILIÉ** — mort) | Worker `delegpharma` (custom domain) |
+| `delegpharma.com` (apex) | A → `146.59.209.152` (vitrine OVH) | Zone CF full → 301/Redirect Rule vers `app` |
+| `www.delegpharma.com` | A → `146.59.209.152` | Redirect Rule CF vers `app` |
+| `app.delegpharma.com` MX | `mx1/2/3.mail.ovh.net` | **à reproduire dans la zone CF avant bascule NS** |
 
-> Les deux CNAME systeme.io (`dejc22hvp6w80...` et `_12505783...`) proviennent de la
-> configuration systeme.io du cahier des charges (§7.1). À vérifier dans le dashboard systeme.io
-> au moment de la bascule — ils peuvent différer selon le projet.
+## État vérifié (16/09, autoritaire `ns106.ovh.net`)
 
-## Ordre de bascule (conservateur, §7.2)
+- NS : `dns106.ovh.net` / `ns106.ovh.net` (registrar OVH — à remplacer par les 2 NS CF).
+- `app.delegpharma.com` A → `164.132.109.175` → **ne répond plus** (VPS résilié 16/09).
+- `delegpharma.com` A → `146.59.209.152` (mutualisée OVH, vitrine marketing).
+- MX OVH intacts (mail `*@delegpharma.com` géré par OVH — **ne pas casser**).
+- Compte CF `Momosall2010` : zone `sakeurimmo.com` active (full, NS `adi.ns.cloudflare.com` +
+  `gerardo.ns.cloudflare.com`). `delegpharma.com` **ABSENTE** du compte.
 
-1. **Avant SSL** : garder l'A apex OVHcloud (WordPress actuel joignable en backup). Ajouter les
-   CNAME systeme.io (www + validation ACM) sans retirer les records existants.
-2. **Après émission du SSL systeme.io** : basculer le trafic vitrine sur systeme.io.
-3. **Backend** : `app.delegpharma.com` → IP du VPS (record **A**, plus fiable qu'un CNAME vers un
-   hôte sans suffixe). SSL via certbot sur le VPS.
-4. **Vérifier** MX + envoi/réception mail, puis décider de la bascule finale apex → CloudFront.
+## Principe — pourquoi c'est à moitié manuel, et ce qui est fait
 
-## Records exacts (à saisir dans la zone OVHcloud)
+La création de zone CF (`Zone:Edit`) et le changement de NS chez le registrar OVH sont des
+actions utilisateur (dashboard) : le token CF actuel n'a qu'un scope `Workers:*` (probe create
+zone → `403`). Le reste est vérifiable/mesurable par script après la bascule
+(`scripts/dns-cutover-verify.sh`). Aucune bascule de NS n'est déclenchée par un script — c'est
+une décision volontaire et réversible (re-pointer NS OVH pour rollback).
 
-```
-# Vitrine systeme.io (CloudFront)
-www.delegpharma.com.  CNAME  dejc22hvp6w80.cloudfront.net.
-_12505783a60f38d6d95de9e9ec48c863.delegpharma.com.  CNAME  _f9e220a0fda19605cd8dcacae8832d82.jkddzztszm.acm-validations.aws.
+## Procédure (ordre strict — le mail ne doit JAMAIS tomber)
 
-# Backend SaaS
-app.delegpharma.com.  A  <IP_VPS>
+### 1. Préparer la zone CF (action utilisateur, dashboard) — ~10 min
+1. Cloudflare dashboard → **Add a site** → `delegpharma.com` (plan Free, zéro carte).
+2. CF propose 2 nameservers : `XXX.ns.cloudflare.com` + `YYY.ns.cloudflare.com`.
+3. **AVANT de toucher aux NS** : dans la zone neuve CF, créer les **mêmes records** que la zone
+   OVH, au minimum :
+   - **MX** `@` → `mx1.mail.ovh.net` (1) / `mx2` (5) / `mx3` (100) — MAIL, non négociable.
+   - TXT SPF/DKIM éventuels (à copier depuis la zone OVH : OVHcloud → domaines →
+     delegpharma.com → Zone DNS).
+   - `www` → vitrine actuelle (`146.59.209.152`) si elle doit rester en l'état.
+4. Ne PAS encore changer de NS.
 
-# Mail — intacts
-@  MX  mx0.mail.ovh.net
-@  MX  mx1.mail.ovh.net
-@  MX  mx2.mail.ovh.net
-@  MX  mx3.mail.ovh.net
-```
+### 2. Bascule DNS (action utilisateur, registrar OVH)
+- OVHcloud → domaines → delegpharma.com → **serveurs DNS** → remplacer
+  `ns106.ovh.net` / `dns106.ovh.net` par les 2 NS CF. Validé en ~24-72 h max (TTL 24 h NS).
 
-## Vérifications
+### 3. Brancher le custom domain Worker (API CF — scriptable)
+Une fois la zone `delegpharma.com` active dans le compte (étape 1), le custom domain se
+branche comme sakeurimmo.com l'est déjà (Workers → Settings → Domains & Routes → Add Custom
+Domain `app.delegpharma.com`, ou API `PUT /accounts/:id/workers/domains`).
+
+### 4. Redirect apex/www → app (Redirect Rule CF)
+Zone CF → Rules → Redirect Rules : `delegpharma.com` et `www.delegpharma.com` → 301
+`https://app.delegpharma.com` (comme l'ancien 301 de la vitrine OVH).
+
+## Vérifications (scriptables après bascule)
 
 ```bash
 # Propagation / records
-dig www.delegpharma.com CNAME +short
-dig _12505783a60f38d6d95de9e9ec48c863.delegpharma.com CNAME +short
-dig app.delegpharma.com A +short
-dig delegpharma.com MX +short
+dig +short delegpharma.com NS            # → 2 NS *.ns.cloudflare.com
+dig +short app.delegpharma.com           # → (résolu par CF) ; https://app.delegpharma.com/healthz → 200
+dig +short delegpharma.com MX
+curl -sS -o /dev/null -w '%{http_code}\n' https://app.delegpharma.com/healthz
+curl -sS -o /dev/null -w '%{http_code}\n' -L https://delegpharma.com/healthz   # → 200 après redirect
 
-# HTTPS
-curl -I https://www.delegpharma.com        # → HTTP/2, TLS OK (systeme.io/CloudFront)
-curl -I https://app.delegpharma.com/api/health   # → {"ok":true}
+# Auto : scripts/dns-cutover-verify.sh delegates all checks
 ```
 
-Propagation DNS : 24–48 h (TTL court avant la bascule recommandé : 300 s).
+## Rollback
+
+Re-pointer les NS OVH (`ns106`/`dns106`) chez le registrar tant que la zone CF n'est pas
+supprimée. Le worker reste joignable sur `delegpharma.momosall2010.workers.dev` quoi qu'il
+arrive (filet).
+
+## Règles
+
+- **Zéro carte** : plan CF Free pour la zone, comme sakeurimmo.com.
+- **Le mail ne tombe jamais** : MX reproduits dans CF AVANT la bascule NS (étape 1.3).
+- Aucun secret dans ce runbook ; aucune action NS sans confirmation explicite.

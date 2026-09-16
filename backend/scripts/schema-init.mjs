@@ -1,7 +1,8 @@
 // Init Schéma idempotent — exécuté par le workflow de déploiement (runner GitHub,
 // CPU illimité), jamais dans le Worker (le multi-statement DDL y dépasserait le budget).
-// Le DEFAULT est schéma seul : la base reste vierge pour la restauration du dump prod
-// (migration-data.yml). --seed / --extras pour un environnement de test/dev.
+// Le DEFAULT est schéma seul : la base reste vierge jusqu'au seed (init-base.yml →
+// npm run seed, idempotent, socle complet : référentiel + formules + catalogue).
+// --seed / --extras pour un environnement de test/dev.
 // Usage : DATABASE_URL="$NEON" node scripts/schema-init.mjs [--seed] [--extras]
 import { setDriver, close } from '../src/db.js';
 import { initSchema } from '../src/schema.js';

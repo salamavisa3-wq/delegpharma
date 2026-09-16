@@ -1,0 +1,60 @@
+name: Init base (schéma + seed idempotent, Neon)
+
+# REMPLACE l'ancien `migration-data.yml` (restauration du dump prod) : le dump OVH
+# a été perdu avec le VPS résilié 16/09 → plus rien à restaurer. La base Neon reste
+# vierge tant que ce workflow n'a pas tourné. Il construit le socle de données
+# opérationnel : référentiel (régions/districts/spécialités), laboratoires + formules,
+# catalogue marché (~220 produits), tenant démo MEDIS, comptes démo.
+#
+# Le seed est IDEMPOTENT (guards meta : seeded_v1, formules_v1, …) — rejouable sans
+# risque. Ne touche qu'aux lignes absentes (INSERT + guards), ne réécrit jamais.
+# À exécuter une fois après le 1er deploy (schema déjà initialisé par deploy.yml) :
+#   gh workflow run init-base.yml
+on:
+  workflow_dispatch:
+
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci --omit=dev
+
+      # Schéma idempotent (comme deploy.yml) — sans lui le seed sur base vide échoue.
+      - name: Init schema (idempotent, Neon)
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: node scripts/schema-init.mjs
+
+      - name: Seed socle de données (idempotent, Neon)
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: npm run seed
+
+      - name: Compteurs post-seed
+        env:
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+        run: |
+          sudo apt-get update && sudo apt-get install -y -qq postgresql-client
+          {
+            echo "## Compteurs après seed (socle Neon)"
+            psql "$NEON_DATABASE_URL" -t -A -c "SELECT 'users='||count(*) FROM users"
+            psql "$NEON_DATABASE_URL" -t -A -c "SELECT 'laboratoires='||count(*) FROM laboratoire"
+            psql "$NEON_DATABASE_URL" -t -A -c "SELECT 'produits='||count(*) FROM produit"
+            psql "$NEON_DATABASE_URL" -t -A -c "SELECT 'formules='||count(*) FROM formule"
+            psql "$NEON_DATABASE_URL" -t -A -c "SELECT 'structures='||count(*) FROM structure"
+            psql "$NEON_DATABASE_URL" -t -A -c "SELECT 'professionnels='||count(*) FROM professionnel"
+            psql "$NEON_DATABASE_URL" -t -A -c "SELECT 'regions='||count(*) FROM region"
+          } > "$GITHUB_STEP_SUMMARY"
+          cat "$GITHUB_STEP_SUMMARY"

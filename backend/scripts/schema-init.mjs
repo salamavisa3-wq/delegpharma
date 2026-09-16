@@ -9,6 +9,14 @@ import { initSchema } from '../src/schema.js';
 import { seed, seedExtras } from '../src/seed.js';
 
 const args = process.argv.slice(2);
+// Garde anti-faux-vert : DATABASE_URL présent mais non-postgres (ex. BOM UTF-8 ajouté
+// à un secret → startsWith() faux → repli silencieux sur sqlite) doit ÉCHOUER, pas
+// déclarer « schéma initialisé » sur un fichier local du runner.
+const rawUrl = process.env.DATABASE_URL;
+if (rawUrl && !rawUrl.startsWith('postgres')) {
+  console.error(`DATABASE_URL invalide : ne commence pas par postgres:// (len=${rawUrl.length}). Encodage/BOM de secret ?`);
+  process.exit(1);
+}
 setDriver(
   process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith('postgres') ? 'pg' : 'sqlite',
 );

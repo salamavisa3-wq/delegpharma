@@ -150,8 +150,8 @@ function landingBody() {
   <div style="text-align:center;margin-top:30px">
     <a class="primary" href="/carte-sanitaire" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Explorer la carte sanitaire du Sénégal</a>
   </div>
-  <footer style="max-width:860px;margin:34px auto 8px;text-align:center;font-size:13px;color:var(--mut)">
-    <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a> · <a href="/tarifs">Tarifs</a> · <a href="/delegue-medical">Délégué médical</a> · <a href="/blog">Blog</a> · <a href="/a-propos">À propos</a> · <a href="/login">Connexion</a> · <a href="/inscription">Compte gratuit</a>
+  <footer style="max-width:860px;margin:34px auto 8px;text-align:center;font-size:14px;color:var(--mut);line-height:1.2">
+    <a style="display:inline-block;padding:8px 6px" href="/carte-sanitaire">Carte sanitaire</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/laboratoires">Laboratoires</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/tarifs">Tarifs</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/delegue-medical">Délégué médical</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/blog">Blog</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/a-propos">À propos</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/login">Connexion</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/inscription">Compte gratuit</a>
   </footer>
   </main>`;
 }
@@ -283,10 +283,12 @@ function laboratoiresBody() {
 /* ---------- Carte sanitaire (SSR public) ---------- */
 
 function publicHeader() {
+  const nav = [['Accueil', '/'], ['Délégué médical', '/delegue-medical'], ['Carte sanitaire', '/carte-sanitaire'], ['Laboratoires', '/laboratoires'], ['Tarifs', '/tarifs'], ['Blog', '/blog'], ['À propos', '/a-propos'], ['Connexion', '/login']];
+  const links = nav.map(([l, h]) => `<a style="display:inline-block;padding:9px 7px;line-height:1.2" href="${h}">${l}</a>`).join('');
   return `
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+  <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px 8px;margin-bottom:20px">
     <div class="brand">DelegPharma</div>
-    <div><a href="/">Accueil</a> · <a href="/delegue-medical">Délégué médical</a> · <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a> · <a href="/tarifs">Tarifs</a> · <a href="/blog">Blog</a> · <a href="/a-propos">À propos</a> · <a href="/login">Connexion</a></div>
+    <nav style="display:flex;flex-wrap:wrap;min-width:0">${links}</nav>
   </div>`;
 }
 

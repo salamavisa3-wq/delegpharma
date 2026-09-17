@@ -88,9 +88,14 @@ const can = (roles) => state.user && roles.includes(state.user.role);
 /* ---------- Démarrage ---------- */
 async function init() {
   const p = location.pathname.replace(/\/+$/, '');
-  // Garde « contenu statique » : /carte-sanitaire/* et /blog/* sont entièrement rendus
-  // serveur (SSR). La SPA ne doit pas écraser le pré-rendu — on sort immédiatement.
-  if (p.startsWith('/carte-sanitaire') || p.startsWith('/blog') || p === '/a-propos') return;
+  // Garde « SSR publique » : seules les URLs que le hash-routing SPA sait hydrater
+  // (home + /landing, /tarifs, /login, /inscription, /laboratoires) sont re-rendues.
+  // Toute AUTRE URL publique — /carte-sanitaire*, /blog*, /a-propos, /delegue-medical,
+  // /mentions-legales, /politique-de-confidentialite, /contact — est entièrement rendue
+  // serveur (SSR). La SPA ne doit PAS écraser son pré-rendu : le title reste celui du SSR
+  // mais le body serait remplacé par la landing (h1/FAQ disparaissent). On sort immédiatement.
+  const SPA_HYDRATABLE = new Set(['', '/landing', '/tarifs', '/login', '/inscription', '/laboratoires']);
+  if (!SPA_HYDRATABLE.has(p)) return;
   // SEO : les URLs publiques /tarifs, /login, /inscription (SSR) doivent hydrater la vue
   // hash-routing correspondante — sinon le JS écraserait le pré-rendu par la landing.
   if (!location.hash) {
@@ -213,8 +218,8 @@ function landingView() {
       <button class="primary" data-action="go-laboratoires" style="padding:11px 26px;font-size:15px">Voir les laboratoires référencés</button>
     </p>
   </div>
-  <footer style="max-width:860px;margin:34px auto 8px;text-align:center;font-size:13px;color:var(--mut)">
-    <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a> · <a href="/tarifs">Tarifs</a> · <a href="/a-propos">À propos</a> · <a href="/login">Connexion</a> · <a href="/inscription">Compte gratuit</a>
+  <footer style="max-width:860px;margin:34px auto 8px;text-align:center;font-size:14px;color:var(--mut);line-height:1.2">
+    <a style="display:inline-block;padding:8px 6px" href="/carte-sanitaire">Carte sanitaire</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/laboratoires">Laboratoires</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/tarifs">Tarifs</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/a-propos">À propos</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/login">Connexion</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/inscription">Compte gratuit</a>
   </footer>
   </main>`;
 }
@@ -229,7 +234,7 @@ function loginView() {
       <div class="error" data-slot="error"></div>
     </form>
     <p class="hint">Comptes démo : <code>dm.senegal</code> / <code>manager.senegal</code> / <code>labo.pharma</code> — mot de passe dans la documentation.</p>
-    <p class="hint">Pas encore de compte ? <a href="#/inscription">Devenir délégué</a> · <a href="#/tarifs">Tarifs</a> · <a href="#/landing">← Retour</a></p>
+    <p class="hint">Pas encore de compte ? <a style="display:inline-block;padding:6px 4px" href="#/inscription">Devenir délégué</a> · <a style="display:inline-block;padding:6px 4px" href="#/tarifs">Tarifs</a> · <a style="display:inline-block;padding:6px 4px" href="#/landing">← Retour</a></p>
   </div>`;
 }
 
@@ -560,9 +565,9 @@ async function campagnesView() {
 function publicPage(title, body) {
   return `
   <div style="max-width:920px;margin:0 auto;padding:28px 16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px 8px;margin-bottom:20px">
       <div class="brand">DelegPharma</div>
-      <div><a href="#/landing">Accueil</a> · <a href="#/laboratoires">Laboratoires</a> · <a href="#/tarifs">Tarifs</a> · <a href="/a-propos">À propos</a> · <a href="#/login">Connexion</a></div>
+      <nav style="display:flex;flex-wrap:wrap;min-width:0"><a style="display:inline-block;padding:9px 7px;line-height:1.2" href="#/landing">Accueil</a><a style="display:inline-block;padding:9px 7px;line-height:1.2" href="#/laboratoires">Laboratoires</a><a style="display:inline-block;padding:9px 7px;line-height:1.2" href="#/tarifs">Tarifs</a><a style="display:inline-block;padding:9px 7px;line-height:1.2" href="/a-propos">À propos</a><a style="display:inline-block;padding:9px 7px;line-height:1.2" href="#/login">Connexion</a></nav>
     </div>
     <h1 style="font-size:26px;margin-bottom:20px">${title}</h1>
     <div id="public">${body}</div>

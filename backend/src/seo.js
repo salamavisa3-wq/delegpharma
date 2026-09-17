@@ -669,8 +669,8 @@ const GUIDES = [
   },
   {
     path: '/blog/carte-sanitaire-senegal-guide',
-    title: 'Carte sanitaire du Sénégal — 14 régions, 79 districts (guide 2026)',
-    desc: 'Guide complet de la carte sanitaire et sociale du Sénégal : 14 régions médicales, 79 districts sanitaires, structures de santé. Idéal pour les délégués médicaux et les laboratoires.',
+    title: 'La carte sanitaire du Sénégal expliquée : découpage, districts, usages',
+    desc: 'Comprendre la carte sanitaire et sociale du Sénégal : le découpage en régions médicales et districts sanitaires, pourquoi c\'est la base du travail du délégué médical, et comment la lire efficacement.',
     h1: 'La carte sanitaire du Sénégal',
     intro: 'La carte sanitaire et sociale est le référentiel officiel du système de santé sénégalais. Pour le délégué médical, c\'est la base de toute planification de tournée.',
     sections: [
@@ -1379,7 +1379,7 @@ const PAGES = {
   },
   '/delegue-medical': {
     index: true,
-    title: 'Délégué médical — métier, formation, salaire, outils | DelegPharma',
+    title: 'Délégué médical au Sénégal : formations, salaire, débouchés et outils | DelegPharma',
     desc: 'Délégué médical (ou visiteur médical) au Sénégal : objectifs, débouchés (laboratoires, grossistes, industries, vendeur en pharmacie), formations et outils de visite médicale.',
     canonical: '/delegue-medical',
     jsonLd: {
@@ -1393,7 +1393,7 @@ const PAGES = {
           '@type': 'WebPage',
           '@id': BASE + '/delegue-medical',
           url: BASE + '/delegue-medical',
-          name: 'Délégué médical — métier, formation, salaire, outils | DelegPharma',
+          name: 'Délégué médical au Sénégal : formations, salaire, débouchés et outils | DelegPharma',
           headline: 'Délégué médical',
           description: 'Délégué médical au Sénégal : objectifs, débouchés (laboratoires, grossistes, industries, vendeur en pharmacie), formations et outils de visite médicale.',
           isPartOf: { '@type': 'WebSite', '@id': BASE + '/#website', url: BASE + '/', name: 'DelegPharma' },

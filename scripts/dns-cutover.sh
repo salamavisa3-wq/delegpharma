@@ -9,10 +9,10 @@
 # CONTRAINTES VÉRIFIÉES (16/09/2026) :
 #   - token CF = Workers:* → NE PEUT PAS créer la zone (POST /zones 403) : la zone delegpharma.com
 #     DOIT être ajoutée au dashboard CF (Add a site, plan Free, zéro carte).
-#   - token OVH = zone DNS delegpharma.com UNIQUEMENT → NE PEUT PAS changer les NS du registrar :
-#     la bascule NS OVH→CF se fait au dashboard OVH (domaines → serveurs DNS).
+#   - token OVH = zone DNS delegpharma.com (v2, 17/09) → peut SOUMETTRE la bascule NS :
+#     POST /domain/delegpharma.com/nameServers/update (tâche 600432804, HTTP 200 le 17/09).
 #   - le custom domain Worker app.delegpharma.com exige la zone ACTIVE dans CE compte CF.
-#   Le script ne déclenche jamais la bascule NS — décision utilisateur volontaire (rollback = re-pointer OVH).
+#   Le script ne re-déclenche jamais la bascule NS — déjà soumise (rollback = re-POST ns106/dns106).
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -74,7 +74,7 @@ ZONE_NS="$(cfj '
 if [ -n "$ZONE_INFO" ]; then
   ZONE_ID="${ZONE_INFO%%|*}"; REST="${ZONE_INFO#*|}"; ZONE_STATUS="${REST%%|*}"; ZONE_PLAN="${REST#*|}"
   echo "zone CF : $DOMAIN PRÉSENTE   id=${ZONE_ID:0:8}…   status=$ZONE_STATUS   plan=$ZONE_PLAN"
-  [ -n "$ZONE_NS" ] && echo "  NS CF assignés (à copier chez OVH -> serveurs DNS) : $ZONE_NS"
+  [ -n "$ZONE_NS" ] && echo "  NS CF assignés (bascule soumise API OVH 17/09, tâche 600432804) : $ZONE_NS"
   # Probe : le token actuel peut-il poser des records dans cette zone ?
   api GET "/zones/$ZONE_ID/dns_records?per_page=1"
   case "$CF_CODE" in
@@ -93,7 +93,7 @@ mapfile -t NS < <(nslookup -type=NS "$DOMAIN" 2>/dev/null | grep -oE 'nameserver
 ovh=0; cfns=0
 for n in "${NS[@]}"; do case "$n" in *ovh.net*) ovh=$((ovh+1));; *ns.cloudflare.com*) cfns=$((cfns+1));; esac; done
 if [ "$ovh" -eq 0 ] && [ "$cfns" -ge 2 ]; then echo "NS : deja basculés Cloudflare ($cfns) — bascule faite ?"
-else echo "NS : encore OVH ($ovh) -> bascule NS = ÉTAPE UTILISATEUR (dashboard OVH -> serveurs DNS). Token OVH sans droit registrar."
+else echo "NS : encore OVH ($ovh) -> bascule NS déjà soumise API OVH 17/09 (POST nameServers/update, tâche 600432804) ; propagation 24-72 h (TTL NS 24 h)."
 fi
 
 # --- 3. Mail -------------------------------------------------------------------------
@@ -141,17 +141,13 @@ if [ "${1:-}" = "--apply" ]; then
   add_rec MX "@" "mx3.mail.ovh.net" 100
   add_rec TXT "@" "v=spf1 include:mx.ovh.com -all"
   add_rec TXT "@" "google-site-verification=1mblS75EDqOJvtI5mmg4BsepwuXoOPmu_TzpQ9G-H1c"
-  add_rec A "@" "146.59.209.152"
-  add_rec A "www" "146.59.209.152"
+  # NB : PAS de A @/www — l'apex et www sont servis par le worker delegpharma-redirect (301 -> app,
+  # custom domain posé plus bas). Les A vitrine OVH ont été volontairement supprimés (état final).
 
   if [ "$ZONE_STATUS" != "active" ]; then
-    echo; echo "Zone status=$ZONE_STATUS -> en attente de bascule NS (étape dashboard OVH)."
-    if [ -n "$ZONE_NS" ]; then
-      echo "  Étape 2 (dashboard OVH -> domaines -> serveurs DNS) : remplacer ns106/dns106.ovh.net par :"
-      echo "    ${ZONE_NS// /, }"
-    fi
-    echo "  Puis relancer 'bash scripts/dns-cutover.sh --apply' — le custom domain et la redirect"
-    echo "  ne se poseront qu'une fois la zone 'active'."
+    echo; echo "Zone status=$ZONE_STATUS -> bascule NS soumise 17/09 (API OVH, tâche 600432804) ;"
+    echo "  propagation 24-72 h (TLT NS 24 h) puis la zone CF passera 'active' seule."
+    echo "  Puis laisser un watcher relancer --apply (custom domain + redirect 301) automatiquement."
     exit 0
   fi
 
@@ -162,14 +158,43 @@ if [ "${1:-}" = "--apply" ]; then
   else echo "  [X] custom domain -> HTTP $CF_CODE ($(cfmsgs))"; fi
 
   echo "Redirect 301 apex + www -> $APP_HOST :"
-  api POST "/zones/$ZONE_ID/rulesets" \
-    '{"phase":"http_request_dynamic_redirect","rules":[{"expression":"(http.host eq \"delegpharma.com\" or http.host eq \"www.delegpharma.com\")","description":"delegpharma apex/www -> app","action":"redirect","action_parameters":{"from_value":{"status_code":301,"target_url":{"expression":"concat(\"https://app.delegpharma.com\", http.request.uri.path)"}}}}]}'
-  if [ "$CF_CODE" = "200" ]; then echo "  [OK] Redirect 301 apex/www"
-  else echo "  [X]  Redirect -> HTTP $CF_CODE ($(cfmsgs))"; fi
+  # NB (vérifié 17/09) : l'API Redirect Rules (/rulesets) est 403 (token sans droit Rulesets) et les
+  # Worker Routes sont "method not allowed" (token sans Zone>Worker Routes:Edit). Chemin PERMIS = binder
+  # delegpharma.com + www comme custom domain du worker delegpharma-redirect (même endpoint que app,
+  # prouvé 200). Les A @/www (vitrine OVH, proxied) sont supprimés AVANT le bind (conflit 100117).
+  REDIR=delegpharma-redirect
+  # 1) upload du worker 301 (syntaxe service-worker, idempotent)
+  CF_CODE=$(curl -sS -m 60 -o "$TMP" -w '%{http_code}' -X PUT \
+    "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/workers/scripts/$REDIR" \
+    -H "Authorization: Bearer $CF_TOKEN" -H "Content-Type: application/javascript" \
+    --data-binary @"$HERE/redirect-worker.js")
+  if [ "$CF_CODE" = "200" ]; then echo "  [OK] worker $REDIR (301 -> $APP_HOST) déployé"
+  else echo "  [X]  upload worker $REDIR -> HTTP $CF_CODE ($(cfmsgs))"; fi
+  # 2) custom domain apex + www (idempotent : skip si déjà bindé ; retire la A conflictante sinon)
+  for h in "$DOMAIN" "www.$DOMAIN"; do
+    api GET "/accounts/$CF_ACCOUNT/workers/domains"
+    if H="$h" cfj '
+        const fs=require("fs"); const r=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
+        console.log((r.result||[]).some(d=>d.hostname===process.env.H));
+      ' | grep -q true; then
+      echo "  [ok] custom domain $h -> déjà bindé à un worker"
+      continue
+    fi
+    api GET "/zones/$ZONE_ID/dns_records?type=A&name=$h"
+    for rid in $(H2="$h" cfj '
+        const fs=require("fs"); const r=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
+        for (const d of (r.result||[])) if (d.name===process.env.H2) console.log(d.id);
+      '); do
+      api DELETE "/zones/$ZONE_ID/dns_records/$rid"
+    done
+    api PUT "/accounts/$CF_ACCOUNT/workers/domains" "{\"hostname\":\"$h\",\"service\":\"$REDIR\",\"environment\":\"production\"}"
+    if [ "$CF_CODE" = "200" ]; then echo "  [OK] custom domain $h -> worker $REDIR"
+    else echo "  [X]  custom domain $h -> HTTP $CF_CODE ($(cfmsgs))"; fi
+  done
 
   echo; echo "== Vérification post-apply =="
   bash "$HERE/dns-cutover-verify.sh" || true
-  echo; echo "IMPORTANT : la bascule NS OVH->CF reste MANUELLE (dashboard OVH)."
+  echo; echo "IMPORTANT : bascule NS déjà soumise 17/09 via API OVH (tâche 600432804)."
   echo "Après propagation (24-72 h), relancer dns-cutover-verify.sh : 4/4 ok attendus."
 fi
 
@@ -185,8 +210,8 @@ cat > "$MANIFEST" <<EOF
 | TXT | @ | v=spf1 include:mx.ovh.com -all | | SPF |
 | TXT | @ | google-site-verification=1mblS75EDqOJvtI5mmg4BsepwuXoOPmu_TzpQ9G-H1c | | GSC |
 | TXT | @ | 1|www.delegpharma.com | | jeton hosting OVH (peut être omis si la vitrine est arrêtée) |
-| A | @ | 146.59.209.152 | | vitrine OVH (conservée jusqu'à validation de la bascule, puis couverte par la Redirect Rule) |
-| A | www | 146.59.209.152 | | vitrine OVH |
+| A | @ | — | | SUPPRIMÉ 17/09 : apex servi par le custom domain worker delegpharma-redirect (301 → app) |
+| A | www | — | | SUPPRIMÉ 17/09 : www servi par le custom domain worker delegpharma-redirect (301 → app) |
 | CNAME | app | (auto-géré par le custom domain Worker) | | ne PAS créer manuellement |
 
 Le A app -> 164.132.109.175 (VPS mort) n'est PAS reproduit : remplacé par le custom domain Worker.

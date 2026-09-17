@@ -1,6 +1,10 @@
 # DNS — delegpharma.com (bascule vers Cloudflare Workers, cible zéro-carte)
 
-ÉTAT AU 16/09/2026 — remplace l'ancien `DNS.md` (v1, périmé : pointait `app` vers le VPS
+ÉTAT AU 17/09 — **BASCULE TERMINÉE (verify 4/4)** : NS publics = `adi.ns.cloudflare.com` +
+`gerardo.ns.cloudflare.com`, custom domain `app.delegpharma.com` → worker delegpharma (healthz 200),
+apex + www → **301 → app** via le worker `delegpharma-redirect` (custom domain), 3 MX mail.ovh.net
+préservés. La bascule NS a été soumise le 17/09 via API OVH (tâche `600432804`, HTTP 200) et la
+propagation a convergé **le jour même**. remplace l'ancien `DNS.md` (v1, périmé : pointait `app` vers le VPS
 OVH `164.132.109.175` et `www` vers la vitrine systeme.io/CloudFront).
 
 ## Objectif
@@ -12,14 +16,21 @@ OVH `164.132.109.175` et `www` vers la vitrine systeme.io/CloudFront).
 | `www.delegpharma.com` | A → `146.59.209.152` | Redirect Rule CF vers `app` |
 | `app.delegpharma.com` MX | `mx1/2/3.mail.ovh.net` | **à reproduire dans la zone CF avant bascule NS** |
 
-## État vérifié (16/09, autoritaire `ns106.ovh.net`)
+## État vérifié (17/09, fin de journée — cutover 4/4)
 
-- NS : `dns106.ovh.net` / `ns106.ovh.net` (registrar OVH — à remplacer par les 2 NS CF).
-- `app.delegpharma.com` A → `164.132.109.175` → **ne répond plus** (VPS résilié 16/09).
-- `delegpharma.com` A → `146.59.209.152` (mutualisée OVH, vitrine marketing).
-- MX OVH intacts (mail `*@delegpharma.com` géré par OVH — **ne pas casser**).
-- Compte CF `Momosall2010` : zone `sakeurimmo.com` active (full, NS `adi.ns.cloudflare.com` +
-  `gerardo.ns.cloudflare.com`). `delegpharma.com` **ABSENTE** du compte.
+- **NS publics : `adi.ns.cloudflare.com` + `gerardo.ns.cloudflare.com`** (bascule API OVH
+  `POST /nameServers/update`, tâche `600432804` ; propagation convergée le jour même).
+- **Zone CF `delegpharma.com` ACTIVE** (id `f4feae61…`, plan Free, zéro carte).
+- **Records dans CF** : MX×3 (`mx1/2/3.mail.ovh.net`), TXT SPF + GSC. **Les A @/www (vitrine
+  `146.59.209.152`) ont été SUPPRIMÉS** (17/09) — l'apex et www sont servis par le custom domain
+  du worker `delegpharma-redirect` (301 → app).
+- **Custom domains CF** : `app.delegpharma.com` → worker `delegpharma` (healthz 200) ;
+  `delegpharma.com` + `www.delegpharma.com` → worker `delegpharma-redirect` (301 → app).
+- **Token CF Zone:DNS:Edit OK** (vérifié API 200, sha16 `dfa639b294abceaf` len 53 dans
+  `~/secrets-delegpharma.env`) — custom domain Worker scriptable.
+- ⚠️ Le token n'a PAS le droit Rulesets (403) ni Worker Routes (`method not allowed`) → la redirect
+  apex/www passe par **custom domain Worker** (`PUT /accounts/:id/workers/domains`, prouvé 200), pas
+  par Redirect Rule ni route Worker.
 
 ## Principe — pourquoi c'est à moitié manuel, et ce qui est fait
 
@@ -42,18 +53,14 @@ automatisé par scripts :
 Aucune bascule de NS n'est déclenchée par un script — c'est une décision volontaire et
 réversible (re-pointer NS OVH pour rollback).
 
-## ⚠️ PRÉREQUIS : token CF avec `Zone:DNS:Edit`
+## ✅ PRÉREQUIS token CF avec `Zone:DNS:Edit` — RÉALISÉ le 17/09
 
-Pour que `--apply` puisse **poser les records** (MX/SPF/A — le cœur du P1), le token CF doit
-avoir le scope **`Zone:DNS:Edit` sur `delegpharma.com`** en plus de `Workers Scripts:Edit`.
-Sans lui (token actuel, vérifié `403` sur `GET /dns_records`), le custom domain Worker et la
-redirect restent possibles (scopes Workers + Zone), mais **aucun record DNS ne sera créé** —
-et la bascule NS partirait sans MX dans CF → mail à risque.
-
-Création (dashboard CF, gratuit, sans carte) : My Profile → **API Tokens** → **Create Token** →
-Template « Edit zone DNS » → Zone Resources = **Specific zone: delegpharma.com** → + perm
-`Workers Scripts:Edit` (Account, pour le custom domain) → créer → coller la valeur dans
-`~/secrets-delegpharma.env` ligne `CF_API_TOKEN=…` (jamais affichée), puis relancer le watcher.
+Token `misty-wildflower-9b19` créé (dashboard CF, zéro carte, value jamais affichée) avec :
+Policy 1 = `delegpharma.com` → **DNS Write** + **Workers Routes Write** (custom domain) ;
+Policy 2 = Compte entier → **Workers Scripts Write**. Posé dans `~/secrets-delegpharma.env`
+(`CF_API_TOKEN=…`, **confirmation sha16 `dfa639b294abceaf`, len 53**), vérifié API 200.
+⚠️ Piège récurrent : après toute écriture PowerShell du fichier secrets, retirer le BOM UTF-8
+(sinon la 1ʳᵉ clé est cassée) et les CRLF — `sed -i '1s/^\xef\xbb\xbf//; s/\r$//'`.
 
 ## Procédure automatisée (le mail ne doit JAMAIS tomber)
 
@@ -69,18 +76,28 @@ Le watch sonde `/zones?name=` et détecte l'apparition de la zone automatiquemen
 est présente il passe à l'étape suivante. *(Alternative manuelle : `bash scripts/dns-cutover.sh`
 puis `--apply` dès que la zone existe.)*
 
-### Étape 2 (action utilisateur, registrar OVH) — remplacer les NS
+### Étape 2 (API OVH — FAITE le 17/09) — remplacer les NS
 Le `--apply` a posé les records **AVANT** ça (MX d'abord), donc le mail ne tombe pas quand les
-NS basculent. Le watch affiche les 2 NS CF à copier : OVHcloud → domaines →
-delegpharma.com → **serveurs DNS** → remplacer `ns106.ovh.net` / `dns106.ovh.net`.
+NS basculent. Le 17/09, la bascule a été soumise par **API OVH** (token `delegpharma-dns-cutover`,
+consumer key créée via `auth.eu.ovhcloud.com/api/createToken`) : `POST /domain/delegpharma.com/
+nameServers/update` → `{"nameServers":[{"host":"adi.ns.cloudflare.com"},{"host":"gerardo.ns.cloudflare.com"}]}`
+→ HTTP 200, tâche `600432804`. ⚠️ **Routes réelles de l'API domain actuelles** : les droits demandés
+« GET/PUT/POST /nameServers » n'existent PLUS (404) — les routes vraies sont `GET/POST
+/nameServer` (singulier) et `POST /nameServers/update` (bascule en bloc). Token v2 avec droits
+corrects (`GET /nameServer/*` + `POST /nameServers/update`) posé dans `~/secrets-delegpharma.env`
+(clés `OVH_API_APPLICATION_KEY`/`_SECRET`/`_CONSUMER_KEY`).
 
 ### Étape 3 (script) — custom domain + redirect, dès que la zone est `active`
-Le watch (ou un second `--apply`) pose `PUT /accounts/:id/workers/domains`
-(`app.delegpharma.com` → worker `delegpharma`) puis la Redirect Rule 301 apex + www → `app`.
+Le watch (ou un second `--apply`) pose `PUT /accounts/:id/workers/domains` :
+`app.delegpharma.com` → worker `delegpharma`, puis `delegpharma.com` + `www.delegpharma.com` →
+worker `delegpharma-redirect` (301 → app ; **les A @/www sont supprimés avant le bind** — sinon
+conflit 100117 « Hostname already has externally managed DNS records »). Les Redirect Rules
+(`/zones/{id}/rulesets`) et les Worker Routes sont **refusés par le token** (403 /
+`method not allowed`, vérifié 17/09) — le custom domain Worker est le seul chemin autorisé.
 
-### Étape 4 (script) — vérification propagation
-`dns-cutover-verify.sh --check` en boucle jusqu'à **4/4** (NS CF, healthz app 200, 3 MX OVH,
-apex 301). Propagation possible 24-72 h (TTL NS 24 h).
+### Étape 4 (script) — vérification propagation — **FAIT (4/4 le 17/09)**
+`dns-cutover-verify.sh --check` : NS CF, healthz app 200, 3 MX OVH, apex 301. Le jour même la
+propagation a convergé (bien avant les 24-72 h redoutés, TTL NS 24 h).
 
 ## Vérifications (scriptables après bascule)
 
@@ -97,8 +114,11 @@ curl -sS -o /dev/null -w '%{http_code}\n' -L https://delegpharma.com/healthz   #
 
 ## Rollback
 
-Re-pointer les NS OVH (`ns106`/`dns106`) chez le registrar tant que la zone CF n'est pas
-supprimée. Le worker reste joignable sur `delegpharma.momosall2010.workers.dev` quoi qu'il
+1. **NS** : re-`POST /domain/delegpharma.com/nameServers/update` avec `ns106.ovh.net` +
+   `dns106.ovh.net` (token OVH déjà dans `~/secrets-delegpharma.env`).
+2. **DNS apex/www** : supprimer les custom domains `delegpharma.com`/`www.delegpharma.com` du worker
+   `delegpharma-redirect` et re-poser les A @/www → `146.59.209.152` (vitrine) si besoin.
+Le worker reste joignable sur `delegpharma.momosall2010.workers.dev` quoi qu'il
 arrive (filet).
 
 ## Règles

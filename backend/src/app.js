@@ -88,6 +88,16 @@ const ASSET_RE = /\.(css|js|svg|jpg|jpeg|png|webp|ico|json|txt|xml|woff2?)$/i;
 export function seoFallback(req, res, next) {
   if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Route API inconnue' });
 
+  // Slash final (/contact/, liens legacy WordPress) → 301 vers la forme canonique sans slash,
+  // seulement si c'est une vraie page (sinon 404 plus bas). Évite les 404 « Introuvable » GSC.
+  if (req.path.length > 1 && req.path.endsWith('/')) {
+    const clean = req.path.replace(/\/+$/, '');
+    if (clean && matchPage(clean)) {
+      const q = req.originalUrl.indexOf('?');
+      return res.redirect(301, clean + (q === -1 ? '' : req.originalUrl.slice(q)));
+    }
+  }
+
   // Pages publiques SSR : source de vérité matchPage (PAGES + /carte-sanitaire/*, '/', fallback noindex).
   if (matchPage(req.path)) {
     return seoShell(req)

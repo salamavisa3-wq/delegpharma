@@ -29,6 +29,6 @@ APP_BASE_URL = "https://app.delegpharma.com"
 COOKIE_SECURE = "true"
 # Bootstrap sûr ; les vraies valeurs (CinetPay/PayPal réels) sont posées au cutover,
 # quand le `.env` de prod est récupéré (une carte n'est jamais requise ici).
-PAY_MODE = "demo"
+PAY_MODE = "qr"
 PAYPAL_SANDBOX = "true"
 OLLAMA_MODEL = "nemotron-3-nano:30b"

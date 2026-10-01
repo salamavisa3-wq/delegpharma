@@ -740,7 +740,12 @@ async function abonnementView() {
         <button class="primary" data-action="abo-payer" data-id="${d.en_attente.id}">Relancer / payer</button>
       </div>`;
     }
-    if (d.pay_mode !== 'demo') {
+    if (d.pay_mode === 'qr') {
+      // Seul le QR est configuré : ne pas proposer CinetPay/PayPal (clés absentes).
+      html += `<div class="card" style="margin:16px 0"><h3 class="section-title">Moyen de paiement</h3>
+        <label style="display:block;margin:6px 0"><input type="radio" name="moyen" value="qr" checked> QR Wave / QR Orange Money — paiement manuel</label>
+      </div>`;
+    } else if (d.pay_mode !== 'demo') {
       html += `<div class="card" style="margin:16px 0"><h3 class="section-title">Moyen de paiement</h3>
         <label style="display:block;margin:6px 0"><input type="radio" name="moyen" value="cinetpay" checked> Mobile Money &amp; Carte (Wave, Orange Money, Visa/Mastercard)</label>
         <label style="display:block;margin:6px 0"><input type="radio" name="moyen" value="paypal"> PayPal (carte ou compte PayPal)</label>

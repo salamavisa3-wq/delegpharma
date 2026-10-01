@@ -179,7 +179,8 @@ router.post('/abonnements/paypal-capture', requireAuth, async (req, res) => {
 });
 
 /** Mode démo : validation manuelle d'un paiement simulé (spéc §3.1, §6.2). */
-router.post('/abonnements/demo-confirmer', requireRole('plateforme', 'laboratoire', 'admin'), async (req, res) => {
+// Réservé à la plateforme : les paiements Wave/OM arrivent sur son compte, elle seule peut les constater.
+router.post('/abonnements/demo-confirmer', requireRole('plateforme'), async (req, res) => {
   const { reference } = req.body || {};
   if (!reference) return res.status(400).json({ error: 'reference requise' });
   const r = await applyPaymentSuccess({ reference, providerRef: 'demo-admin' });

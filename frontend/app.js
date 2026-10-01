@@ -851,9 +851,14 @@ async function assistantView() {
 async function plateformeView() {
   renderMain('<div class="muted">Chargement…</div>');
   try {
-    const [dash, revenus] = await Promise.all([api('/plateforme/dashboard'), api('/revenus')]);
+    const [dash, revenus, txs] = await Promise.all([api('/plateforme/dashboard'), api('/revenus'), api('/abonnements/transactions')]);
     const t = dash.totaux || {};
+    const aValider = txs.filter((x) => x.statut === 'en_attente');
     return `
+    <div class="card" style="margin:0 0 16px"><h3 class="section-title">Paiements à valider (${aValider.length})</h3>
+      <p class="hint">Vérifiez la réception sur Wave / Orange Money (montant + référence) avant de valider.</p>
+      ${aValider.length ? `<table><thead><tr><th>Date</th><th>Délégué</th><th>Formule</th><th>Montant</th><th>Référence</th><th>Moyen</th><th></th></tr></thead><tbody>${aValider.map((x) => `<tr><td>${fmtDate(x.created_at)}</td><td>${esc(x.user_nom)}</td><td>${esc(x.formule_nom)}</td><td>${Number(x.montant).toLocaleString('fr-FR')} FCFA</td><td><code>${esc(x.reference)}</code></td><td class="muted">${esc(x.provider)}</td><td><button class="primary" data-action="tx-valider" data-ref="${esc(x.reference)}">Valider le paiement</button></td></tr>`).join('')}</tbody></table>` : '<div class="muted">Aucun paiement en attente.</div>'}
+    </div>
     <div class="stats">
       <div class="stat"><div class="n">${t.n_laboratoires ?? 0}</div><div class="l">Laboratoires</div></div>
       <div class="stat"><div class="n">${t.n_delegues ?? 0}</div><div class="l">Délégués inscrits</div></div>
@@ -1042,6 +1047,11 @@ function bind() {
       if (act === 'go-abonnement') { location.hash = '#/abonnement'; return; }
       if (act === 'abo-initier') { await aboInitier(el.dataset.id); return; }
       if (act === 'abo-payer') { await aboPayer(el.dataset.id); return; }
+      if (act === 'tx-valider') {
+        if (!confirm(`Valider le paiement ${el.dataset.ref} ?\nVérifiez d'abord la réception sur Wave / Orange Money.`)) return;
+        await api('/abonnements/demo-confirmer', { method: 'POST', body: JSON.stringify({ reference: el.dataset.ref }) });
+        toast('Paiement validé — abonnement activé'); return showView();
+      }
       if (act === 'objectif-new-open') { await objectifNewModal(); return; }
       if (act === 'objectif-del') {
         if (!confirm('Supprimer cet objectif ?')) return;

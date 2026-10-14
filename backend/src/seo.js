@@ -358,8 +358,8 @@ function districtBody(region, district) {
 function hubPage() {
   return {
     index: true,
-    title: 'Carte sanitaire du Sénégal — 14 régions médicales, 79 districts sanitaires',
-    desc: 'La carte sanitaire et sociale du Sénégal : 14 régions médicales, 79 districts sanitaires, 3 915 structures de santé. Le référentiel national des délégués médicaux et des laboratoires pharmaceutiques.',
+    title: 'Carte sanitaire du Sénégal : 14 régions, 79 districts sanitaires',
+    desc: 'La carte sanitaire du Sénégal : 14 régions médicales, 79 districts, 3 915 structures de santé. Le référentiel des délégués médicaux et des laboratoires.',
     canonical: '/carte-sanitaire',
     jsonLd: {
       '@context': 'https://schema.org',
@@ -593,7 +593,7 @@ function delegueMedicalBody() {
 const GUIDES = [
   {
     path: '/blog/comment-devenir-delegue-medical-senegal',
-    title: 'Comment devenir délégué médical au Sénégal — formation, compétences, débouchés',
+    title: 'Devenir délégué médical au Sénégal : compétences et débouchés',
     desc: 'Devenir délégué médical au Sénégal : formations (licence pro, ISMED UCAD, IUP-Santé, CEFAS), compétences requises, salaire et débouchés. Le guide complet du métier.',
     h1: 'Comment devenir délégué médical au Sénégal',
     intro: 'Le délégué médical (DM) est le représentant terrain des laboratoires pharmaceutiques auprès des professionnels de santé. Voici le parcours complet pour exercer ce métier au Sénégal.',
@@ -671,8 +671,8 @@ const GUIDES = [
   },
   {
     path: '/blog/carte-sanitaire-senegal-guide',
-    title: 'La carte sanitaire du Sénégal expliquée : découpage, districts, usages',
-    desc: 'Comprendre la carte sanitaire et sociale du Sénégal : le découpage en régions médicales et districts sanitaires, pourquoi c\'est la base du travail du délégué médical, et comment la lire efficacement.',
+    title: 'La carte sanitaire du Sénégal expliquée : découpage et usages',
+    desc: 'Comprendre la carte sanitaire du Sénégal : régions médicales, districts sanitaires, et pourquoi elle est la base du travail du délégué médical.',
     h1: 'La carte sanitaire du Sénégal',
     intro: 'La carte sanitaire et sociale est le référentiel officiel du système de santé sénégalais. Pour le délégué médical, c\'est la base de toute planification de tournée.',
     sections: [
@@ -701,8 +701,8 @@ const GUIDES = [
   },
   {
     path: '/blog/agrement-arp-laboratoires',
-    title: 'Agrément ARP : ce que les laboratoires pharmaceutiques doivent savoir',
-    desc: 'L\'agrément ARP (Agence de Régulation Pharmaceutique) expliqué : définition, rôle, procédure et importance pour les laboratoires et produits pharmaceutiques au Sénégal.',
+    title: 'Agrément ARP : ce que les laboratoires doivent savoir',
+    desc: 'L\'agrément ARP (Agence de Régulation Pharmaceutique) expliqué : définition, rôle, procédure et enjeux pour les laboratoires pharmaceutiques au Sénégal.',
     h1: 'Agrément ARP : le sésame des laboratoires au Sénégal',
     intro: 'L\'Agence de Régulation Pharmaceutique (ARP) est l\'autorité qui encadre le médicament au Sénégal. Son agrément est indispensable pour commercialiser un produit.',
     sections: [
@@ -726,7 +726,7 @@ const GUIDES = [
   },
   {
     path: '/blog/tournees-terrain-delegue-medical',
-    title: 'Tournées terrain : comment optimiser sa couverture de délégué médical',
+    title: 'Tournées terrain : optimiser sa couverture de délégué médical',
     desc: 'Optimiser ses tournées de délégué médical : planification par district, checklist des professionnels, couverture sans doublon et suivi des objectifs.',
     h1: 'Tournées terrain : optimiser sa couverture',
     intro: 'La tournée est le cœur de l\'activité du délégué médical. Bien planifiée, elle maximise la couverture de la zone et la qualité des visites.',
@@ -787,8 +787,8 @@ const GUIDES = [
   },
   {
     path: '/blog/carte-sanitaire-laboratoire-couverture-territoriale',
-    title: 'Carte sanitaire et laboratoire : découpage territorial, couverture et objectifs',
-    desc: 'Comment les laboratoires pharmaceutiques utilisent la carte sanitaire du Sénégal (14 régions, 79 districts, 3 915 structures) pour répartir leurs délégués médicaux et mesurer la couverture des campagnes.',
+    title: 'Carte sanitaire et laboratoire : couverture et objectifs',
+    desc: 'Comment les laboratoires utilisent la carte sanitaire du Sénégal (14 régions, 79 districts) pour répartir leurs délégués médicaux et mesurer la couverture.',
     h1: 'La carte sanitaire au service des laboratoires pharmaceutiques',
     intro: 'La carte sanitaire et sociale est bien plus qu\'un document administratif : c\'est l\'outil de découpage territorial qui permet à un laboratoire de répartir ses délégués médicaux, de cibler les prescripteurs et de mesurer la couverture réelle de ses campagnes.',
     sections: [
@@ -818,8 +818,8 @@ const GUIDES = [
   },
   {
     path: '/blog/objectifs-campagnes-chiffre-affaires-laboratoire',
-    title: 'Objectifs commerciaux et campagnes : piloter le chiffre d\'affaires d\'un laboratoire au Sénégal',
-    desc: 'Comment un laboratoire pharmaceutique au Sénégal définit des objectifs par produit, lance des campagnes de visite médicale et mesure leur impact sur le chiffre d\'affaires : indicateurs, couverture, reporting.',
+    title: 'Objectifs et campagnes : le chiffre d\'affaires d\'un laboratoire',
+    desc: 'Fixer des objectifs par produit, lancer des campagnes de visite médicale et mesurer leur impact sur le chiffre d\'affaires d\'un laboratoire au Sénégal.',
     h1: 'Objectifs commerciaux et campagnes : le levier de chiffre d\'affaires d\'un laboratoire',
     intro: 'Le chiffre d\'affaires d\'un laboratoire repose sur sa force de vente : chaque visite médicale doit contribuer à un objectif produit, chaque campagne doit être mesurée. Encore faut-il définir les objectifs sur la bonne maille — les 14 régions et 79 districts de la carte sanitaire — et les suivre jusqu\'au terrain.',
     sections: [
@@ -870,8 +870,8 @@ const GUIDES = [
   },
   {
     path: '/blog/reporting-kpi-laboratoire-force-de-vente',
-    title: 'Reporting et KPIs d\'un laboratoire : piloter la force de vente pharmaceutique',
-    desc: 'Les indicateurs clés pour piloter une force de vente pharmaceutique au Sénégal : couverture, objectifs, CRV, taux de conversion, tableau de bord et exports pour le manager de laboratoire.',
+    title: 'Reporting et KPIs : piloter la force de vente d\'un laboratoire',
+    desc: 'Les KPIs pour piloter une force de vente pharmaceutique au Sénégal : couverture, objectifs, CRV, conversion, tableau de bord et exports manager.',
     h1: 'Reporting et KPIs : piloter la force de vente d\'un laboratoire',
     intro: 'Un laboratoire qui déploie des délégués médicaux ne peut pas piloter sans indicateurs. Le reporting transforme l\'activité terrain en décisions : réallouer les efforts, recentrer une campagne, valider le retour sur investissement de la force de vente.',
     sections: [
@@ -1157,8 +1157,8 @@ const GUIDES = [
   },
   {
     path: '/blog/meilleur-logiciel-gestion-delegues-medicaux-senegal',
-    title: 'Meilleur logiciel de gestion des délégués médicaux au Sénégal : comparatif 2026',
-    desc: 'Excel, WhatsApp, papier ou CRM métier : comparatif des méthodes de gestion des tournées et CRV pour délégué médical ou visiteur médical au Sénégal, avec grille de critères et tarifs réels.',
+    title: 'Meilleur logiciel de gestion des délégués médicaux au Sénégal',
+    desc: 'Excel, WhatsApp, papier ou CRM métier : comparatif 2026 des outils de gestion des tournées et CRV pour délégués médicaux au Sénégal, avec tarifs réels.',
     h1: 'Meilleur logiciel de gestion des délégués médicaux au Sénégal',
     intro: 'La majorité des délégués médicaux (aussi appelés visiteurs médicaux) et de leurs laboratoires gèrent encore tournées et comptes rendus de visite avec Excel, WhatsApp ou du papier. Voici ce que ces méthodes permettent, leurs limites, et ce qu\'apporte un logiciel métier.',
     sections: [
@@ -1195,8 +1195,8 @@ const GUIDES = [
   },
   {
     path: '/blog/grossiste-repartiteur-pharmaceutique-senegal',
-    title: 'Grossiste répartiteur pharmaceutique au Sénégal : rôle, acteurs, force de vente',
-    desc: 'Le grossiste répartiteur pharmaceutique au Sénégal : rôle dans la chaîne du médicament, cadre réglementaire ARP, acteurs présents (SOGEN, UbiPharm Sénégal) et pilotage de la force commerciale.',
+    title: 'Grossiste répartiteur pharmaceutique au Sénégal : rôle, acteurs',
+    desc: 'Le grossiste répartiteur au Sénégal : rôle dans la chaîne du médicament, cadre ARP, acteurs (SOGEN, UbiPharm Sénégal) et pilotage de la force commerciale.',
     h1: 'Le grossiste répartiteur pharmaceutique au Sénégal',
     intro: 'Entre le laboratoire qui fabrique ou importe le médicament et l\'officine qui le délivre, le grossiste répartiteur assure la distribution en gros. Un maillon réglementé, avec ses propres commerciaux terrain.',
     sections: [
@@ -1228,8 +1228,8 @@ const GUIDES = [
   },
   {
     path: '/blog/pharmacien-officine-senegal-visite-medicale',
-    title: 'Le pharmacien d\'officine au Sénégal : rôle, régulation, visite du délégué médical',
-    desc: 'Le pharmacien d\'officine au Sénégal : rôle de dispensation, régulation ARP et Ordre des Pharmaciens, et ce qu\'attend un pharmacien d\'une visite de délégué médical.',
+    title: 'Pharmacien d\'officine au Sénégal : rôle et visite médicale',
+    desc: 'Le pharmacien d\'officine au Sénégal : dispensation, régulation ARP et Ordre des Pharmaciens, et ce qu\'il attend de la visite du délégué médical.',
     h1: 'Le pharmacien d\'officine face au délégué médical',
     intro: 'Dernier maillon avant le patient, le pharmacien d\'officine dispense, conseille et peut proposer une alternative. Une visite de délégué médical réussie ne s\'y prépare pas comme chez un médecin.',
     sections: [
@@ -1260,7 +1260,7 @@ const GUIDES = [
   },
   {
     path: '/blog/medecin-prescripteur-senegal-visite-medicale',
-    title: 'Le médecin prescripteur au Sénégal : déontologie et visite du délégué médical',
+    title: 'Médecin prescripteur au Sénégal : déontologie et visite médicale',
     desc: 'Le médecin, premier prescripteur au Sénégal : rôle, cadre déontologique de l\'Ordre National des Médecins (ONMS) et bonnes pratiques de la visite médicale.',
     h1: 'Le médecin face au délégué médical',
     intro: 'Premier prescripteur, le médecin attend d\'une visite médicale des données cliniques solides — dans un cadre déontologique strict qui encadre la relation entre professionnels de santé et industrie pharmaceutique.',
@@ -1315,7 +1315,7 @@ const LANDING_JD = {
 const PAGES = {
   '/': {
     index: true,
-    title: 'DelegPharma — CRM des laboratoires et délégués médicaux au Sénégal',
+    title: 'DelegPharma — CRM laboratoires et délégués médicaux au Sénégal',
     desc: 'Le CRM des laboratoires et délégués médicaux au Sénégal : tournées, CRV, objectifs, couverture par district. Compte gratuit. Dès 5 000 FCFA/mois.',
     canonical: '/',
     jsonLd: LANDING_JD,
@@ -1324,7 +1324,7 @@ const PAGES = {
   '/tarifs': {
     index: true,
     title: 'Tarifs DelegPharma — 5 000 / 10 000 / 15 000 FCFA par mois',
-    desc: 'Abonnez-vous à DelegPharma : Essentiel 5 000 FCFA, Standard 10 000 FCFA ou Premium 15 000 FCFA par mois. Paiement Mobile Money (Wave, Orange Money, QR Wave/OM), carte Visa/Mastercard ou PayPal. 30 jours, renouvelable.',
+    desc: 'DelegPharma : Essentiel 5 000, Standard 10 000 ou Premium 15 000 FCFA par mois. Paiement Wave, Orange Money, carte Visa/Mastercard ou PayPal. 30 jours.',
     canonical: '/tarifs',
     jsonLd: () => ({
       '@context': 'https://schema.org',
@@ -1346,11 +1346,11 @@ const PAGES = {
     body: laboratoiresBody,
   },
   '/login': { index: false, title: 'Connexion — DelegPharma', desc: 'Accédez à votre espace délégué médical DelegPharma.', canonical: '/login', jsonLd: null, body: loginBody },
-  '/inscription': { index: true, title: 'Créer un compte gratuit — DelegPharma', desc: 'Créez votre compte gratuit DelegPharma : découvrez le CRM des délégués médicaux et des laboratoires pharmaceutiques au Sénégal, puis abonnez-vous en Mobile Money (Wave, Orange Money, QR), carte Visa/Mastercard ou PayPal.', canonical: '/inscription', jsonLd: null, body: inscriptionBody },
+  '/inscription': { index: true, title: 'Créer un compte gratuit — DelegPharma', desc: 'Créez votre compte gratuit DelegPharma, le CRM des délégués médicaux et laboratoires au Sénégal. Abonnement en Wave, Orange Money, carte ou PayPal.', canonical: '/inscription', jsonLd: null, body: inscriptionBody },
   '/a-propos': {
     index: true,
-    title: 'À propos — DelegPharma, le CRM des laboratoires et délégués médicaux du Sénégal',
-    desc: 'DelegPharma est conçu par un docteur en pharmacie, délégué médical au Sénégal, sur le référentiel officiel de la carte sanitaire (MSAS/ANSD) : 14 régions, 79 districts, pour les laboratoires et les délégués médicaux.',
+    title: 'À propos de DelegPharma, CRM des délégués médicaux au Sénégal',
+    desc: 'DelegPharma, conçu par un docteur en pharmacie délégué médical au Sénégal, repose sur la carte sanitaire officielle (MSAS/ANSD) : 14 régions, 79 districts.',
     canonical: '/a-propos',
     jsonLd: {
       '@context': 'https://schema.org',
@@ -1365,7 +1365,7 @@ const PAGES = {
   '/blog': {
     index: true,
     title: 'Blog — guides du délégué médical et du laboratoire',
-    desc: 'Les guides de DelegPharma pour les délégués médicaux et les laboratoires pharmaceutiques au Sénégal : formation, salaire, tournées, CRV, carte sanitaire, CRM de visite médicale.',
+    desc: 'Guides DelegPharma pour délégués médicaux et laboratoires au Sénégal : formation, salaire, tournées, CRV, carte sanitaire et CRM de visite médicale.',
     canonical: '/blog',
     jsonLd: () => ({
       '@context': 'https://schema.org',
@@ -1381,8 +1381,8 @@ const PAGES = {
   },
   '/delegue-medical': {
     index: true,
-    title: 'Délégué médical au Sénégal : formations, salaire, débouchés et outils | DelegPharma',
-    desc: 'Délégué médical (ou visiteur médical) au Sénégal : objectifs, débouchés (laboratoires, grossistes, industries, vendeur en pharmacie), formations et outils de visite médicale.',
+    title: 'Délégué médical au Sénégal : formations, salaire et outils',
+    desc: 'Délégué médical (visiteur médical) au Sénégal : objectifs, débouchés (laboratoires, grossistes, industrie, officine), formations et outils de visite.',
     canonical: '/delegue-medical',
     jsonLd: {
       '@context': 'https://schema.org',

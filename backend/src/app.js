@@ -38,7 +38,8 @@ export function createApp() {
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     // CSP : tout est servi par l'origine (aucun CDN, aucun script inline exécutable) ;
     // 'unsafe-inline' sur les styles seulement (attributs style= du SSR et de la SPA).
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests");
+    // cloudflareinsights : beacon Web Analytics injecté par l'edge Cloudflare (pages HTML).
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests");
     next();
   });
 

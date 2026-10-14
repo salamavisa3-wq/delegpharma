@@ -25,6 +25,20 @@ export function createApp() {
   app.set('trust proxy', 1); // derrière le proxy edge (IP réelle, HTTPS)
   app.disable('x-powered-by');
 
+  // HTTPS forcé + en-têtes de sécurité. Le schéma d'origine vient de l'edge Cloudflare
+  // (CF-Visitor / X-Forwarded-Proto) ; en dev node local (sans ces en-têtes) : no-op.
+  app.use((req, res, next) => {
+    const viaHttp = /"scheme":"http"/.test(req.headers['cf-visitor'] || '')
+      || req.headers['x-forwarded-proto'] === 'http';
+    if (viaHttp && req.headers.host) return res.redirect(301, `https://${req.headers.host}${req.originalUrl}`);
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    next();
+  });
+
   app.use(cookieParser());
   app.use(express.json({ limit: '15mb' })); // pièces jointes CRV en base64
   app.use(express.urlencoded({ extended: true })); // webhook CinetPay (form)

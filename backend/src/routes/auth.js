@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { get, run, lastInsertId } from '../db.js';
 import {
   signToken, setAuthCookie, clearAuthCookie, requireAuth, requireRole, verifyPassword,
-  hashPassword, publicUser, getSubscriptionState, isLegacyHash, needsRehash,
+  hashPassword, publicUser, getSubscriptionState, isLegacyHash, needsRehash, COOKIE,
 } from '../auth.js';
 import { payment, makeReference, payMode } from '../payments/adapter.js';
 
@@ -113,7 +113,8 @@ router.post('/logout', (req, res) => {
   return res.json({ ok: true });
 });
 
-router.get('/me', requireAuth, async (req, res) => {
+// Visiteur sans cookie : 200 { user: null } plutôt qu'un 401 (erreur console sur chaque page publique).
+router.get('/me', (req, res, next) => (req.cookies?.[COOKIE] ? next() : res.json({ user: null })), requireAuth, async (req, res) => {
   const user = await get('SELECT * FROM users WHERE id = $1', [req.user.id]);
   if (!user) return res.status(401).json({ error: 'Compte introuvable' });
   const labo = user.laboratoire_id

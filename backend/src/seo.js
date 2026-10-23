@@ -109,50 +109,57 @@ function tarifs() {
 function landingBody() {
   const popM = (NATIONAL.population / 1000000).toFixed(1).replace('.', ',');
   return `
-  <main>
-  <div class="hero">
-    <h1><span>DelegPharma</span> — le CRM des délégués médicaux et des laboratoires au Sénégal</h1>
-    <p>Planifiez vos tournées, suivez chaque professionnel de santé, rédigez vos comptes rendus de visite et pilotez vos campagnes — de Dakar à Kédougou.</p>
-    <p style="margin-top:18px">
-      <a class="primary" href="/inscription" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Créer un compte gratuit</a>
-      <a class="primary" href="/login" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Se connecter</a>
-      <a class="primary" href="/tarifs" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Voir les tarifs</a>
-    </p>
-    <p class="hint" style="margin-top:14px">Le métier de <a href="/delegue-medical">délégué médical</a> expliqué · Nos <a href="/blog">guides pratiques</a> pour laboratoires et visiteurs médicaux</p>
-  </div>
-  <div class="features">
-    <div class="feature"><div class="ico">🗺️</div><h2>Référentiel national</h2><p>14 régions médicales, 79 districts sanitaires, structures et professionnels de santé ciblés. <a href="/carte-sanitaire">Explorer la carte sanitaire →</a></p></div>
-    <div class="feature"><div class="ico">📋</div><h2>Comptes rendus de visite</h2><p>CRV brouillon → soumis → validé, pièces jointes et PDF signé généré en une seconde.</p></div>
-    <div class="feature"><div class="ico">🧭</div><h2>Tournées terrain</h2><p>Checklist des professionnels par district pour ne rater aucune visite.</p></div>
-    <div class="feature"><div class="ico">📈</div><h2>Campagnes & couverture</h2><p>Objectifs validés, taux de couverture par produit, pilotage par laboratoire.</p></div>
-  </div>
-  <div class="stats" style="max-width:860px;margin:26px auto 6px">
-    <div class="stat"><div class="n">14</div><div class="l">régions médicales</div></div>
-    <div class="stat"><div class="n">79</div><div class="l">districts sanitaires</div></div>
-    <div class="stat"><div class="n">3 915</div><div class="l">structures de santé</div></div>
-    <div class="stat"><div class="n">34 388</div><div class="l">professionnels recensés</div></div>
-    <div class="stat"><div class="n">${popM} M</div><div class="l">habitants couverts</div></div>
-  </div>
-  <p class="hint" style="text-align:center;margin:-2px 0 0">Référentiel officiel MSAS / ANSD — la maille exacte pour répartir votre force de vente. <a href="/carte-sanitaire">Explorer la carte sanitaire →</a></p>
-  <div class="lab-band">
-    <h2>Le CRM pensé pour les laboratoires pharmaceutiques</h2>
-    <p class="hint">Pilotez vos délégués médicaux, vos objectifs produits et votre couverture territoriale — et développez le chiffre d'affaires de vos campagnes.</p>
-    <div class="features" style="margin-top:16px">
-      <div class="feature"><div class="ico">🎯</div><h2>Objectifs produits</h2><p>Objectifs par produit phare et par zone, taux de réalisation, campagnes mesurées sur le chiffre d'affaires.</p></div>
-      <div class="feature"><div class="ico">🗺️</div><h2>Couverture sans doublon</h2><p>Force de vente répartie sur le référentiel officiel : chaque district a sa checklist, chaque zone est mesurée.</p></div>
-      <div class="feature"><div class="ico">📊</div><h2>Terrain en temps réel</h2><p>CRV validés depuis le terrain, couverture par district, exports CSV/PDF — fini les CRV papier et les tableurs. <a href="/blog/meilleur-logiciel-gestion-delegues-medicaux-senegal">Voir le comparatif →</a></p></div>
+  <main class="landing">
+  <section class="hero2"><div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">CRM pharmaceutique · Sénégal</span>
+      <h1><span>DelegPharma</span> — le CRM des délégués médicaux et des laboratoires au Sénégal</h1>
+      <p class="lead">Planifiez vos tournées, suivez chaque professionnel de santé, rédigez vos comptes rendus de visite et pilotez vos campagnes — de Dakar à Kédougou.</p>
+      <div class="cta-row">
+        <a class="btn btn-light" href="/inscription">Créer un compte gratuit</a>
+        <a class="btn btn-ghost" href="/login">Se connecter</a>
+        <a class="btn btn-link" href="/tarifs">Voir les tarifs →</a>
+      </div>
+      <p class="hero-note">Le métier de <a href="/delegue-medical">délégué médical</a> expliqué · Nos <a href="/blog">guides pratiques</a> pour laboratoires et visiteurs médicaux</p>
     </div>
-    <p style="text-align:center;margin-top:18px">
-      <a class="primary" href="/inscription" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Équiper mon laboratoire</a>
-      <a class="primary" href="/laboratoires" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Voir les laboratoires référencés</a>
-    </p>
-  </div>
-  <div style="text-align:center;margin-top:30px">
-    <a class="primary" href="/carte-sanitaire" style="display:inline-block;padding:11px 26px;font-size:15px;text-decoration:none">Explorer la carte sanitaire du Sénégal</a>
-  </div>
-  <footer style="max-width:860px;margin:34px auto 8px;text-align:center;font-size:14px;color:var(--mut);line-height:1.2">
-    <a style="display:inline-block;padding:8px 6px" href="/carte-sanitaire">Carte sanitaire</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/laboratoires">Laboratoires</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/tarifs">Tarifs</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/delegue-medical">Délégué médical</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/blog">Blog</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/a-propos">À propos</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/login">Connexion</a><span> · </span><a style="display:inline-block;padding:8px 6px" href="/inscription">Compte gratuit</a>
-  </footer>
+    <div class="hero-art" role="img" aria-label="Aperçu du tableau de bord DelegPharma : tournées, comptes rendus de visite et couverture"></div>
+  </div></section>
+  <section class="trust" aria-label="Chiffres clés du référentiel">
+    <div class="stats">
+      <div class="stat"><div class="n">14</div><div class="l">régions médicales</div></div>
+      <div class="stat"><div class="n">79</div><div class="l">districts sanitaires</div></div>
+      <div class="stat"><div class="n">3 915</div><div class="l">structures de santé</div></div>
+      <div class="stat"><div class="n">34 388</div><div class="l">professionnels recensés</div></div>
+      <div class="stat"><div class="n">${popM} M</div><div class="l">habitants couverts</div></div>
+    </div>
+    <p class="hint trust-note">Référentiel officiel MSAS / ANSD — la maille exacte pour répartir votre force de vente. <a href="/carte-sanitaire">Explorer la carte sanitaire →</a></p>
+  </section>
+  <section class="sec"><div class="wrap">
+    <div class="sec-head"><span class="kicker">Pour les délégués médicaux</span><h2>Tout le terrain dans une seule application</h2></div>
+    <div class="features">
+      <div class="feature"><div class="ico">🗺️</div><h3>Référentiel national</h3><p>14 régions médicales, 79 districts sanitaires, structures et professionnels de santé ciblés. <a href="/carte-sanitaire">Explorer la carte sanitaire →</a></p></div>
+      <div class="feature"><div class="ico">📋</div><h3>Comptes rendus de visite</h3><p>CRV brouillon → soumis → validé, pièces jointes et PDF signé généré en une seconde.</p></div>
+      <div class="feature"><div class="ico">🧭</div><h3>Tournées terrain</h3><p>Checklist des professionnels par district pour ne rater aucune visite.</p></div>
+      <div class="feature"><div class="ico">📈</div><h3>Campagnes & couverture</h3><p>Objectifs validés, taux de couverture par produit, pilotage par laboratoire.</p></div>
+    </div>
+  </div></section>
+  <section class="lab-band"><div class="wrap">
+    <div class="sec-head"><span class="kicker">Pour les laboratoires</span><h2>Le CRM pensé pour les laboratoires pharmaceutiques</h2><p>Pilotez vos délégués médicaux, vos objectifs produits et votre couverture territoriale — et développez le chiffre d'affaires de vos campagnes.</p></div>
+    <div class="features">
+      <div class="feature"><div class="ico">🎯</div><h3>Objectifs produits</h3><p>Objectifs par produit phare et par zone, taux de réalisation, campagnes mesurées sur le chiffre d'affaires.</p></div>
+      <div class="feature"><div class="ico">🗺️</div><h3>Couverture sans doublon</h3><p>Force de vente répartie sur le référentiel officiel : chaque district a sa checklist, chaque zone est mesurée.</p></div>
+      <div class="feature"><div class="ico">📊</div><h3>Terrain en temps réel</h3><p>CRV validés depuis le terrain, couverture par district, exports CSV/PDF — fini les CRV papier et les tableurs. <a href="/blog/meilleur-logiciel-gestion-delegues-medicaux-senegal">Voir le comparatif →</a></p></div>
+    </div>
+    <div class="cta-row" style="justify-content:center;margin-top:34px">
+      <a class="primary" href="/inscription">Équiper mon laboratoire</a>
+      <a class="primary" href="/laboratoires">Voir les laboratoires référencés</a>
+    </div>
+  </div></section>
+  <section class="final-cta">
+    <h2>Prêt à structurer votre force de vente ?</h2>
+    <p>Créez votre compte gratuit et explorez la carte sanitaire du Sénégal, région par région.</p>
+    <div class="cta-row"><a class="btn btn-light" href="/inscription">Créer un compte gratuit</a><a class="btn btn-ghost" href="/carte-sanitaire">Explorer la carte sanitaire du Sénégal</a></div>
+  </section>
   </main>`;
 }
 
@@ -202,10 +209,7 @@ function tarifsBody() {
   }).join('');
   return `
   <main style="max-width:920px;margin:0 auto;padding:28px 16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <div class="brand">DelegPharma</div>
-      <div><a href="/">Accueil</a> · <a href="/delegue-medical">Délégué médical</a> · <a href="/tarifs">Tarifs</a> · <a href="/login">Connexion</a></div>
-    </div>
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="/">Accueil</a> › Tarifs</nav>
     <h1 style="font-size:26px;margin-bottom:20px">Nos tarifs</h1>
     <div id="public">
       <div class="cards">${cards}</div>
@@ -234,10 +238,7 @@ function inscriptionBody() {
   const formules = tarifs().map((t) => `<option value="${t.id}">${esc(t.nom)} — ${toFr(t.prix)} FCFA</option>`).join('');
   return `
   <main style="max-width:920px;margin:0 auto;padding:28px 16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <div class="brand">DelegPharma</div>
-      <div><a href="/">Accueil</a> · <a href="/delegue-medical">Délégué médical</a> · <a href="/tarifs">Tarifs</a> · <a href="/login">Connexion</a></div>
-    </div>
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="/">Accueil</a> › Inscription</nav>
     <h1 style="font-size:26px;margin-bottom:12px">Créer un compte gratuit</h1>
     <p class="hint" style="margin-bottom:20px">Le CRM des délégués médicaux et des laboratoires pharmaceutiques au Sénégal : tournées, comptes rendus de visite, objectifs et couverture par district. Sans formule : découverte en lecture seule. Avec formule : abonnement réglé par Mobile Money (Wave, Orange Money, QR), carte Visa/Mastercard ou PayPal.</p>
     <div class="card" style="max-width:600px">
@@ -270,10 +271,7 @@ function laboratoiresBody() {
   ).join('');
   return `
   <main style="max-width:920px;margin:0 auto;padding:28px 16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <div class="brand">DelegPharma</div>
-      <div><a href="/">Accueil</a> · <a href="/delegue-medical">Délégué médical</a> · <a href="/tarifs">Tarifs</a> · <a href="/login">Connexion</a></div>
-    </div>
+    <nav class="breadcrumb" aria-label="Fil d'Ariane"><a href="/">Accueil</a> › Laboratoires</nav>
     <h1 style="font-size:26px;margin-bottom:12px">Laboratoires pharmaceutiques au Sénégal</h1>
     <p class="hint" style="margin-bottom:20px">Annuaire des laboratoires référencés sur DelegPharma. La liste est enrichie régulièrement.</p>
     <ul style="line-height:1.8;column-count:2;column-gap:32px">${list || '<li class="muted">Aucun laboratoire référencé pour le moment.</li>'}</ul>
@@ -282,15 +280,24 @@ function laboratoiresBody() {
 
 /* ---------- Carte sanitaire (SSR public) ---------- */
 
-function publicHeader() {
-  const nav = [['Accueil', '/'], ['Délégué médical', '/delegue-medical'], ['Carte sanitaire', '/carte-sanitaire'], ['Laboratoires', '/laboratoires'], ['Tarifs', '/tarifs'], ['Blog', '/blog'], ['À propos', '/a-propos'], ['Connexion', '/login']];
-  const links = nav.map(([l, h]) => `<a style="display:inline-block;padding:9px 7px;line-height:1.2" href="${h}">${l}</a>`).join('');
-  return `
-  <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px 8px;margin-bottom:20px">
-    <div class="brand">DelegPharma</div>
-    <nav style="display:flex;flex-wrap:wrap;min-width:0">${links}</nav>
-  </div>`;
+// ───── Cadre commun des pages publiques (en-tête, pied de page) — injecté par seoShell ─────
+const PUB_NAV = [['Accueil', '/'], ['Délégué médical', '/delegue-medical'], ['Carte sanitaire', '/carte-sanitaire'], ['Laboratoires', '/laboratoires'], ['Tarifs', '/tarifs'], ['Blog', '/blog'], ['À propos', '/a-propos']];
+const LOGO_SVG = '<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect width="40" height="40" rx="11" fill="#0f766e"/><g transform="rotate(-38 20 20)"><rect x="9" y="14.5" width="22" height="11" rx="5.5" fill="#fff"/><path d="M20 14.5h6.3a5.5 5.5 0 0 1 0 11H20z" fill="#99f6e4"/></g><path d="M29.5 8.5v6M26.5 11.5h6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>';
+function pubHeaderHtml(path) {
+  const links = PUB_NAV.map(([l, h]) => `<a href="${h}"${(h === '/' ? path === '/' : path === h || path.startsWith(h + '/')) ? ' aria-current="page"' : ''}>${l}</a>`).join('');
+  return `<header class="pubhead"><div class="in"><a class="brand" href="/" aria-label="DelegPharma — accueil">${LOGO_SVG}DelegPharma</a><nav aria-label="Navigation principale">${links}</nav><a class="cta" href="/inscription">Créer un compte</a></div></header>`;
 }
+function pubFooterHtml() {
+  const regs = carteRegions().map((r) => `<li><a href="/carte-sanitaire/${slugify(r.nom)}">${esc(r.nom)}</a></li>`).join('');
+  return `<footer class="pubfoot"><div class="in">
+    <div><a class="brand" href="/">${LOGO_SVG}DelegPharma</a><p>Le CRM des délégués médicaux et des laboratoires pharmaceutiques du Sénégal, construit sur la carte sanitaire officielle (MSAS / ANSD).</p></div>
+    <div><h2>Produit</h2><ul><li><a href="/delegue-medical">Délégué médical</a></li><li><a href="/laboratoires">Laboratoires</a></li><li><a href="/tarifs">Tarifs</a></li><li><a href="/inscription">Créer un compte</a></li><li><a href="/login">Connexion</a></li></ul></div>
+    <div><h2>Ressources</h2><ul><li><a href="/blog">Blog et guides</a></li><li><a href="/blog/meilleur-logiciel-gestion-delegues-medicaux-senegal">Comparatif des CRM</a></li><li><a href="/blog/crv-compte-rendu-de-visite-guide">Guide du CRV</a></li><li><a href="/a-propos">À propos</a></li><li><a href="/contact">Contact</a></li><li><a href="/mentions-legales">Mentions légales</a></li><li><a href="/politique-de-confidentialite">Confidentialité</a></li></ul></div>
+    <div><h2>Carte sanitaire</h2><ul class="cols"><li><a href="/carte-sanitaire">Toutes les régions</a></li>${regs}</ul></div>
+  </div><div class="legal">© 2026 DelegPharma — CRM des délégués médicaux au Sénégal</div></footer>`;
+}
+// Les gabarits de page n'embarquent plus leur en-tête : seoShell l'ajoute (HTML sémantique unique).
+function publicHeader() { return ''; }
 
 function hubBody() {
   const rows = carteRegions().map((r) => {
@@ -435,7 +442,14 @@ function carteSanitairePage(regionSlug, districtSlug) {
 
 /* ---------- Guides métier (blog SSR) ---------- */
 
-function articleBody({ h1, intro, sections, faq }) {
+const STOP = new Set(['dans', 'pour', 'avec', 'comment', 'guide', 'senegal', 'sénégal', 'delegue', 'délégué', 'délégués', 'medical', 'médical', 'medicaux', 'médicaux', 'laboratoire', 'laboratoires', 'quelle', 'votre']);
+function relatedGuides(path, n = 3) {
+  const me = GUIDES.find((g) => g.path === path);
+  const words = (t) => new Set(String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(/[^a-z0-9]+/).filter((w) => w.length > 4 && !STOP.has(w)));
+  const mine = words(me ? me.h1 + ' ' + (me.title || '') : path);
+  return GUIDES.filter((g) => g.path !== path).map((g, i) => ({ g, sc: [...words(g.h1 + ' ' + (g.title || ''))].filter((w) => mine.has(w)).length * 10 - i * 0.01 })).sort((a, b) => b.sc - a.sc).slice(0, n).map((x) => x.g);
+}
+function articleBody({ h1, intro, sections, faq, path }) {
   const secs = sections.map((s) => `<section><h2 style="font-size:19px;margin:18px 0 10px">${esc(s.h)}</h2>${s.p.map((p) => `<p style="line-height:1.7;margin-bottom:10px">${p}</p>`).join('')}</section>`).join('');
   const faqHtml = faq.map((f) => `<details style="margin:8px 0"><summary style="cursor:pointer;font-weight:600">${esc(f.q)}</summary><p style="line-height:1.7;margin-top:6px">${f.a}</p></details>`).join('');
   return `
@@ -452,6 +466,8 @@ function articleBody({ h1, intro, sections, faq }) {
         ${faqHtml}
       </section>
     </article>
+    ${path ? `<aside class="related" aria-label="Guides associés"><h2>À lire aussi</h2><ul>${relatedGuides(path).map((g) => `<li><a href="${g.path}">${esc(g.h1)}</a></li>`).join('')}</ul></aside>
+    <section class="cta-card"><h2>Passez de la théorie au terrain</h2><p>Planifiez vos tournées, rédigez vos CRV et suivez votre couverture par district avec DelegPharma.</p><a class="primary" href="/inscription">Créer un compte gratuit</a></section>` : ''}
     <p class="hint" style="margin-top:24px">DelegPharma, le CRM des délégués médicaux au Sénégal. <a href="/tarifs">Découvrir les tarifs</a> · <a href="/carte-sanitaire">Carte sanitaire</a> · <a href="/laboratoires">Laboratoires</a></p>
   </main>`;
 }
@@ -470,8 +486,9 @@ function articlePage({ path, title, desc, h1, intro, sections, faq, published = 
           { '@type': 'ListItem', position: 2, name: h1, item: BASE + path },
         ] },
         {
-          '@type': 'WebPage',
+          '@type': 'Article',
           '@id': BASE + path,
+          mainEntityOfPage: BASE + path,
           url: BASE + path,
           name: title,
           headline: h1,
@@ -487,7 +504,7 @@ function articlePage({ path, title, desc, h1, intro, sections, faq, published = 
         { '@type': 'FAQPage', mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) },
       ],
     },
-    body: () => articleBody({ h1, intro, sections, faq }),
+    body: () => articleBody({ h1, intro, sections, faq, path }),
   };
 }
 
@@ -1326,11 +1343,23 @@ const PAGES = {
     title: 'Tarifs DelegPharma — 5 000 / 10 000 / 15 000 FCFA par mois',
     desc: 'DelegPharma : Essentiel 5 000, Standard 10 000 ou Premium 15 000 FCFA par mois. Paiement Wave, Orange Money, carte Visa/Mastercard ou PayPal. 30 jours.',
     canonical: '/tarifs',
-    jsonLd: () => ({
-      '@context': 'https://schema.org',
-      '@type': 'ItemList',
-      itemListElement: tarifs().map((t, i) => ({ '@type': 'ListItem', position: i + 1, name: t.nom, item: BASE + '/tarifs', offers: { '@type': 'Offer', price: String(t.prix), priceCurrency: 'XOF' } })),
-    }),
+    jsonLd: () => {
+      const t = tarifs(); const prices = t.map((x) => Number(x.prix));
+      return {
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        '@id': BASE + '/tarifs#app',
+        name: 'DelegPharma',
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web, Android, iOS (navigateur)',
+        url: BASE + '/tarifs',
+        inLanguage: 'fr',
+        offers: {
+          '@type': 'AggregateOffer', priceCurrency: 'XOF', lowPrice: String(Math.min(...prices)), highPrice: String(Math.max(...prices)), offerCount: t.length,
+          offers: t.map((x) => ({ '@type': 'Offer', name: x.nom, price: String(x.prix), priceCurrency: 'XOF', url: BASE + '/inscription', availability: 'https://schema.org/InStock', eligibleDuration: { '@type': 'QuantitativeValue', value: 30, unitCode: 'DAY' } })),
+        },
+      };
+    },
     body: tarifsBody,
   },
   '/laboratoires': {
@@ -1499,6 +1528,17 @@ const FALLBACK = { index: false, title: 'DelegPharma — CRM des laboratoires et
 
 /* ---------- Assembleur de shell ---------- */
 
+// BreadcrumbList manquant sur les pages simples (tarifs, laboratoires, inscription, contact, pages légales).
+const CRUMB_LABEL = { '/tarifs': 'Tarifs', '/laboratoires': 'Laboratoires', '/inscription': 'Inscription', '/contact': 'Contact', '/mentions-legales': 'Mentions légales', '/politique-de-confidentialite': 'Politique de confidentialité' };
+function withBreadcrumb(page, jsonLd) {
+  const label = CRUMB_LABEL[page.canonical];
+  if (!label || (jsonLd && JSON.stringify(jsonLd).includes('BreadcrumbList'))) return jsonLd;
+  const bc = { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Accueil', item: BASE + '/' }, { '@type': 'ListItem', position: 2, name: label, item: BASE + page.canonical }] };
+  if (!jsonLd) return { '@context': 'https://schema.org', ...bc };
+  const strip = ({ '@context': _c, ...r }) => r;
+  return { '@context': 'https://schema.org', '@graph': [...(jsonLd['@graph'] || [jsonLd]).map(strip), bc] };
+}
+
 function head(page) {
   const robots = page.index ? 'index, follow' : 'noindex, nofollow';
   const canonical = BASE + page.canonical;
@@ -1518,7 +1558,7 @@ function head(page) {
     `<meta name="twitter:image" content="${BASE}/og-image-1200x630.png">`,
   ].join('\n  ');
   // jsonLd peut être un objet statique ou une fonction évaluée à la requête (caches warmés : tarifs, laboratoires).
-  const jsonLd = typeof page.jsonLd === 'function' ? page.jsonLd() : page.jsonLd;
+  const jsonLd = withBreadcrumb(page, typeof page.jsonLd === 'function' ? page.jsonLd() : page.jsonLd);
   const jdHtml = jsonLd ? `\n  <script type="application/ld+json">${jd(jsonLd)}</script>` : '';
   return [
     `<title>${esc(page.title)}</title>`,
@@ -1540,12 +1580,15 @@ function matchPage(path) {
 export async function seoShell(req) {
   const page = matchPage(req.path) || FALLBACK;
   await ensureWarm();
-  const body = page.body();
+  let body = page.body();
+  if (!/<main[^>]*\sid=/.test(body)) body = body.replace('<main', '<main id="contenu"');
   const shell = await getShell();
+  const frame = `<a class="skip" href="#contenu">Aller au contenu</a>${pubHeaderHtml(req.path)}${body}${pubFooterHtml()}`;
   // Remplace la ligne <title> d'origine par le head SEO complet (title, desc, canonical, OG, JSON-LD).
   return shell
     .replace(/<title>.*?<\/title>/, `  ${head(page)}`)
-    .replace('<div id="app"></div>', `<div id="app">${body}</div>`);
+    .replace('<body>', '<body class="pub">')
+    .replace('<div id="app"></div>', `<div id="app">${frame}</div>`);
 }
 
 /* ---------- robots.txt / sitemap.xml ---------- */

@@ -3,7 +3,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 
-import { requireAuth, requireRole } from './auth.js';
+import { requireAuth, requireRole, requireDonneesLabo } from './auth.js';
 import { seoShell, robotsTxt, sitemapXml, matchPage } from './seo.js';
 import authRoutes from './routes/auth.js';
 import referentielRoutes from './routes/referentiel.js';
@@ -60,6 +60,9 @@ export function createApp() {
   // middleware d'un router monté sur /api gate TOUTE requête /api/* qui y entre).
   app.use('/api/auth', authRoutes);
   app.use('/api', abonnementsRoutes);     // public : /tarifs, /laboratoires, /webhooks/cinetpay
+  // Données du laboratoire : un délégué sans abonnement n'y accède pas (audit 2026-11-05, constat 1).
+  // Placé APRÈS les routes publiques/abonnements (qu'un compte gratuit doit atteindre) et AVANT les données.
+  app.use('/api', requireAuth, requireDonneesLabo);
   app.use('/api', referentielRoutes);
   app.use('/api', crvRoutes);
   app.use('/api', tourneeRoutes);

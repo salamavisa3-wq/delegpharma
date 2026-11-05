@@ -6,8 +6,10 @@ import { requireAuth, requireRole, requireAboWrite } from '../auth.js';
 const router = Router();
 router.use(requireAuth);
 
-/** Visite complète scopée tenant (jointures référentiel). */
+/** Visite complète scopée tenant (jointures référentiel). Un délégué n'accède qu'à SES visites
+ *  (comme la liste) ; manager / admin / laboratoire voient celles de leur laboratoire. */
 async function scopeVisite(req, id) {
+  const delegue = req.user.role === 'delegue';
   return get(`
     SELECT v.*, p.nom AS professionnel, p.potentiel, sp.nom AS specialite,
            s.localite AS structure, s.telephone AS structure_telephone,
@@ -20,7 +22,15 @@ async function scopeVisite(req, id) {
     LEFT JOIN district d ON d.id = s.district_id
     LEFT JOIN region r ON r.id = s.region_id
     LEFT JOIN users u ON u.id = v.user_id
-    WHERE v.id = $1 AND v.laboratoire_id = $2`, [id, req.user.laboratoire_id]);
+    WHERE v.id = $1 AND v.laboratoire_id = $2${delegue ? ' AND v.user_id = $3' : ''}`,
+  delegue ? [id, req.user.laboratoire_id, req.user.id] : [id, req.user.laboratoire_id]);
+}
+
+/** Même règle d'accès que scopeVisite, sans les jointures (PDF et état du PDF). */
+async function visiteAccessible(req, id) {
+  const delegue = req.user.role === 'delegue';
+  return get(`SELECT id FROM visite WHERE id = $1 AND laboratoire_id = $2${delegue ? ' AND user_id = $3' : ''}`,
+    delegue ? [id, req.user.laboratoire_id, req.user.id] : [id, req.user.laboratoire_id]);
 }
 
 const VISITE_LIST = `
@@ -130,8 +140,7 @@ router.post('/visites/:id/refuse', requireRole('manager', 'admin', 'laboratoire'
 // générée par le job GitHub Actions → KV). GET + POST = même enqueue idempotente :
 // une ligne pdf_jobs par visite ; echoue → relancée.
 async function enqueuePdf(req, res) {
-  const v = await get('SELECT id FROM visite WHERE id = $1 AND laboratoire_id = $2',
-    [req.params.id, req.user.laboratoire_id]);
+  const v = await visiteAccessible(req, req.params.id);
   if (!v) return res.status(404).json({ error: 'Visite introuvable' });
 
   let job = await get('SELECT statut, url, erreur FROM pdf_jobs WHERE visite_id = $1', [req.params.id]);
@@ -151,8 +160,7 @@ router.route('/visites/:id/pdf')
   .post(enqueuePdf);
 
 router.get('/visites/:id/pdf/status', async (req, res) => {
-  const v = await get('SELECT id FROM visite WHERE id = $1 AND laboratoire_id = $2',
-    [req.params.id, req.user.laboratoire_id]);
+  const v = await visiteAccessible(req, req.params.id);
   if (!v) return res.status(404).json({ error: 'Visite introuvable' });
   const job = await get('SELECT statut, url, erreur FROM pdf_jobs WHERE visite_id = $1', [req.params.id]);
   return res.json(job || { statut: 'aucun', url: '', erreur: '' });

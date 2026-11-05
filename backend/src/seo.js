@@ -282,15 +282,17 @@ function laboratoiresBody() {
 
 // ───── Cadre commun des pages publiques (en-tête, pied de page) — injecté par seoShell ─────
 const PUB_NAV = [['Accueil', '/'], ['Délégué médical', '/delegue-medical'], ['Carte sanitaire', '/carte-sanitaire'], ['Laboratoires', '/laboratoires'], ['Tarifs', '/tarifs'], ['Blog', '/blog'], ['À propos', '/a-propos']];
-const LOGO_SVG = '<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect width="40" height="40" rx="11" fill="#0f766e"/><g transform="rotate(-38 20 20)"><rect x="9" y="14.5" width="22" height="11" rx="5.5" fill="#fff"/><path d="M20 14.5h6.3a5.5 5.5 0 0 1 0 11H20z" fill="#99f6e4"/></g><path d="M29.5 8.5v6M26.5 11.5h6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>';
+function logoSvg(id) {
+  return `<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><defs><linearGradient id="dpg-${id}" x1="6" y1="2" x2="42" y2="46" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#0f766e"/></linearGradient></defs><path d="M19 2h10a3 3 0 0 1 3 3v11h11a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H32v11a3 3 0 0 1-3 3H19a3 3 0 0 1-3-3V32H5a3 3 0 0 1-3-3V19a3 3 0 0 1 3-3h11V5a3 3 0 0 1 3-3z" fill="url(#dpg-${id})"/><path d="M19 2h10a3 3 0 0 1 3 3v11H16V5a3 3 0 0 1 3-3z" fill="#fff" opacity=".16"/><g transform="rotate(-45 24 24)"><rect x="13.5" y="19.5" width="21" height="9" rx="4.5" fill="#fff"/><path d="M24 19.5h6a4.5 4.5 0 0 1 0 9h-6z" fill="#a7f3d0"/></g></svg>`;
+}
 function pubHeaderHtml(path) {
   const links = PUB_NAV.map(([l, h]) => `<a href="${h}"${(h === '/' ? path === '/' : path === h || path.startsWith(h + '/')) ? ' aria-current="page"' : ''}>${l}</a>`).join('');
-  return `<header class="pubhead"><div class="in"><a class="brand" href="/" aria-label="DelegPharma — accueil">${LOGO_SVG}DelegPharma</a><nav aria-label="Navigation principale">${links}</nav><a class="cta" href="/inscription">Créer un compte</a></div></header>`;
+  return `<header class="pubhead"><div class="in"><a class="brand" href="/" aria-label="DelegPharma — accueil">${logoSvg('h')}<span class="wm">Deleg<b>Pharma</b></span></a><nav aria-label="Navigation principale">${links}</nav><a class="cta" href="/inscription">Créer un compte</a></div></header>`;
 }
 function pubFooterHtml() {
   const regs = carteRegions().map((r) => `<li><a href="/carte-sanitaire/${slugify(r.nom)}">${esc(r.nom)}</a></li>`).join('');
   return `<footer class="pubfoot"><div class="in">
-    <div><a class="brand" href="/">${LOGO_SVG}DelegPharma</a><p>Le CRM des délégués médicaux et des laboratoires pharmaceutiques du Sénégal, construit sur la carte sanitaire officielle (MSAS / ANSD).</p></div>
+    <div><a class="brand" href="/">${logoSvg('f')}<span class="wm">Deleg<b>Pharma</b></span></a><p>Le CRM des délégués médicaux et des laboratoires pharmaceutiques du Sénégal, construit sur la carte sanitaire officielle (MSAS / ANSD).</p></div>
     <div><h2>Produit</h2><ul><li><a href="/delegue-medical">Délégué médical</a></li><li><a href="/laboratoires">Laboratoires</a></li><li><a href="/tarifs">Tarifs</a></li><li><a href="/inscription">Créer un compte</a></li><li><a href="/login">Connexion</a></li></ul></div>
     <div><h2>Ressources</h2><ul><li><a href="/blog">Blog et guides</a></li><li><a href="/blog/meilleur-logiciel-gestion-delegues-medicaux-senegal">Comparatif des CRM</a></li><li><a href="/blog/crv-compte-rendu-de-visite-guide">Guide du CRV</a></li><li><a href="/a-propos">À propos</a></li><li><a href="/contact">Contact</a></li><li><a href="/mentions-legales">Mentions légales</a></li><li><a href="/politique-de-confidentialite">Confidentialité</a></li></ul></div>
     <div><h2>Carte sanitaire</h2><ul class="cols"><li><a href="/carte-sanitaire">Toutes les régions</a></li>${regs}</ul></div>

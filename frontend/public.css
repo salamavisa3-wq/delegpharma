@@ -19,6 +19,8 @@ body.pub .pubhead { position: sticky; top: 0; z-index: 40; background: rgba(255,
 body.pub .pubhead .in { max-width: 1160px; margin: 0 auto; padding: 10px 24px; display: flex; align-items: center; gap: 22px; }
 body.pub .pubhead .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; letter-spacing: -.02em; color: var(--t3); text-decoration: none; flex: none; }
 body.pub .pubhead .brand svg { width: 34px; height: 34px; flex: none; }
+body.pub .pubhead .brand svg { filter: drop-shadow(0 3px 6px rgba(15,118,110,.28)); }
+body.pub .pubhead .brand b { color: #09855b; font-weight: 800; }
 body.pub .pubhead nav { display: flex; gap: 2px; flex: 1; justify-content: center; min-width: 0; }
 body.pub .pubhead nav a { padding: 9px 13px; border-radius: 10px; font-size: 14.5px; font-weight: 600; color: #26414a; text-decoration: none; white-space: nowrap; transition: background .15s, color .15s; }
 body.pub .pubhead nav a:hover { background: var(--soft); color: var(--t2); text-decoration: none; }
@@ -123,6 +125,7 @@ body.pub .pubfoot { background: var(--t0); color: #b5d4cf; padding: 56px 0 0; ma
 body.pub .pubfoot .in { max-width: 1160px; margin: 0 auto; padding: 0 24px; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1.3fr; gap: 36px; }
 body.pub .pubfoot .brand { display: inline-flex; align-items: center; gap: 10px; color: #fff; font-weight: 800; font-size: 20px; text-decoration: none; margin-bottom: 12px; }
 body.pub .pubfoot .brand svg { width: 34px; height: 34px; }
+body.pub .pubfoot .brand b { color: #6ee7b7; font-weight: 800; }
 body.pub .pubfoot p { font-size: 14.5px; line-height: 1.7; color: #9fc2bc; max-width: 330px; margin: 0; }
 body.pub .pubfoot h2, body.pub .pubfoot h3 { color: #fff; font-size: 14px; letter-spacing: .1em; text-transform: uppercase; margin: 4px 0 14px; font-weight: 800; }
 body.pub .pubfoot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }

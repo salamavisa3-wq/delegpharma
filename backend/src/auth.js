@@ -169,3 +169,23 @@ export function requireAboActive(req, res, next) {
     })
     .catch(next);
 }
+
+/** Chemins /api qu'un délégué SANS abonnement (compte gratuit « découverte », décision produit du 2026-08-12)
+ *  peut encore lire : références nationales et vues propres au délégué (ces routes filtrent déjà sur l'utilisateur).
+ *  Tout le reste = données du laboratoire (professionnels, structures, campagnes, catalogue produits, messages,
+ *  assistant, export) : abonnement requis (audit sécurité 2026-11-05 : un inscrit gratuit lisait tout le laboratoire). */
+const LIBRES_SANS_ABONNEMENT = [
+  /^\/regions\/?$/i,
+  /^\/districts\/?$/i,
+  /^\/dashboard\/?$/i,
+  /^\/objectifs\/?$/i,
+  /^\/visites(\/|$)/i,
+  /^\/tournees(\/|$)/i,
+];
+
+/** Verrou des données du laboratoire : n'affecte que les délégués (autres rôles : inchangé). */
+export function requireDonneesLabo(req, res, next) {
+  if (!req.user || req.user.role !== 'delegue') return next();
+  if (LIBRES_SANS_ABONNEMENT.some((re) => re.test(req.path))) return next();
+  return requireAboRead(req, res, next);
+}

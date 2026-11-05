@@ -176,7 +176,8 @@ article details p { margin: 8px 0 0; color: var(--mut); font-size: 14px; }
  * Largeur de coupure 768px = tablette, 480px = smartphone. */
 @media (max-width: 768px) {
   #app { padding: 12px; }
-  header.app { flex-direction: column; align-items: stretch; gap: 10px; padding: 10px 4px; }
+  /* nowrap : en colonne, flex-wrap: wrap (hérité du bureau) donnait à la ligne la largeur du menu (721 px) au lieu de celle de l'écran → le menu ne défilait jamais et la page débordait. */
+  header.app { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 10px; padding: 10px 4px; }
   .brand { font-size: 16px; }
   nav.main { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory;
     display: flex; gap: 4px; flex-wrap: nowrap; padding-bottom: 6px; margin: 0 -4px; }

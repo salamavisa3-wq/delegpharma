@@ -56,6 +56,9 @@ tr:hover td { background: #f8fafc; }
 header.app { display: flex; align-items: center; gap: 18px; padding: 12px 4px; border-bottom: 1px solid var(--line); margin-bottom: 18px; flex-wrap: wrap; }
 .brand { font-weight: 800; font-size: 18px; color: var(--teal); letter-spacing: -.01em; }
 .brand small { font-weight: 500; color: var(--mut); }
+.brand { display: inline-flex; align-items: center; gap: 8px; }
+.brand svg { width: 26px; height: 26px; flex: none; }
+.brand b { color: #09855b; font-weight: 800; }
 nav.main { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; }
 nav.main a { padding: 7px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--ink); }
 nav.main a:hover { background: var(--teal-soft); color: var(--teal-dark); }
